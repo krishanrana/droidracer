@@ -17,10 +17,17 @@ Desciption:
 '''
 
 import socket
-import cv2
 import struct
 import logging
 import numpy as np
+
+try:
+    import cv2
+    cv2_found = True
+except:
+    logging.warning("cv2 unable to be imported. JPEG compression not available without opencv installed.")
+    cv2_found = False
+
 
 
 '''
@@ -63,7 +70,7 @@ def SendNumpy(sock, nparray, jpeg=False):
         jpeg:       Enables jpeg compression before sending.
                     Must be decoded on the receiving end.
     '''
-    if jpeg:
+    if jpeg and cv2_found:
         buf = cv2.imencode('.jpg', nparray)[1].tostring()
         SendMsg(sock, buf)
     else:
@@ -86,7 +93,7 @@ def RecvNumpy(sock, jpeg=False):
         jpeg:       Enables jpeg decompression.
                     To be enabled if the transmission was compressed.
     '''
-    if jpeg:
+    if jpeg and cv2_found:
         buf = np.fromstring(RecvMsg(sock), np.uint8)
         nparray = cv2.imdecode(buf, cv2.IMREAD_COLOR)
     else:
