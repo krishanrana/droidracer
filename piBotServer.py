@@ -50,7 +50,7 @@ class PiBotServer:
         
         # Raspberry pi camera
         self.cam = 0
-        self.cam_resolution = (2592,1944)
+        self.cam_resolution = (640,480)
         self.__camera_flag = False
 
         logging.debug("PiBotServer instance created")
@@ -168,7 +168,7 @@ class PiBotServer:
             if self.cam.frame_available:
                 self.cam.frame_available = False
                 self.frame = self.cam.read() # Might want to preprocess here on the raspberry pi?
-                SendNumpy(conn, self.frame, jpeg=True) # Send an image
+                SendNumpy(conn, self.frame, jpeg=False) # Send an image
 
         self.cam.stop()
         conn.close()

@@ -60,6 +60,7 @@ class PiBotClient:
         self.__cam_stream_enable = False
         self.cam_resolution = cam_resolution
         self.frame = np.empty((cam_resolution[0],cam_resolution[1],3), 'uint8')
+        self.frame_available = False
 
         logging.debug("Created instance of PiBotClient")
 
@@ -82,7 +83,7 @@ class PiBotClient:
         s.connect((self.host, self.port_camera))
 
         while(self.__cam_stream_enable):
-            self.frame = RecvNumpy(s, jpeg=True)
+            self.frame = RecvNumpy(s, jpeg=False)
             self.frame_available = True
             
         s.close()
@@ -147,8 +148,6 @@ class PiBotClient:
 
 
 
-
-
 '''
 Captures the cntl+C keyboard command to close the services and free 
 resources gracefully.
@@ -156,6 +155,8 @@ Allows the sockets immediately reopened on next run without
 waiting for the OS to close them on us.
 '''
 def signal_handler(signal, frame):
+    global shutdown_sig
+    shutdown_sig = True
     print('Closed gracefully. Bye Bye!')
     sys.exit(0)
 
@@ -163,7 +164,16 @@ def signal_handler(signal, frame):
 Test the class or connection.
 '''
 if __name__ == '__main__':
+    import cv2
+    shutdown_sig = False
     signal.signal(signal.SIGINT, signal_handler)
 
-    pb = PiBotClient()
+    pb = PiBotClient(host='172.19.63.112')
+    pb.StartCamStream()
+
+    while not shutdown_sig:
+        if pb.frame_available:
+            pb.frame_available = False
+            cv2.imshow('This is my window', pb.frame)
+            cv2.waitKey(100)
     input()
