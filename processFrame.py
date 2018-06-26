@@ -1,11 +1,15 @@
-
+# Set up script
 import cv2
 import numpy as np
 import time
 
 frameNo = 0
-
+estimateIDX = 0
 kernel = np.ones((5,5),np.uint8)
+oldDistance = np.zeros((1,10))
+oldHeading = np.zeros((1,10))
+oldCentreOffset = np.zeros((1,10))
+
 
 
 cap = cv2.VideoCapture('/Volumes/dougBrain1/Droidracer/DroidVision/DRC2017Short.mp4')
@@ -18,7 +22,7 @@ centreY = 400 # Result of calibration
 
 font = cv2.FONT_HERSHEY_SIMPLEX
 e1 = cv2.getTickCount()
-
+# Main loop for frame processing
 while(cap.isOpened()):
     #Process entire image
     ret, frame = cap.read()
@@ -27,6 +31,12 @@ while(cap.isOpened()):
     except:
         break
     frameNo += 1
+    estimateIDX += 1
+    if estimateIDX > 9:
+        estimateIDX = 9
+        oldDistance[0,0:8] = oldDistance[0,1:9]
+
+            
     frame = frame[450:frame.shape[0]-1,:,:]
 #    frame = cv2.resize(frame,(0,0), fx=0.5, fy=0.5)
     centreX = np.round(frame.shape[1]/2)
@@ -81,6 +91,7 @@ while(cap.isOpened()):
         # blob detect,get centroids
         im2, contours, hierarchy = cv2.findContours(purple,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
         # find centroid of largest blob
+    
         blob = max(contours, key=lambda el: cv2.contourArea(el))
         M = cv2.moments(blob)
         center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
@@ -93,13 +104,14 @@ while(cap.isOpened()):
         topEdge = tuple(cnt[cnt[:,:,1].argmin()][0])
         bottomEdge = tuple(cnt[cnt[:,:,1].argmax()][0])
         # Calculate distance to object
-        
-        
+        obDistance = (centreY - bottomEdge[1])*0.04
+
         # Draw outputs
         cv2.rectangle(frame,(0,bottomEdge[1]),(width,bottomEdge[1]),(0,0,255),2)
         cv2.circle(frame, center, 5, (0,0,255), -1)
     except:
         print('No objects, drive fast!') 
+        obDistance = oldDistance[0,estimateIDX-1]
 
     
     try:
@@ -109,16 +121,39 @@ while(cap.isOpened()):
         vpY = (yZeroCrossing - bZeroCrossing)/(bM - yM) + centreY
         vpX = bM * (vpY - centreY) + bZeroCrossing
         Heading = np.arctan((vpX - centreX)/(centreY - vpY))
-        cv2.putText(frame, "{:10.2f}".format(Heading), (20, 50), font, 0.8, (255, 0, 0), 2, cv2.LINE_AA)
-        cv2.putText(frame, "{:10.2f}".format(centreOffset), (20, 100), font, 0.8, (0, 0, 0), 2, cv2.LINE_AA)
-        cv2.putText(frame, "{:10.2f}".format(bottomEdge[1]), (20, 150), font, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
-        cv2.line(frame,(int(centreX),int(centreY)),(int(vpX),int(vpY)),(0,0,255),3)
+        
+
+      
     except:
         print('all fucked right now')
+        Heading = oldHeading[0,estimateIDX-1]
+        centreOffset = oldCentreOffset[0,estimateIDX-1]
+
+        
+        
+    # moving average filter states
+    
+    oldDistance[0,estimateIDX] = obDistance
+    oldHeading[0,estimateIDX] = Heading
+    oldCentreOffset[0,estimateIDX] = centreOffset
+    
+    
+    
+    try:
+        cv2.putText(frame, "{:10.2f}".format(oldHeading), (20, 50), font, 0.8, (255, 0, 0), 2, cv2.LINE_AA)
+        cv2.putText(frame, "{:10.2f}".format(oldCentreOffset), (20, 100), font, 0.8, (0, 0, 0), 2, cv2.LINE_AA)
+        cv2.putText(frame, "{:10.2f}".format(oldDistance[0,estimateIDX]), (20, 150), font, 0.8, (0, 255, 0), 2, cv2.LINE_AA)
+        cv2.line(frame,(int(centreX),int(centreY)),(int(vpX),int(vpY)),(0,0,255),3)
+        cv2.line(frame,(int(bZeroCrossing),int(centreY)),(int(vpX),int(vpY)),(0,255,0),1)
+        cv2.line(frame,(int(yZeroCrossing),int(centreY)),(int(vpX),int(vpY)),(0,255,0),1)
+        
+    except:
+        print('print problems')
+
         
     cv2.imshow('frame',frame)
 
-    time.sleep(0.1)
+    #time.sleep(0.1)
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
     
