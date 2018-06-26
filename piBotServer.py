@@ -53,6 +53,9 @@ class PiBotServer:
         self.cam_resolution = (640,480)
         self.__camera_flag = False
 
+        # Keep track of open ports to close when server is closed
+        self.open_socks = []
+
         logging.debug("PiBotServer instance created")
 
 
@@ -64,9 +67,9 @@ class PiBotServer:
         
     def StartServers(self):
         # Starts the listener servers each in a fresh thread
-        cmdsA_thr = threading.Thread(name="CmdsAListener", target=self.__Listen, args=(self.port_cmds_a,), daemon=True)
-        cmdsB_thr =threading.Thread(name="CmdsBListener", target=self.__Listen, args=(self.port_cmds_b,), daemon=True)
-        cam_thr = threading.Thread(name="CameraListener", target=self.__Listen, args=(self.port_camera,), daemon=True)
+        cmdsA_thr = threading.Thread(name="CmdsAListener", target=self.__Listen, args=(self.port_cmds_a,), daemon=False)
+        cmdsB_thr =threading.Thread(name="CmdsBListener", target=self.__Listen, args=(self.port_cmds_b,), daemon=False)
+        cam_thr = threading.Thread(name="CameraListener", target=self.__Listen, args=(self.port_camera,), daemon=False)
         cmdsA_thr.start()
         cmdsB_thr.start()
         cam_thr.start()
@@ -79,10 +82,12 @@ class PiBotServer:
         s.bind(('0.0.0.0', port))
         logging.info("Server started on %s. Listning on port %d...", socket.gethostname(), port)
 
-        s.listen(num_of_connects)        # Now wait for client connection.
+        s.listen(num_of_connects)   # Now wait for client connection.
+
+        self.open_socks.append(s)   # Add listeners to sockets list. Need to close the listeners when shutting down the server.
 
         while (not shutdown_flag):
-            conn, addr = s.accept()          # Establish connection with client.
+            conn, addr = s.accept() # Establish connection with client.
             logging.info("Got connection from %s:%d", addr[0], addr[1])
             thr = threading.Thread(name=addr, target=self.__HandleClient, args=(conn, addr, port))
             thr.start()
@@ -178,8 +183,10 @@ class PiBotServer:
         global shutdown_flag
         shutdown_flag = True
         self.__camera_flag = False
-        time.sleep(0.1)
-        self.__speed_control_flag = False
+
+        # Shutdown the listener sockets
+        for s in self.open_socks:
+            s.close()
        
 
 
