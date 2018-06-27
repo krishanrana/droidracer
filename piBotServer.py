@@ -99,7 +99,7 @@ class PiBotServer:
         Choose what to do with the client data here.
         '''
         if port == self.port_camera:
-            self.__ProcessCameraStream(conn, addr)
+            self.__SendCameraStream(conn)
         elif port == self.port_cmds_a:
             self.__ProcessCmdA(conn, addr)
         elif port == self.port_cmds_b:
@@ -158,8 +158,7 @@ class PiBotServer:
         conn.close()            # Close the connection
 
 
-
-    def __ProcessCameraStream(self, conn, addr):
+    def StartCameraStream(self):
         # Start the capture stream
         self.cam = piVideoStream.PiVideoStream(
                                             resolution=self.cam_resolution,
@@ -169,6 +168,8 @@ class PiBotServer:
         self.cam.start()                    # Start the capture stream
         self.__camera_flag = True
 
+
+    def __SendCameraStream(self, conn):
         while (self.__camera_flag): # Keep streaming
             if self.cam.frame_available:
                 self.cam.frame_available = False
@@ -229,5 +230,6 @@ if __name__ == '__main__':
     global pb
     pb = PiBotServer()
     pb.StartServers()
+    pb.StartCameraStream()
     while not shutdown_flag:
         time.sleep(1)
