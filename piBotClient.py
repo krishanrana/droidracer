@@ -158,7 +158,7 @@ def signal_handler(signal, frame):
     global shutdown_sig
     shutdown_sig = True
     print('Closed gracefully. Bye Bye!')
-    sys.exit(0)
+
 
 '''
 Test the class or connection.
@@ -168,7 +168,7 @@ if __name__ == '__main__':
     shutdown_sig = False
     signal.signal(signal.SIGINT, signal_handler)
 
-    pb = PiBotClient(host='172.19.63.112')
+    pb = PiBotClient(host=DEFAULT_HOST)
     pb.StartCamStream()
 
     while not shutdown_sig:
