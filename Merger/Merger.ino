@@ -1,8 +1,3 @@
-/*
-   Records encoder ticks for each wheel
-   and prints the number of ticks for
-   each encoder every 500ms
-*/
 //This provides a library to set pin change interrupts which we will use for the encoders
 #include "PinChangeInt.h"
 
@@ -19,6 +14,8 @@
 #define M3_ENCODER_B 7
 
 //Motors
+#define TICKS_PER_REV 108
+#define WHEEL_DIAMETER 0.058
 // L9958 DIRection pins
 #define DIR_M1 2
 #define DIR_M2 3
@@ -35,8 +32,8 @@ int dir1, dir2, dir3;
 
 
 // PID variables
-#define KP 5
-#define KI 0
+#define KP 10
+#define KI 30
 #define KD 0
 volatile double speed_M1, speed_M2, speed_M3;         // Used for input measurement to PID
 double out_M1, out_M2, out_M3;                        // Output from PID to power motors
@@ -74,17 +71,17 @@ void setup() {
   TIMSK2 |= (1 << OCIE2A); // enable timer compare interrupt
   interrupts(); // enable all interrupts
   
-  pinMode(M3_ENCODER_A, INPUT);
-  pinMode(M3_ENCODER_B, INPUT);
   pinMode(M1_ENCODER_A, INPUT);
   pinMode(M1_ENCODER_B, INPUT);
   pinMode(M2_ENCODER_A, INPUT);
   pinMode(M2_ENCODER_B, INPUT);
-
+  pinMode(M3_ENCODER_A, INPUT);
+  pinMode(M3_ENCODER_B, INPUT);
+  
   // initialize hardware interrupts
-  attachPinChangeInterrupt(A0, M1EncoderEvent, CHANGE);
-  attachPinChangeInterrupt(6, M3EncoderEvent, CHANGE);
-  attachPinChangeInterrupt(11, M2EncoderEvent, CHANGE);
+  attachPinChangeInterrupt(M1_ENCODER_A, M1EncoderEvent, CHANGE);
+  attachPinChangeInterrupt(M2_ENCODER_A, M2EncoderEvent, CHANGE);
+  attachPinChangeInterrupt(M3_ENCODER_A, M3EncoderEvent, CHANGE);
 
   //Motor stuff
 
@@ -95,6 +92,10 @@ void setup() {
   setspeed_M1 = 0;
   setspeed_M2 = 0;
   setspeed_M3 = 0;
+  // Configure for backwards values too
+  PID_M1.SetOutputLimits(-255, 255);
+  PID_M2.SetOutputLimits(-255, 255);
+  PID_M3.SetOutputLimits(-255, 255);
   // Turn the PIDs on
   PID_M1.SetMode(AUTOMATIC);
   PID_M2.SetMode(AUTOMATIC);
@@ -107,13 +108,15 @@ void setup() {
   
   // L9958 PWM pins
   pinMode(PWM_M1, OUTPUT);  digitalWrite(PWM_M1, LOW);
-  pinMode(PWM_M2, OUTPUT);  digitalWrite(PWM_M2, LOW);    // Timer1
+  pinMode(PWM_M2, OUTPUT);  digitalWrite(PWM_M2, LOW);
   pinMode(PWM_M3, OUTPUT);  digitalWrite(PWM_M3, LOW);
  
   // L9958 Enable for all 4 motors
   pinMode(ENABLE_MOTORS, OUTPUT);  digitalWrite(ENABLE_MOTORS, LOW);   // HIGH = disabled
 
   Serial.begin(9600);
+
+  delay(2000);
 }
 
 
@@ -127,21 +130,39 @@ void loop() {
   
 
   // Update the measured motor speeds
-  //computeVelocities(10, 90, 0);
-  setspeed_M1 = 10;
-  setspeed_M2 = 10;
-  setspeed_M3 = 10;
+  //computeVelocities(2, PI, 0);
+
+  // Just using these for testing instead of using computeVelocities()
+  setspeed_M1 = 2;
+  setspeed_M2 = -2;
+  
 
   // Process the PIDs
+  Serial.print("Motor 1: ");
+  Serial.print(speed_M1);
+  Serial.print(", ");
+  Serial.print(out_M1);
+  Serial.print(", ");
+  Serial.println(setspeed_M1);
+  Serial.print("Motor 2: ");
+  Serial.print(speed_M2);
+  Serial.print(", ");
+  Serial.print(out_M2);
+  Serial.print(", ");
+  Serial.println(setspeed_M2);
+  Serial.print("Motor 3: ");
+  Serial.print(speed_M3);
+  Serial.print(", ");
+  Serial.print(out_M3);
+  Serial.print(", ");
+  Serial.println(setspeed_M3);
+  Serial.println("");
   PID_M1.Compute();
   PID_M2.Compute();
   PID_M3.Compute();
 
   // Write to the motor directions and pwm power
 
-  Serial.println(out_M1);
-  Serial.println(out_M2);
-  Serial.println(out_M3);
   if (out_M1 < 0){
     digitalWrite(DIR_M1, LOW);
   } else {
@@ -170,10 +191,12 @@ void loop() {
 /////////////////////////////////////////////////////////////////////////////////////////////
 ISR(TIMER2_COMPA_vect) // timer compare interrupt service routine - fires every 0.01632 seconds
 {
-  //Ticks per second
-  speed_M1 = M1_Count / 0.01632;
-  speed_M2 = M2_Count / 0.01632;
-  speed_M3 = M3_Count / 0.01632;
+  // Ticks per second
+  // Don't know why but M2 and M3 counts are backwards. 
+  // Possible swapped wiring of encoders or swapped pin defs?
+  speed_M1 = ticks2metres(M1_Count / 0.01632);
+  speed_M2 = ticks2metres(-M2_Count / 0.01632);
+  speed_M3 = ticks2metres(-M3_Count / 0.01632);
 
   M1_Count = 0;
   M2_Count = 0;
@@ -243,9 +266,10 @@ void computeVelocities(float vel, float heading, float angular_vel) {
   // Transforms from velocity/heading/angular velocity to motor speeds
   int radius = 12;
   setspeed_M1 = vel * (-0.5 * cos(heading) - sqrt(3) / 2 * sin(heading)) + radius * angular_vel;
-  setspeed_M2 = vel * (-0.5 * cos(heading) + sqrt(3) / 2 * sin(heading)) + radius * angular_vel;  
+  setspeed_M2 = vel * (-0.5 * cos(heading) + sqrt(3) / 2 * sin(heading)) + radius * angular_vel;
   setspeed_M3 = vel * cos(heading) + radius * angular_vel;
-  Serial.println(setspeed_M1);
-  Serial.println(setspeed_M2);
-  Serial.println(setspeed_M3);
+}
+
+double ticks2metres(int ticks){
+  return double(ticks)/TICKS_PER_REV * PI * WHEEL_DIAMETER;
 }
