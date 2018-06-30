@@ -189,7 +189,7 @@ class PiBotServer:
         for s in self.open_socks:
             s.close()
        
-
+        self.cam.stop()
 
     '''
     #####################################################################################
