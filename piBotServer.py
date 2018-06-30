@@ -16,10 +16,8 @@ import os
 
 import piVideoStream
 from socket_helpers import *
+from constants import *
 
-PORT_CMDS_A = 5000
-PORT_CMDS_B = 5001
-PORT_CAMERA = 5002
 
 logging.basicConfig(level=logging.DEBUG,
                       format='[%(levelname)s] (%(threadName)-9s) %(message)s',)
@@ -121,6 +119,7 @@ class PiBotServer:
         '''
         opCodes for commands A are:
             0   Control motor power
+            1   Mode selection ('auto','manual')
 
         '''
         if opCode == 0:
@@ -128,6 +127,16 @@ class PiBotServer:
             motor2 = int(cmds[2])
             motor3 = int(cmds[3])
             self.setPower(motor1, motor2, motor3)
+
+        if opCode == 1:
+            if cmds[1].lower() == 'auto':
+                logging.debug("TODO: ENTERING AUTONOMOUS MODE")
+                #TODO: lots of stuff?
+            elif cmds[1].lower() == 'manual':
+                logging.debug("TODO: ENTERING MANUAL MODE")
+                #TODO: Turn motors off?
+            else:
+                logging.error("Unknown mode '%s'", cmds[1])
 
         else:
             logging.warning("Ignoring unknown opCode: %d", opCode)

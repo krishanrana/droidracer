@@ -14,11 +14,7 @@ import time
 import numpy as np
 
 from socket_helpers import *
-
-PORT_CMDS_A = 5000
-PORT_CMDS_B = 5001
-PORT_CAMERA = 5002
-DEFAULT_HOST = '0.0.0.0'
+from constants import *
 
 
 logging.basicConfig(level=logging.DEBUG,
@@ -105,6 +101,14 @@ class PiBotClient:
         msg = "%d,%d,%d" % (motor1,motor2,motor3)   # Prepare the comma-separated values
         self.__sendCmdA(opCode, msg)                # Use the helper function to send the cmd
         
+    def setMode(self, mode='manual'):
+        '''
+        Use this to change robot between auto or manual operation modes.
+        Default is manual.
+        '''
+        opCode = 1
+        msg = mode                                  # Prepare the comma-separated values
+        self.__sendCmdA(opCode, msg)                # Use the helper function to send the cmd
 
     '''
     #####################################################################################

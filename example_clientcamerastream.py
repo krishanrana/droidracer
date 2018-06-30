@@ -4,10 +4,9 @@ ON THE SERVER. The client is still able to access the feed
 '''
 import time
 import cv2
+
 import piBotClient
-
-DEFAULT_HOST = '192.168.1.59' # IP of the server
-
+from constants import *
 
 if __name__=="__main__":
     droid = piBotClient.PiBotClient(host=DEFAULT_HOST)
