@@ -35,7 +35,7 @@ class PiBotClient:
     def __init__(   
                     self, 
                     host=DEFAULT_HOST, 
-                    cam_resolution=(2592,1944),
+                    cam_resolution=(640,480),
                     port_cmds_a=PORT_CMDS_A,
                     port_cmds_b=PORT_CMDS_B,
                     port_camera=PORT_CAMERA,
@@ -69,7 +69,7 @@ class PiBotClient:
         SERVICES
     #####################################################################################
     '''
-    def StartCamStream(self):
+    def StartCameraStream(self):
         threading.Thread(name="CameraStreamReceiver", target=self.__StartCamStream, daemon=False).start()
         
     def __StartCamStream(self):
