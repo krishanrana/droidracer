@@ -137,9 +137,7 @@ while(cap.isOpened()):
         Heading = np.arctan((vpX - centreX)/(centreY - vpY))
         dataAvailable = 1
 
-        
-        
-      
+  
     except:
         print('all fucked right now')
         dataAvailable = 0
