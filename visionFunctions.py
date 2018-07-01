@@ -27,18 +27,18 @@ class droidVision():
         width = frame.shape[1]
         dataAvailable = 1; 
         vpHeading = 0
-        droidOffset = [0,0]
         obCentre = [0,0]
-        obWidth = 0
         obDistance = 0
         obHeading = 0
         vpX = 0
         vpY = 0
-        
+        leftOffset = 0
+        rightOffset = 0
+
         #State flags
         blueDetect = 0
         yellowDetect = 0
-        obstacleDetect = 0
+        obstacle = 0
         
         # Work with frame
         centreX = np.round(width/2)
@@ -130,15 +130,14 @@ class droidVision():
             
             # Calculate distance to object
             obDistance = (centreY - obBottom[1]) * mPerPixel
-            obWidth = obRight - obLeft
             obHeading = np.arctan((obCentre[0] - centreX)/(centreY - obCentre[1]))
             print('Obstacle detected')
-            obstacleDetect = 1
+            obstacle = 1
             
 
         except:
             print('No objects, drive fast!') 
-            obstacleDetect = 0
+            obstacle = 0
             
             
         linestate = yellowDetect + blueDetect
@@ -158,7 +157,6 @@ class droidVision():
                 if blueDetect:
                     leftOffset = (centreX-bZero)
                     rightOffset = np.NaN
-                    droidOffset = [leftOffset, rightOffset]
                     vpY = 0
                     vpX = (bM * centreY) + centreX
                     vpHeading = np.arctan((vpX - centreX)/(centreY - vpY))
@@ -167,7 +165,6 @@ class droidVision():
                 elif yellowDetect:
                     leftOffset =  np.NaN
                     rightOffset = (centreX-yZero)
-                    droidOffset = [leftOffset, rightOffset]
                     vpY = 0
                     vpX = (yM * centreY) + centreX
                     vpHeading = np.arctan((vpX - centreX)/(centreY - vpY))
@@ -183,7 +180,6 @@ class droidVision():
                 dataAvailable = 1
                 leftOffset = (centreX-bZero)
                 rightOffset = (yZero - centreX)
-                droidOffset = [leftOffset, rightOffset]
                 vpY = (yZero - bZero)/(bM - yM) + centreY
                 vpX = bM * (vpY - centreY) + bZero
                 vpHeading = np.arctan((vpX - centreX)/(centreY - vpY))
@@ -205,7 +201,7 @@ class droidVision():
         except:
             print('cant show obstacle')
             
-        return frame, dataAvailable,vpHeading, droidOffset, obCentre, obWidth, obDistance, obHeading
+        return dataAvailable,vpHeading, leftOffset, rightOffset, obstacle, obDistance, obHeading
 
 
             
