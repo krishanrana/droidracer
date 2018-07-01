@@ -29,8 +29,10 @@ def main():
     while(cap.isOpened()):
         # Process vision
         ret, frame = cap.read()
+        frame = frame[450:frame.shape[0]-1,:,:]
 
-        dataAvailable, vpHeading, droidOffset, obCentre, obWidth, obDistance, obHeading = vision.processFrame(frame)
+
+        dataAvailable, vpX, vpY, vpHeading, droidOffset, obCentre, obWidth, obDistance, obHeading = vision.processFrame(frame)
               
         # Filter outputs
         if dataAvailable:
@@ -62,8 +64,8 @@ def main():
 #        droidX = deque([0],2)
 #        droidY = deque([0],2)
 #        startTime = time.time()
-        # Between frames (not sure how to do this)
-
+#         #Between frames (not sure how to do this)
+#
 #        # Read current IMU feed
 #        if IMUAvailable:
 #            deltaTime = time.time() - startTime
@@ -72,11 +74,11 @@ def main():
 #
 #
 #            droidTheta.append()
-
-        # Course correction - Angle
-        # Face towards Vanishing point, reduce error to heading
-
-        # Tunable parameter - how to work out?
+#
+##         Course correction - Angle
+##         Face towards Vanishing point, reduce error to heading
+#
+#         #Tunable parameter - how to work out?
 #        K_theta = 5
 #        thetaError = 0 - avHeading
 #        omega = K_theta * thetaError
@@ -88,7 +90,6 @@ def main():
 
         # Display results
         
-        frame = frame[450:frame.shape[0]-1,:,:]
         centreY = 400 # Result of calibration
 
         width = frame.shape[1]

@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
 
+
+
 class droidVision():
 
     def __init__(self):
@@ -36,7 +38,6 @@ class droidVision():
         obstacleDetect = 0
         
         # Work with frame
-        frame = frame[450:frame.shape[0]-1,:,:]
         centreX = np.round(width/2)
         processed = cv2.medianBlur(frame,5)
         lab = cv2.cvtColor(processed,cv2.COLOR_BGR2LAB) 
@@ -49,19 +50,20 @@ class droidVision():
         # Split into yellow and blue and green lines
         retY,yellow = cv2.threshold(clB,170,1,cv2.THRESH_BINARY)
         retB,blue = cv2.threshold(clB,100,1,cv2.THRESH_BINARY)
-        retG,green = cv2.threshold(clA,100,1,cv2.THRESH_BINARY)
+#        retG,green = cv2.threshold(clA,100,1,cv2.THRESH_BINARY)
         retP,purple = cv2.threshold(clA,160,1,cv2.THRESH_BINARY)
         
-        green = cv2.bitwise_not(green) - 254 # invert green line
+#        green = cv2.bitwise_not(green) - 254 # invert green line
         blue = cv2.bitwise_not(blue) - 254 # invert blue line
         try:
             # process yellow line
             yellow = cv2.morphologyEx(yellow, cv2.MORPH_OPEN, kernel)
-            yLine = np.squeeze(cv2.HoughLinesP(yellow,1,thetaThresh,rhoThresh,minLineLength,maxLineGap))#detect lines
-            yGrad = (yLine[:,0]-yLine[:,2])/(yLine[:,1]-yLine[:,3] + 0.001)# find gradient of lines
-            yFilt = rejectOutliers(yGrad)
-            yMag = np.sqrt((yLine[:,1]-yLine[:,3])**2+(yLine[:,0]-yLine[:,2])**2) # find magnitude of lines
-            yM = np.sum((yFilt*yMag),axis=0)/np.sum(yMag,axis=0) # find weighted average gradient
+            yLine = np.squeeze(cv2.HoughLinesP(yellow,1,thetaThresh,rhoThresh,minLineLength,maxLineGap))
+            yGrad = (yLine[:,0]-yLine[:,2])/(yLine[:,1]-yLine[:,3] + 0.001)
+            yFilt = rejectOutliers(yGrad, m=10)
+            
+            yMag = np.sqrt((yLine[:,1]-yLine[:,3])**2+(yLine[:,0]-yLine[:,2])**2) 
+            yM = np.sum((yFilt*yMag),axis=0)/np.sum(yMag,axis=0) 
             # find intersection point with baseline centreY, using gradient and mean point
             yX,yY = np.sum((yLine[:,0] + yLine[:,2])/(2*yLine.shape[0])),np.sum((yLine[:,1] + yLine[:,3])/(2*yLine.shape[0]))
             yZero = yX + yM*(centreY-yY)
@@ -77,10 +79,9 @@ class droidVision():
             blue = cv2.morphologyEx(blue, cv2.MORPH_OPEN, kernel)
             bLine = np.squeeze(cv2.HoughLinesP(blue,1,thetaThresh,rhoThresh,minLineLength,maxLineGap))
             bGrad = (bLine[:,0]-bLine[:,2])/(bLine[:,1]-bLine[:,3] + 0.001)
-            bFilt = rejectOutliers(bGrad)
+            bFilt = rejectOutliers(bGrad,m=10)
 
             bMag = np.sqrt((bLine[:,1]-bLine[:,3])**2+(bLine[:,0]-bLine[:,2])**2) 
-            # find weighted average gradient
             bM = np.sum((bFilt*bMag),axis=0)/np.sum(bMag,axis=0) 
             
             #find intersection point with baseline centreY, using gradient and mean point
@@ -108,21 +109,20 @@ class droidVision():
         try:
             # process purple objects
             purple = cv2.morphologyEx(purple, cv2.MORPH_OPEN, kernel)
-            # blob detect,get centroids
             __, contours, __ = cv2.findContours(purple,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
             # find centroid of largest blob
-        
             blob = max(contours, key=lambda el: cv2.contourArea(el))
             M = cv2.moments(blob)
             obCentre = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
             
             # Find edges of obstacle
-            cnt = blob
+            blob = blob
 
-            obLeft = tuple(cnt[cnt[:,:,0].argmin()][0])
-            obRight = tuple(cnt[cnt[:,:,0].argmax()][0])
-            #obTop = tuple(cnt[cnt[:,:,1].argmin()][0])
-            obBottom = tuple(cnt[cnt[:,:,1].argmax()][0])
+            obLeft = tuple(blob[blob[:,:,0].argmin()][0])
+            obRight = tuple(blob[blob[:,:,0].argmax()][0])
+            #obTop = tuple(blob[blob[:,:,1].argmin()][0])
+            obBottom = tuple(blob[blob[:,:,1].argmax()][0])
+            
             # Calculate distance to object
             obDistance = (centreY - obBottom[1]) * mPerPixel
             obWidth = obRight - obLeft
@@ -137,24 +137,30 @@ class droidVision():
             
         linestate = yellowDetect + blueDetect
         
-            
-        if linestate = 0:
-            dataAvailable = 0;
-        else if linestate = 1;
-            
-        try:
-            leftOffset = (centreX-bZero)
-            rightOffset = (yZero - centreX)
-            droidOffset = rightOffset-leftOffset
-            vpY = (yZero - bZero)/(bM - yM) + centreY
-            vpX = bM * (vpY - centreY) + bZero
-            vpHeading = np.arctan((vpX - centreX)/(centreY - vpY))
+        try:   
+            if linestate == 0:
+                dataAvailable = 0
+                
+            elif linestate == 1:
+                dataAvailable = 1
+                
+                
+            else:
+                dataAvailable = 1
+                leftOffset = (centreX-bZero)
+                rightOffset = (yZero - centreX)
+                droidOffset = [leftOffset, rightOffset]
+                vpY = (yZero - bZero)/(bM - yM) + centreY
+                vpX = bM * (vpY - centreY) + bZero
+                vpHeading = np.arctan((vpX - centreX)/(centreY - vpY))
                   
         except:
             print('all fucked right now')
             dataAvailable = 0;
             
-        return dataAvailable, vpHeading, droidOffset, obCentre, obWidth, obDistance, obHeading
+        return dataAvailable, vpX, vpY, vpHeading, droidOffset, obCentre, obWidth, obDistance, obHeading
+
+
             
 def rejectOutliers(data, m = 10.):
     d = np.abs(data - np.median(data))
@@ -166,8 +172,7 @@ def rejectOutliers(data, m = 10.):
 
 
 class goal():
-    def __init__(self,name):
-        self.name = name
+    def __init__(self):
         self.vP = [0,0]
         self.offset = [0,0]
         # possible states ['NoLines' 0, 'OneLine' 1, 'TwoLines'2]
@@ -180,8 +185,8 @@ class goal():
         
         
 class obstacle():
-    def __init__(self,name):
-        self.name = name
+    def __init__(self):
+
         self.number = 0
         self.centre = [0,0]
         self.distance = 0
@@ -193,8 +198,8 @@ class obstacle():
         
 
 class droidState():
-    def __init__(self,name):
-        self.name = name
+    def __init__(self):
+
         # possible states ['start', 'ready', 'run', 'lost','finish']
         self.droidstate = 'start'
         # possible states = ['Correct', 'Incorrect', 'Unknown']
