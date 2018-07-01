@@ -10,6 +10,7 @@ class droidVision():
 
 
     def processFrame(self, frame):
+        frame = frame[450:frame.shape[0]-1,:,:]
 
         clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
         thetaThresh = np.pi/180 *1.5
@@ -26,11 +27,13 @@ class droidVision():
         width = frame.shape[1]
         dataAvailable = 1; 
         vpHeading = 0
-        droidOffset = 0
+        droidOffset = [0,0]
         obCentre = [0,0]
         obWidth = 0
         obDistance = 0
         obHeading = 0
+        vpX = 0
+        vpY = 0
         
         #State flags
         blueDetect = 0
@@ -68,8 +71,9 @@ class droidVision():
             yX,yY = np.sum((yLine[:,0] + yLine[:,2])/(2*yLine.shape[0])),np.sum((yLine[:,1] + yLine[:,3])/(2*yLine.shape[0]))
             yZero = yX + yM*(centreY-yY)
             yellowDetect = 1
+            for x1,y1,x2,y2 in yLine: 
+                cv2.line(frame,(x1,y1),(x2,y2),(0,0,255),1)
         except:
-            print('No yellow') 
             yellowDetect = 0
             
             
@@ -88,9 +92,10 @@ class droidVision():
             bX,bY = np.sum((bLine[:,0] + bLine[:,2])/(2*bLine.shape[0])),np.sum((bLine[:,1] + bLine[:,3])/(2*bLine.shape[0]))
             bZero = bX + bM * (centreY-bY)
             blueDetect = 1
+            for x1,y1,x2,y2 in bLine:
+                cv2.line(frame,(x1,y1),(x2,y2),(0,255,0),1)
 
         except:
-            print('No blue')
             blueDetect = 0
         # Detect finish line - Unfinished, need example
 #        try:   
@@ -127,8 +132,9 @@ class droidVision():
             obDistance = (centreY - obBottom[1]) * mPerPixel
             obWidth = obRight - obLeft
             obHeading = np.arctan((obCentre[0] - centreX)/(centreY - obCentre[1]))
-            print('object detected')
+            print('Obstacle detected')
             obstacleDetect = 1
+            
 
         except:
             print('No objects, drive fast!') 
@@ -140,12 +146,40 @@ class droidVision():
         try:   
             if linestate == 0:
                 dataAvailable = 0
+                print('No lines') 
+
+            
                 
             elif linestate == 1:
                 dataAvailable = 1
+                # In case of occlusion
+#                if obstacleDetect:
+                    
+                if blueDetect:
+                    leftOffset = (centreX-bZero)
+                    rightOffset = np.NaN
+                    droidOffset = [leftOffset, rightOffset]
+                    vpY = 0
+                    vpX = (bM * centreY) + centreX
+                    vpHeading = np.arctan((vpX - centreX)/(centreY - vpY))
+                    print('Just blue ')
+
+                elif yellowDetect:
+                    leftOffset =  np.NaN
+                    rightOffset = (centreX-yZero)
+                    droidOffset = [leftOffset, rightOffset]
+                    vpY = 0
+                    vpX = (yM * centreY) + centreX
+                    vpHeading = np.arctan((vpX - centreX)/(centreY - vpY))
+                    print('Just yellow ')
+#                else:
+#                    dataAvailable = 1
+#                    print('1 line, no obstacle')
+                        
                 
                 
             else:
+                # Situation normal, 2 lines seen
                 dataAvailable = 1
                 leftOffset = (centreX-bZero)
                 rightOffset = (yZero - centreX)
@@ -153,12 +187,25 @@ class droidVision():
                 vpY = (yZero - bZero)/(bM - yM) + centreY
                 vpX = bM * (vpY - centreY) + bZero
                 vpHeading = np.arctan((vpX - centreX)/(centreY - vpY))
-                  
+                print('2 lines')
+ 
         except:
             print('all fucked right now')
             dataAvailable = 0;
+        try:
+            cv2.line(frame,(int(bZero),int(centreY)),(int(vpX),int(vpY)),(0,255,0),2)
+            cv2.line(frame,(int(yZero),int(centreY)),(int(vpX),int(vpY)),(0,255,0),2)
+        except:
+            print('cant show lines')  
             
-        return dataAvailable, vpX, vpY, vpHeading, droidOffset, obCentre, obWidth, obDistance, obHeading
+        try:
+            cv2.line(frame,(0,obBottom[1]),(width,obBottom[1]),(0,255,0),2)
+            cv2.circle(frame, obCentre, 5, (0,255,0), -1)
+        
+        except:
+            print('cant show obstacle')
+            
+        return frame, dataAvailable,vpHeading, droidOffset, obCentre, obWidth, obDistance, obHeading
 
 
             
@@ -201,8 +248,8 @@ class droidState():
     def __init__(self):
 
         # possible states ['start', 'ready', 'run', 'lost','finish']
-        self.droidstate = 'start'
+        self.droidstate = 0
         # possible states = ['Correct', 'Incorrect', 'Unknown']
-        self.trackstate = 'Unknown'
+        #self.trackstate = 'Unknown'
         
         pass
