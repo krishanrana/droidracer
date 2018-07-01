@@ -16,6 +16,4 @@ if __name__=="__main__":
             time.sleep(0.01)
         droid.cam.frame_available = False   # Reset the flag so you aren't processing the same image over and over
         im = droid.cam.read()
-        print("Received image of size: ")
-        print(im.shape)
-        # Do want you want with im
+
