@@ -15,25 +15,13 @@ droid.StartCameraStream()           # Make sure you start the camera stream!
 droid.StartServers()                # Only if you are connecting a client
 
 
-
-
-
-
-
-
-
 def tohex(val):
     out = hex(((abs(val) ^ 0xffff) + 1) & 0xffff)
     return out
 
 
-
-
-
-
-
 ########Testing how to send the 3 sets of data to the arduino
-def navigation(state, Heading, leftOffset, rightOffset, obstacle, obDist):
+def navigation(Heading, leftOffset, rightOffset, obstacle, obDist):
     
     raceSpeed = 1
     Komega = 2
@@ -77,14 +65,12 @@ def piToArduino(speed, vector, omega):
 
     ser.write(data_out.encode("ascii"))
 
-def main():
 
+def main():
 
     vision = visionFunctions.droidVision()
     
     print('Entering while...')
-
-
 
     while not droid.cam.frame_available:   # Wait till a frame is in the buffer
         time.sleep(0.01)
@@ -92,12 +78,11 @@ def main():
 
     while(1):
         
-       
         frame = droid.cam.read()
             
         avHeading, avLeftOffset, avRightOffset, obstacle, avObDist = vision.processFrame(frame)
         
-        speed , vector, omega = navigation(avHeading, avLeftOffset, avRightOffset, obstacle, avObDist)
+        speed, vector, omega = navigation(avHeading, avLeftOffset, avRightOffset, obstacle, avObDist)
         
         piToArduino(speed, vector, omega)
 
@@ -109,8 +94,4 @@ def signalHandler(signal, frame):
 
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, signalHandler)
-    
     main()
-
-
-#TODO: USE CTR C INTERRUPT TO CLOSE SERIAL PORT ser.close()
