@@ -180,40 +180,12 @@ def rejectOutliers(data, m = 10.):
     return data[s<m]
 
 
-
-
-class goal():
-    def __init__(self):
-        self.vP = [0,0]
-        self.offset = [0,0]
-        # possible states ['NoLines' 0, 'OneLine' 1, 'TwoLines'2]
-        self.linestate = 0
-        
-        pass
+def objectDistance(VertPix,tiltAngle, Height, bottomEdge, xOffset):
     
-        
-        
-        
-        
-class obstacle():
-    def __init__(self):
+    Y = VertPix/2 - bottomEdge
 
-        self.number = 0
-        self.centre = [0,0]
-        self.distance = 0
-        self.edges = [0,0]
-        
-        pass
-        
-        
-        
-
-class droidState():
-    def __init__(self):
-
-        # possible states ['start', 'ready', 'run', 'lost','finish']
-        self.droidstate = 0
-        # possible states = ['Correct', 'Incorrect', 'Unknown']
-        #self.trackstate = 'Unknown'
-        
-        pass
+    fieldAngle = 0.8517
+    pxAngle = ((Y * fieldAngle)/(VertPix))
+    obDist = Height * np.tan(tiltAngle + pxAngle - (3/2*np.pi))
+    
+    return obDist
