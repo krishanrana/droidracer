@@ -64,9 +64,8 @@ class droidVision():
             #yellow = cv2.Canny(yellow,0,1,apertureSize = 5)
             yline = np.squeeze(cv2.HoughLinesP(yellow,1,self.thetaThresh,self.rhoThresh,self.minLineLength,self.maxLineGap))#detect lines
             ygrad = (yline[:,0]-yline[:,2])/(yline[:,1]-yline[:,3]+0.001)# find gradient of lines
-            yfilt = rejectOutliers(ygrad, m=10)
-            ymag = np.sqrt((yline[:,1]-yline[:,3])**2+(yline[:,0]-yline[:,2])**2) # find magnitude of lines
-            yM = np.sum((yfilt*ymag),axis=0)/np.sum(ymag,axis=0) # find weighted average gradient
+            yfilt = rejectOutliers(ygrad, m=5)
+            yM = np.median(yfilt)
             #find intersection point with baseline centreY, using gradient and mean point
             ypointX,ypointY = np.sum((yline[:,0] + yline[:,2])/(2*yline.shape[0])),np.sum((yline[:,1] + yline[:,3])/(2*yline.shape[0]))
             yZeroCrossing = ypointX + yM*(self.centreY-ypointY)
@@ -81,10 +80,8 @@ class droidVision():
     #        blue = cv2.Canny(blue,0,1,apertureSize = 5)
             bline = np.squeeze(cv2.HoughLinesP(blue,1,self.thetaThresh,self.rhoThresh,self.minLineLength,self.maxLineGap))#detect lines
             bgrad = (bline[:,0]-bline[:,2])/(bline[:,1]-bline[:,3])# find gradient of lines
-            bfilt = rejectOutliers(bgrad, m=10)
-
-            bmag = np.sqrt((bline[:,1]-bline[:,3])**2+(bline[:,0]-bline[:,2])**2) # find magnitude of lines
-            bM = np.sum((bfilt*bmag),axis=0)/np.sum(bmag,axis=0) # find weighted average gradient
+            bfilt = rejectOutliers(bgrad, m=5)
+            bM = np.median(bfilt)
             #find intersection point with baseline centreY, using gradient and mean point
             bpointX,bpointY = np.sum((bline[:,0] + bline[:,2])/(2*bline.shape[0])),np.sum((bline[:,1] + bline[:,3])/(2*bline.shape[0]))
             bZeroCrossing = bpointX + bM*(self.centreY-bpointY)
