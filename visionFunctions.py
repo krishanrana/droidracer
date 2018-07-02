@@ -84,8 +84,8 @@ class droidVision():
             bpointX,bpointY = np.sum((bline[:,0] + bline[:,2])/(2*bline.shape[0])),np.sum((bline[:,1] + bline[:,3])/(2*bline.shape[0]))
             bZeroCrossing = bpointX + bM*(self.centreY-bpointY)
         
-           for x1,y1,x2,y2 in bline:
-               cv2.line(frame,(x1,y1),(x2,y2),(0,255,0),1)
+            for x1,y1,x2,y2 in bline:
+                cv2.line(frame,(x1,y1),(x2,y2),(0,255,0),1)
         except:
             print('No blue')
             
