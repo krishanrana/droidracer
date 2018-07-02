@@ -53,7 +53,7 @@ def navigation(Heading, leftOffset, rightOffset, obstacle, obDist):
 def main():
 
     vision = visionFunctions.droidVision()
-    
+    droid.state = 1
     print('Entering while...')
 
     while not droid.cam.frame_available:   # Wait till a frame is in the buffer
@@ -69,6 +69,9 @@ def main():
         speed, vector, omega = navigation(avHeading, avLeftOffset, avRightOffset, obstacle, avObDist)
 
         # Control
+        print(speed)
+        print(vector)
+        print(omega)
         droid.setSpeed(speed, vector, omega)
 
 
