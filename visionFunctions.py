@@ -5,6 +5,11 @@ from collections import deque
 
 from constants import *
 
+FRAME_SCALE = 3
+BLUE_THRESH = 100
+YELLOW_THRESH = 160
+
+
 class droidVision():
 
     def __init__(self):
@@ -28,8 +33,8 @@ class droidVision():
         self.clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
         self.thetaThresh = np.pi/180 *1.5
         self.rhoThresh = 80
-        self.minLineLength = 100
-        self.maxLineGap = 30
+        self.minLineLength = 100 * FRAME_SCALE
+        self.maxLineGap = 30 * FRAME_SCALE
         self.centreY = 1000 # Result of calibration
 
         self.debugFrame = np.empty((DEFAULT_CAM_H,DEFAULT_CAM_W,3))
@@ -50,8 +55,8 @@ class droidVision():
         
         clB = self.clahe.apply(b) # histogram adjustment
         # Split into yellow and blue lines
-        retY,yellow = cv2.threshold(clB,170,1,cv2.THRESH_BINARY)
-        retB,blue = cv2.threshold(clB,100,1,cv2.THRESH_BINARY)
+        retY,yellow = cv2.threshold(clB,YELLOW_THRESH,1,cv2.THRESH_BINARY)
+        retB,blue = cv2.threshold(clB,BLUE_THRESH,1,cv2.THRESH_BINARY)
         blue = cv2.bitwise_not(blue)-254 # invert blue line
         try:
             # process yellow line
