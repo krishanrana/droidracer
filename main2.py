@@ -1,28 +1,44 @@
-import cv2
 import numpy as np
 import time
-from visionFunctions import droidVision
+import piBotServer
+import visionFunctions
+import signal
 
-from collections import deque
-#import serial
-#
-#ser = serial.Serial('/dev/ttyUSB4', 9600)
-#s = [0]
-#
-#def tohex(val):
-#    out = hex(((abs(val) ^ 0xffff) + 1) & 0xffff)
-#    return out
+import serial
 
-state = 0
+ser = serial.Serial('/dev/ttyUSB4', 9600)
+s = [0]
+
+
+droid = piBotServer.PiBotServer()
+droid.StartCameraStream()           # Make sure you start the camera stream!
+droid.StartServers()                # Only if you are connecting a client
+
+
+
+
+
+
+
+
+
+def tohex(val):
+    out = hex(((abs(val) ^ 0xffff) + 1) & 0xffff)
+    return out
+
+
+
+
+
 
 
 ########Testing how to send the 3 sets of data to the arduino
 def navigation(state, Heading, leftOffset, rightOffset, obstacle, obDist):
     
-    raceSpeed = 2
-    Komega = 5
+    raceSpeed = 1
+    Komega = 2
     Kh = 1
-    Kt = 1
+    #Kt = 1
     
     # Determine angular velocity based on camera direction 
     
@@ -31,34 +47,23 @@ def navigation(state, Heading, leftOffset, rightOffset, obstacle, obDist):
     
     # Determine speed based on state (ready = 0, race = 1, obstacles = 1 - K/distance to obstacle)
     # If checking systems
-    if state == 0:
+    if droid.state == 0:
         speed = 0
     # Ready to race
-    elif state == 1:
-        speed = 0
-    # If racing
-    elif state == 2:
-        if obstacle:
-           speed = raceSpeed * 1/obDist 
-        else:
-           speed = raceSpeed
-    # If lost
-    elif state == 3: 
-        speed = 0.2 * raceSpeed
-    # If race finished
-    elif state == 4: 
-        speed = 0
+    elif droid.state == 1:
+        speed = raceSpeed
         
     else:
         speed = 0
         
     # Determine vehicle heading vector in radians from x right = 0
-    trackOffset = leftOffset - rightOffset
+   # trackOffset = leftOffset - rightOffset
     
     # Create a vehicle direction vector
-    vector = (theta * Kh) + (trackOffset * Kt)
+    #vector = (theta * Kh) + (trackOffset * Kt)
     
-
+    vector = (theta * Kh)
+    
     return speed, vector, omega
 
 
@@ -70,78 +75,41 @@ def piToArduino(speed, vector, omega):
     omega = str(omega)
     data_out = speed + "," + vector + "," + omega + "\n"
 
-#    ser.write(data_out.encode("ascii"))
+    ser.write(data_out.encode("ascii"))
 
 def main():
-    histHeading = deque([0],10)
-    histLeftOffset = deque([0],10)
-    histRightOffset = deque([0],10)
-    histObDist = deque([0],10)
-    failedFrame = 0
-    obMissing = 0
 
-    vision = droidVision()
-    cap = cv2.VideoCapture('DRC2017Short.mp4')
+
+    vision = visionFunctions.droidVision()
+    
     print('Entering while...')
 
 
 
-############################
+    while not droid.cam.frame_available:   # Wait till a frame is in the buffer
+        time.sleep(0.01)
+    droid.cam.frame_available = False 
 
-
-    while(cap.isOpened()):
-
-        ret, frame = cap.read()
-        dataAvailable,Heading, leftOffset, rightOffset, obstacle, obDistance, obHeading = vision.processFrame(frame)
+    while(1):
         
-        
-        if dataAvailable: 
-            failedFrame = 0
-            histHeading.append(Heading)
-            histLeftOffset.append(leftOffset)
-            histRightOffset.append(rightOffset)
-        
-        else:
-            failedFrame += 1
-            # If lines are not detected for 10 frames, remove history
-        if failedFrame >= 10:
-            histHeading = deque([0],10)
-            histLeftOffset = deque([0],10)
-            histRightOffset = deque([0],10)
-            print('10 failed frames')
-        
-        if obstacle:
-            obMissing = 0
-            histObDist.append(obDistance)
+       
+        frame = droid.cam.read()
             
-        else:
-            obMissing +=1
-            
-        if obMissing >= 10:
-            histObDist = deque([0],10)
-            print('Lost the obstacle')
-                
-            
-        avHeading = np.nanmedian(histHeading)
-        avLeftOffset = np.nanmedian(histLeftOffset)
-        avRightOffset = np.nanmedian(histRightOffset)
-        avObDist = np.nanmedian(histObDist)
+        avHeading, avLeftOffset, avRightOffset, obstacle, avObDist = vision.processFrame(frame)
         
-        speed , vector, omega = navigation(state, avHeading, avLeftOffset, avRightOffset, obstacle, avObDist)
+        speed , vector, omega = navigation(avHeading, avLeftOffset, avRightOffset, obstacle, avObDist)
         
         piToArduino(speed, vector, omega)
-        
-        #print("new data")
-        #print(dataAvailable, ' ', newHeading, ' ', newOffset)
-        #print("moving average")
-        #print(dataAvailable, ' ', avHeading, ' ', avOffset)
 
-    cap.release()
 
+def signalHandler(signal, frame):
+    ser.close()
+    pass
 
 
 if __name__ == "__main__":
-
+    signal.signal(signal.SIGINT, signalHandler)
+    
     main()
 
 
