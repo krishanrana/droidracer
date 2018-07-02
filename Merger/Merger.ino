@@ -134,8 +134,6 @@ void setup() {
 void loop() {
 
   // Check serial comms for new vel/heading/angular_vel
-  //TODO:
-
   if (Serial.available() > 0)
   {
 
@@ -154,7 +152,6 @@ void loop() {
     }
 
     // Update the measured motor speeds
-    ////////SYNTAX: computeVelocities(linear velocity, heading, angular velocity);////////////
     computeVelocities(data[0], data[1], data[2]);
 
   }
@@ -183,32 +180,40 @@ void loop() {
   //  Serial.print(", ");
   //  Serial.println(setspeed_M3);
   //  Serial.println("");
+
+  
   PID_M1.Compute();
   PID_M2.Compute();
   PID_M3.Compute();
 
   // Write to the motor directions and pwm power
+  if (setspeed_M1==0 && setspeed_M2==0 && setspeed_M3==0){
+    analogWrite(PWM_M1, 0);
+    analogWrite(PWM_M2, 0);
+    analogWrite(PWM_M3, 0);
 
-  if (out_M1 < 0) {
-    digitalWrite(DIR_M1, LOW);
   } else {
-    digitalWrite(DIR_M1, HIGH);
+    if (out_M1 < 0) {
+      digitalWrite(DIR_M1, LOW);
+    } else {
+      digitalWrite(DIR_M1, HIGH);
+    }
+    analogWrite(PWM_M1, int(abs(out_M1)));
+  
+    if (out_M2 < 0) {
+      digitalWrite(DIR_M2, LOW);
+    } else {
+      digitalWrite(DIR_M2, HIGH);
+    }
+    analogWrite(PWM_M2, int(abs(out_M2)));
+  
+    if (out_M3 < 0) {
+      digitalWrite(DIR_M3, LOW);
+    } else {
+      digitalWrite(DIR_M3, HIGH);
+    }
+    analogWrite(PWM_M3, int(abs(out_M3)));
   }
-  analogWrite(PWM_M1, int(abs(out_M1)));
-
-  if (out_M2 < 0) {
-    digitalWrite(DIR_M2, LOW);
-  } else {
-    digitalWrite(DIR_M2, HIGH);
-  }
-  analogWrite(PWM_M2, int(abs(out_M2)));
-
-  if (out_M3 < 0) {
-    digitalWrite(DIR_M3, LOW);
-  } else {
-    digitalWrite(DIR_M3, HIGH);
-  }
-  analogWrite(PWM_M3, int(abs(out_M3)));
 }
 
 
