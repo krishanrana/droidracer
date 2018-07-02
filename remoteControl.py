@@ -7,6 +7,7 @@ logging.basicConfig(level=logging.DEBUG,
 
 import piBotClient
 
+SPEED = 1
 
 if __name__=='__main__':
 
@@ -14,31 +15,35 @@ if __name__=='__main__':
     droid = piBotClient.PiBotClient()
     droid.StartCameraStream()
 
-    # Wait until a frame is available
+    # Wait until a first frame is available
     while (not droid.frame_available):
         time.sleep(0.01)
-    
-    im = droid.frame
+    key = cv2.waitKey(100)
 
-    cv2.imshow("Droid Vision")
-    key = cv2.waitKey(10)
+    while key != ord('q'):
+        im = droid.frame
 
-    if key == ord('w'): # Forward
-        logging.debug("Going forward")
-        droid.setSpeed(2, np.pi, 0)
+        cv2.imshow("Droid Vision", im)
+        key = cv2.waitKey(100)
 
-    elif key == ord('s'): # Back
-        logging.debug("Going back")
-        droid.setSpeed(-2, np.pi, 0)
+        if key == ord('w'): # Forward
+            logging.debug("Going forward")
+            droid.setSpeed(SPEED, np.pi/2, 0)
 
-    elif key == ord('a'): # Left
-        logging.debug("Going left")
-        droid.setSpeed(0, np.pi, 0.5)
+        elif key == ord('s'): # Back
+            logging.debug("Going back")
+            droid.setSpeed(SPEED, 3*np.pi/2, 0)
 
-    elif key == ord('d'): # Right
-        logging.debug("Going right")
-        droid.setSpeed(0, np.pi, -0.5)
+        elif key == ord('a'): # Left
+            logging.debug("Going left")
+            droid.setSpeed(SPEED, np.pi, 0)
 
-    else:
-        droid.setSpeed(0, 0, 0)
+        elif key == ord('d'): # Right
+            logging.debug("Going right")
+            droid.setSpeed(SPEED, 0, 0)
+
+        else:
+            droid.setSpeed(0, 0, 0)
+
+        logging.debug("Key pressed: %s", key)
 

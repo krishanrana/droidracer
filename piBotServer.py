@@ -51,7 +51,7 @@ class PiBotServer:
         '''
         self.state = 0
         # Used for sending debug images
-        self.debug_frame = 0
+        self.debug_frame = np.zeros((DEFAULT_CAM_H,DEFAULT_CAM_W,3))
         self.debug = False     
         
         # Ports
