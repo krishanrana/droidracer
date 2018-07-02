@@ -124,14 +124,14 @@ class droidVision():
             self.vpY = (yZeroCrossing - bZeroCrossing)/(bM - yM) + self.centreY
             self.vpX = bM * (self.vpY - self.centreY) + bZeroCrossing
             Heading = np.arctan((self.vpX - centreX)/(self.centreY - self.vpY))
-            dataAvailable = 1
+            self.dataAvailable = 1
 
     
         except:
             print('all fucked right now')
             self.dataAvailable = 0
             
-        if dataAvailable:   
+        if self.dataAvailable:   
             self.histVPHeading.append(Heading)
             self.histLeftOffset.append(leftOffset)
             self.histRightOffset.append(rightOffset)
