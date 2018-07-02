@@ -55,7 +55,7 @@ class PiBotClient:
         # Camera stuff
         self.__cam_stream_enable = False
         self.cam_resolution = cam_resolution
-        size = (cam_resolution[1]*CAM_SCALING,cam_resolution[0]*CAM_SCALING,3)
+        size = (int(cam_resolution[1]*CAM_SCALING),int(cam_resolution[0]*CAM_SCALING),3)
         self.frame = np.empty(size, 'uint8')
         self.frame_available = False
 

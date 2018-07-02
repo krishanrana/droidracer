@@ -52,7 +52,7 @@ class PiBotServer:
         '''
         self.state = 0
         # Used for sending debug images
-        size = (cam_resolution[1]*CAM_SCALING,cam_resolution[0]*CAM_SCALING,3)
+        size = (int(cam_resolution[1]*CAM_SCALING),int(cam_resolution[0]*CAM_SCALING),3)
         self.debug_frame = np.empty(size, 'uint8')
         self.debug = False  
         
