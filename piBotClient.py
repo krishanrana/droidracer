@@ -105,6 +105,11 @@ class PiBotClient:
         opCode = 0
         msg = mode                                  # Prepare the comma-separated values
         self.__sendCmdA(opCode, msg)                # Use the helper function to send the cmd
+        if mode.lower() == 'manual':
+            self.state = 0
+        elif mode.lower() == 'auto':
+            self.state = 1
+
 
 
     def setRawSpeed(self, motor1, motor2, motor3):
