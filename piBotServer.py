@@ -38,8 +38,15 @@ class PiBotServer:
                     port_camera=PORT_CAMERA,
                 ):
 
-        self.speed = np.array([0,0,0])
-        
+        self.speed = 0
+        self.vector = 0
+        self.omega = 0
+        '''
+        Robot states:
+            0 = 'manual'
+            1 = 'auto'
+        '''
+        self.state = 0        
         
         # Ports
         self.port_cmds_a = port_cmds_a
@@ -130,11 +137,11 @@ class PiBotServer:
 
         if opCode == 1:
             if cmds[1].lower() == 'auto':
-                logging.debug("TODO: ENTERING AUTONOMOUS MODE")
-                #TODO: lots of stuff?
+                logging.debug("ENTERING AUTONOMOUS MODE")
+                self.state = 1
             elif cmds[1].lower() == 'manual':
-                logging.debug("TODO: ENTERING MANUAL MODE")
-                #TODO: Turn motors off?
+                logging.debug("ENTERING MANUAL MODE")
+                self.state = 0
             else:
                 logging.error("Unknown mode '%s'", cmds[1])
 
