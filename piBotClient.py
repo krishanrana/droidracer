@@ -109,18 +109,25 @@ class PiBotClient:
     #####################################################################################
     '''
 
-    def setPower(self, motor1, motor2, motor3):
-        opCode = 0
-        msg = "%d,%d,%d" % (motor1,motor2,motor3)   # Prepare the comma-separated values
-        self.__sendCmdA(opCode, msg)                # Use the helper function to send the cmd
-        
     def setMode(self, mode='manual'):
         '''
         Use this to change robot between auto or manual operation modes.
         Default is manual.
         '''
-        opCode = 1
+        opCode = 0
         msg = mode                                  # Prepare the comma-separated values
+        self.__sendCmdA(opCode, msg)                # Use the helper function to send the cmd
+
+
+    def setRawSpeed(self, motor1, motor2, motor3):
+        opCode = 1
+        msg = "%d,%d,%d" % (motor1,motor2,motor3)   # Prepare the comma-separated values
+        self.__sendCmdA(opCode, msg)                # Use the helper function to send the cmd
+
+
+    def setSpeed(self, speed, vector, omega):
+        opCode = 2
+        msg = "%d,%d,%d" % (speed,vector,omega)   # Prepare the comma-separated values
         self.__sendCmdA(opCode, msg)                # Use the helper function to send the cmd
 
     '''

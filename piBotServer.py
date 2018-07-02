@@ -13,6 +13,7 @@ import sys
 import time
 import numpy as np
 import os
+import serial
 
 import piVideoStream
 from socket_helpers import *
@@ -36,6 +37,8 @@ class PiBotServer:
                     port_cmds_a=PORT_CMDS_A,
                     port_cmds_b=PORT_CMDS_B,
                     port_camera=PORT_CAMERA,
+                    serial_port='/dev/ttyUSB0',
+                    baud=9600,
                 ):
 
         self.speed = 0
@@ -52,6 +55,9 @@ class PiBotServer:
         self.port_cmds_a = port_cmds_a
         self.port_cmds_b = port_cmds_b
         self.port_camera = port_camera
+
+        # Open serial comms to Arduino
+        self.ser = serial.Serial(serial_port, baud)
         
         # Raspberry pi camera
         self.cam = 0
@@ -72,7 +78,7 @@ class PiBotServer:
         SERVICES
     #####################################################################################
     '''
-        
+
     def StartServers(self):
         # Starts the listener servers each in a fresh thread
         cmdsA_thr = threading.Thread(name="CmdsAListener", target=self.__Listen, args=(self.port_cmds_a,), daemon=False)
@@ -128,17 +134,12 @@ class PiBotServer:
 
         '''
         opCodes for commands A are:
-            0   Control motor power
-            1   Mode selection ('auto','manual')
+            0   Mode selection ('auto','manual')
+            1   Control raw motor powers            # NOT IMPLEMENTED
+            2   Control speed/heading/omega
 
         '''
         if opCode == 0:
-            motor1 = int(cmds[1])
-            motor2 = int(cmds[2])
-            motor3 = int(cmds[3])
-            self.setPower(motor1, motor2, motor3)
-
-        if opCode == 1:
             if cmds[1].lower() == 'auto':
                 logging.debug("ENTERING AUTONOMOUS MODE")
                 self.state = 1
@@ -147,6 +148,20 @@ class PiBotServer:
                 self.state = 0
             else:
                 logging.error("Unknown mode '%s'", cmds[1])
+                
+
+        elif opCode == 1:
+            motor1 = int(cmds[1])
+            motor2 = int(cmds[2])
+            motor3 = int(cmds[3])
+            self.setPower(motor1, motor2, motor3)
+
+
+        elif opCode == 2:
+            speed = int(cmds[1])
+            vector = int(cmds[2])
+            omega = int(cmds[3])
+            self.setSpeed(speed, vector, omega)
 
         else:
             logging.warning("Ignoring unknown opCode: %d", opCode)
@@ -166,10 +181,7 @@ class PiBotServer:
 
         '''
         if opCode == 0:
-            speeds = self.getSpeed()
-            msg = "%d,%d,%d" % (speeds[0],speeds[1],speeds[2])
-            msg = msg.encode()
-            SendMsg(conn, msg)
+            logging.error("getSpeed not implemented yet")
 
         else:
             logging.warning("Ignoring unknown opCode: %d", opCode)
@@ -205,6 +217,9 @@ class PiBotServer:
         shutdown_flag = True
         self.__camera_flag = False
 
+        # Close serial port
+        self.ser.close()
+
         # Shutdown the listener sockets
         for s in self.open_socks:
             s.close()
@@ -218,6 +233,14 @@ class PiBotServer:
     '''
     def setPower(self, motor1, motor2, motor3):
         logging.error("Damn, havent got any motors programmed yet")
+
+    def setSpeed(self, speed, vector, omega):
+        speed = str(speed)
+        vector = str(vector)
+        omega = str(omega)
+        data_out = speed + "," + vector + "," + omega + "\n"
+
+        self.ser.write(data_out.encode("ascii"))
 
     '''
     #####################################################################################

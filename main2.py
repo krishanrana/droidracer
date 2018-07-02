@@ -4,12 +4,6 @@ import piBotServer
 import visionFunctions
 import signal
 
-import serial
-
-ser = serial.Serial('/dev/ttyUSB0', 9600)
-s = [0]
-
-
 droid = piBotServer.PiBotServer()
 droid.StartCameraStream()           # Make sure you start the camera stream!
 droid.StartServers()                # Only if you are connecting a client
@@ -55,17 +49,6 @@ def navigation(Heading, leftOffset, rightOffset, obstacle, obDist):
     return speed, vector, omega
 
 
-
-
-def piToArduino(speed, vector, omega):
-    speed = str(speed)
-    vector = str(vector)
-    omega = str(omega)
-    data_out = speed + "," + vector + "," + omega + "\n"
-
-    ser.write(data_out.encode("ascii"))
-
-
 def main():
 
     vision = visionFunctions.droidVision()
@@ -74,27 +57,24 @@ def main():
 
     while not droid.cam.frame_available:   # Wait till a frame is in the buffer
         time.sleep(0.01)
-    droid.cam.frame_available = False 
 
     while(not shutdown_sig):
-        
+        # Vision
         frame = droid.cam.read()
-            
         avHeading, avLeftOffset, avRightOffset, obstacle, avObDist = vision.processFrame(frame)
-
         droid.debug_frame = vision.debugFrame
         
+        # Nav
         speed, vector, omega = navigation(avHeading, avLeftOffset, avRightOffset, obstacle, avObDist)
-        
-        piToArduino(speed, vector, omega)
+
+        # Control
+        droid.setSpeed(speed, vector, omega)
 
 
 def signalHandler(signal, frame):
     global shutdown_sig
     shutdown_sig = True
-    ser.close()
     droid.close()
-    pass
 
 
 if __name__ == "__main__":
