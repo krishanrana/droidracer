@@ -55,7 +55,7 @@ class PiBotServer:
         
         # Raspberry pi camera
         self.cam = 0
-        self.cam_resolution = (640,480)
+        self.cam_resolution = (DEFAULT_CAM_W,DEFAULT_CAM_H)
         self.__camera_flag = False
 
         # Keep track of open ports to close when server is closed
@@ -222,9 +222,7 @@ class PiBotServer:
     '''
     def getSpeed(self):
         logging.error("Don't got no speeds to give. Just sending random numbers")
-        self.speed[0] = 12
-        self.speed[1] = 45
-        self.speed[2] = -87
+        
         return self.speed
     
 

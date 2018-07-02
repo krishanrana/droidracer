@@ -44,7 +44,7 @@ class PiBotClient:
     def __init__(   
                     self, 
                     host=DEFAULT_HOST, 
-                    cam_resolution=(640,480),
+                    cam_resolution=(DEFAULT_CAM_W,DEFAULT_CAM_H),
                     port_cmds_a=PORT_CMDS_A,
                     port_cmds_b=PORT_CMDS_B,
                     port_camera=PORT_CAMERA,

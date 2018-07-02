@@ -76,7 +76,7 @@ def main():
         time.sleep(0.01)
     droid.cam.frame_available = False 
 
-    while(1):
+    while(not shutdown_sig):
         
         frame = droid.cam.read()
             
@@ -88,10 +88,14 @@ def main():
 
 
 def signalHandler(signal, frame):
+    global shutdown_sig
+    shutdown_sig = True
     ser.close()
+    droid.close()
     pass
 
 
 if __name__ == "__main__":
+    shutdown_sig = False
     signal.signal(signal.SIGINT, signalHandler)
     main()
