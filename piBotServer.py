@@ -18,6 +18,7 @@ import serial
 import piVideoStream
 from socket_helpers import *
 from constants import *
+import auto
 
 
 logging.basicConfig(level=logging.DEBUG,
@@ -33,7 +34,7 @@ class PiBotServer:
     '''
     def __init__(
                     self,
-                    ticks_per_rev=(200,200),
+                    cam_resolution=(DEFAULT_CAM_W,DEFAULT_CAM_H),
                     port_cmds_a=PORT_CMDS_A,
                     port_cmds_b=PORT_CMDS_B,
                     port_camera=PORT_CAMERA,
@@ -51,8 +52,9 @@ class PiBotServer:
         '''
         self.state = 0
         # Used for sending debug images
-        self.debug_frame = np.zeros((DEFAULT_CAM_H,DEFAULT_CAM_W,3))
-        self.debug = False     
+        size = (cam_resolution[1]*CAM_SCALING,cam_resolution[0]*CAM_SCALING,3)
+        self.debug_frame = np.empty(size, 'uint8')
+        self.debug = False  
         
         # Ports
         self.port_cmds_a = port_cmds_a
@@ -64,7 +66,7 @@ class PiBotServer:
         
         # Raspberry pi camera
         self.cam = 0
-        self.cam_resolution = (DEFAULT_CAM_W,DEFAULT_CAM_H)
+        self.cam_resolution = cam_resolution
         self.__camera_flag = False
 
         # Keep track of open ports to close when server is closed
@@ -129,7 +131,7 @@ class PiBotServer:
         conn.close()            # Close the connection
         logging.debug('Received data: %s', data)
 
-        # Seperate opCode from the payload. Payload hadling will
+        # Separate opCode from the payload. Payload hadling will
         # differ depending on the operation.
         cmds = data.decode().split(',')
         opCode = int(cmds[0])
@@ -144,10 +146,10 @@ class PiBotServer:
         if opCode == 0:
             if cmds[1].lower() == 'auto':
                 logging.debug("ENTERING AUTONOMOUS MODE")
-                self.state = 1
+                self.enterAutoMode()
             elif cmds[1].lower() == 'manual':
                 logging.debug("ENTERING MANUAL MODE")
-                self.state = 0
+                self.enterManualMode()
             else:
                 logging.error("Unknown mode '%s'", cmds[1])
                 
@@ -209,8 +211,8 @@ class PiBotServer:
                 if self.debug:
                     self.frame = self.debug_frame
                 else:
-                    self.frame = self.cam.read() # Might want to preprocess here on the raspberry pi?
-                SendNumpy(conn, self.frame, jpeg=False) # Send an image
+                    self.frame = self.cam.read()
+                SendNumpy(conn, self.frame, jpeg=True) # Send an image
 
         self.cam.stop()
         conn.close()
@@ -230,13 +232,27 @@ class PiBotServer:
        
         self.cam.stop()
 
+
+    '''
+    #####################################################################################
+        STATE MACHINE MODES
+    #####################################################################################
+    '''
+    def enterManualMode(self):
+        self.state = 0
+        auto.stop()
+
+    def enterAutoMode(self):
+        self.state = 1
+        auto.begin(self) # Pass the droid object so auto can grab frames and setSpeeds 
+
     '''
     #####################################################################################
         SETTERS
     #####################################################################################
     '''
     def setPower(self, motor1, motor2, motor3):
-        logging.error("Damn, havent got any motors programmed yet")
+        logging.error("Damn, sending raw power commands is not implemented yet")
 
 
     def setSpeed(self, speed, vector, omega):
@@ -252,7 +268,7 @@ class PiBotServer:
     #####################################################################################
     '''
     def getSpeed(self):
-        logging.error("Don't got no speeds to give. Just sending random numbers")
+        logging.error("Damn, receiving speed values is not implemented yet")
         
         return self.speed
     

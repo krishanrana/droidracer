@@ -50,11 +50,13 @@ class PiBotClient:
         self.port_cmds_b = port_cmds_b
         self.port_camera = port_camera
 
+        self.state = 0
 
         # Camera stuff
         self.__cam_stream_enable = False
         self.cam_resolution = cam_resolution
-        self.frame = np.empty((cam_resolution[0],cam_resolution[1],3), 'uint8')
+        size = (cam_resolution[1]*CAM_SCALING,cam_resolution[0]*CAM_SCALING,3)
+        self.frame = np.empty(size, 'uint8')
         self.frame_available = False
 
         logging.debug("Created instance of PiBotClient")
@@ -78,7 +80,7 @@ class PiBotClient:
         s.connect((self.host, self.port_camera))
 
         while(self.__cam_stream_enable):
-            self.frame = RecvNumpy(s, jpeg=False)
+            self.frame = RecvNumpy(s, jpeg=True)
             self.frame_available = True
             
         s.close()

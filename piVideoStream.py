@@ -16,6 +16,8 @@ import threading
 import numpy as np
 import time
 
+from constants import *
+
 class PiVideoStream():
     def __init__(self, 
                 resolution=(3280,2464), 
@@ -76,7 +78,10 @@ class PiVideoStream():
 
     def read(self):
         # return the frame most recently read
-        return self.frame
+        return cv2.resize(  self.frame, None, 
+                            fx=CAM_SCALING, 
+                            fy=CAM_SCALING,
+                            interpolation=cv2.INTER_AREA ) 
 
 
 if __name__ == '__main__':

@@ -37,7 +37,7 @@ class droidVision():
         self.maxLineGap = 30 * FRAME_SCALE
         self.centreY = 1000 # Result of calibration
 
-        self.debugFrame = np.empty((DEFAULT_CAM_H,DEFAULT_CAM_W,3))
+        self.frame_edited = np.empty((DEFAULT_CAM_H,DEFAULT_CAM_W,3))
 
 
     def processFrame(self, frame):
@@ -167,7 +167,7 @@ class droidVision():
         avRightOffset = np.nanmedian(self.histRightOffset)
         avObDist = np.nanmedian(self.histObDist)
 
-        self.debugFrame = np.copy(frame)
+        self.frame_edited = np.copy(frame)
             
         return avHeading, avLeftOffset, avRightOffset, obstacle, avObDist
 
