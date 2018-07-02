@@ -6,7 +6,7 @@ import signal
 
 import serial
 
-ser = serial.Serial('/dev/ttyUSB4', 9600)
+ser = serial.Serial('/dev/ttyUSB0', 9600)
 s = [0]
 
 
