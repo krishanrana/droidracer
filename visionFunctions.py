@@ -161,7 +161,7 @@ class droidVision():
         avRightOffset = np.nanmedian(self.histRightOffset)
         avObDist = np.nanmedian(self.histObDist)
             
-        return self.dataAvailable, avHeading, leftOffset, rightOffset, obstacle, obDistance #, obHeading
+        return self.dataAvailable, avHeading, avLeftOffset, avRightOffset, obstacle, avObDist #, obHeading
 
 
             
