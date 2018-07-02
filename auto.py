@@ -49,10 +49,9 @@ def begin(droid):
 
 
 
-def stop():
+def stop(droid):
     global shutdown_sig
     shutdown_sig = True
-    droid.setSpeed(0,0,0)
 
 
 def signalHandler(signal, frame):
@@ -72,4 +71,6 @@ if __name__ == "__main__":
 
     begin(droid) # The main loop
 
+    time.sleep(0.1)
+    droid.setSpeed(0,0,0)
     droid.close()

@@ -240,7 +240,7 @@ class PiBotServer:
     '''
     def enterManualMode(self):
         self.state = 0
-        auto.stop()
+        auto.stop(self)
 
     def enterAutoMode(self):
         self.state = 1
