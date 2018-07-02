@@ -21,7 +21,7 @@ from constants import *
 import auto
 
 
-logging.basicConfig(level=logging.DEBUG,
+logging.basicConfig(level=logging.INFO,
                       format='[%(levelname)s] (%(threadName)-9s) %(message)s',)
 shutdown_flag = False
 
@@ -106,7 +106,7 @@ class PiBotServer:
 
         while (not shutdown_flag):
             conn, addr = s.accept() # Establish connection with client.
-            logging.info("Got connection from %s:%d", addr[0], addr[1])
+            logging.debug("Got connection from %s:%d", addr[0], addr[1])
             thr = threading.Thread(name=addr, target=self.__HandleClient, args=(conn, addr, port))
             thr.start()
 
@@ -145,10 +145,10 @@ class PiBotServer:
         '''
         if opCode == 0:
             if cmds[1].lower() == 'auto':
-                logging.debug("ENTERING AUTONOMOUS MODE")
+                logging.info("ENTERING AUTONOMOUS MODE")
                 self.enterAutoMode()
             elif cmds[1].lower() == 'manual':
-                logging.debug("ENTERING MANUAL MODE")
+                logging.info("ENTERING MANUAL MODE")
                 self.enterManualMode()
             else:
                 logging.error("Unknown mode '%s'", cmds[1])
