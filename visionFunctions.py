@@ -3,6 +3,8 @@ import numpy as np
 
 from collections import deque
 
+from constants import *
+
 class droidVision():
 
     def __init__(self):
@@ -28,7 +30,9 @@ class droidVision():
         self.rhoThresh = 80
         self.minLineLength = 100
         self.maxLineGap = 30
-        self.centreY = 400 # Result of calibration
+        self.centreY = 1000 # Result of calibration
+
+        self.debugFrame = np.empty((DEFAULT_CAM_H,DEFAULT_CAM_W,3))
 
 
     def processFrame(self, frame):
@@ -61,8 +65,8 @@ class droidVision():
             #find intersection point with baseline centreY, using gradient and mean point
             ypointX,ypointY = np.sum((yline[:,0] + yline[:,2])/(2*yline.shape[0])),np.sum((yline[:,1] + yline[:,3])/(2*yline.shape[0]))
             yZeroCrossing = ypointX + yM*(self.centreY-ypointY)
-            #for x1,y1,x2,y2 in yline: 
-            #cv2.line(frame,(x1,y1),(x2,y2),(0,0,255),1)
+            for x1,y1,x2,y2 in yline: 
+                cv2.line(frame,(x1,y1),(x2,y2),(0,0,255),1)
         except:
             print('No yellow') 
             
@@ -80,8 +84,8 @@ class droidVision():
             bpointX,bpointY = np.sum((bline[:,0] + bline[:,2])/(2*bline.shape[0])),np.sum((bline[:,1] + bline[:,3])/(2*bline.shape[0]))
             bZeroCrossing = bpointX + bM*(self.centreY-bpointY)
         
-    #        for x1,y1,x2,y2 in bline:
-    #            cv2.line(frame,(x1,y1),(x2,y2),(0,255,0),1)
+           for x1,y1,x2,y2 in bline:
+               cv2.line(frame,(x1,y1),(x2,y2),(0,255,0),1)
         except:
             print('No blue')
             
@@ -160,6 +164,8 @@ class droidVision():
         avLeftOffset = np.nanmedian(self.histLeftOffset)
         avRightOffset = np.nanmedian(self.histRightOffset)
         avObDist = np.nanmedian(self.histObDist)
+
+        self.debugFrame = np.copy(frame)
             
         return avHeading, avLeftOffset, avRightOffset, obstacle, avObDist
 

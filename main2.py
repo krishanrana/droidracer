@@ -81,6 +81,8 @@ def main():
         frame = droid.cam.read()
             
         avHeading, avLeftOffset, avRightOffset, obstacle, avObDist = vision.processFrame(frame)
+
+        droid.debug_frame = vision.debugFrame
         
         speed, vector, omega = navigation(avHeading, avLeftOffset, avRightOffset, obstacle, avObDist)
         

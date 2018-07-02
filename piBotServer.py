@@ -61,6 +61,9 @@ class PiBotServer:
         # Keep track of open ports to close when server is closed
         self.open_socks = []
 
+        # Used for sending debug images
+        self.debug_frame = np.empty((DEFAULT_CAM_H,DEFAULT_CAM_W,3))
+
         logging.debug("PiBotServer instance created")
 
 
@@ -190,7 +193,8 @@ class PiBotServer:
             if self.cam.frame_available:
                 self.cam.frame_available = False
                 self.frame = self.cam.read() # Might want to preprocess here on the raspberry pi?
-                SendNumpy(conn, self.frame, jpeg=False) # Send an image
+                # SendNumpy(conn, self.frame, jpeg=False) # Send an image
+                SendNumpy(conn, self.debug_frame, jpeg=False) # Send an image
 
         self.cam.stop()
         conn.close()
