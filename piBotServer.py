@@ -49,7 +49,10 @@ class PiBotServer:
             0 = 'manual'
             1 = 'auto'
         '''
-        self.state = 0        
+        self.state = 0
+        # Used for sending debug images
+        self.debug_frame = 0
+        self.debug = False     
         
         # Ports
         self.port_cmds_a = port_cmds_a
@@ -67,8 +70,7 @@ class PiBotServer:
         # Keep track of open ports to close when server is closed
         self.open_socks = []
 
-        # Used for sending debug images
-        self.debug_frame = np.empty((DEFAULT_CAM_H,DEFAULT_CAM_W,3))
+        
 
         logging.debug("PiBotServer instance created")
 
@@ -204,9 +206,11 @@ class PiBotServer:
         while (self.__camera_flag): # Keep streaming
             if self.cam.frame_available:
                 self.cam.frame_available = False
-                self.frame = self.cam.read() # Might want to preprocess here on the raspberry pi?
-                # SendNumpy(conn, self.frame, jpeg=False) # Send an image
-                SendNumpy(conn, self.debug_frame, jpeg=False) # Send an image
+                if self.debug:
+                    self.frame = self.debug_frame
+                else:
+                    self.frame = self.cam.read() # Might want to preprocess here on the raspberry pi?
+                SendNumpy(conn, self.frame, jpeg=False) # Send an image
 
         self.cam.stop()
         conn.close()
@@ -234,12 +238,12 @@ class PiBotServer:
     def setPower(self, motor1, motor2, motor3):
         logging.error("Damn, havent got any motors programmed yet")
 
+
     def setSpeed(self, speed, vector, omega):
         speed = str(speed)
         vector = str(vector)
         omega = str(omega)
         data_out = speed + "," + vector + "," + omega + "\n"
-
         self.ser.write(data_out.encode("ascii"))
 
     '''

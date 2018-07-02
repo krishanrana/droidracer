@@ -7,6 +7,7 @@ import signal
 droid = piBotServer.PiBotServer()
 droid.StartCameraStream()           # Make sure you start the camera stream!
 droid.StartServers()                # Only if you are connecting a client
+droid.debug = True
 
 
 def tohex(val):

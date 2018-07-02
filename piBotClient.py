@@ -14,21 +14,7 @@ import time
 import numpy as np
 
 from socket_helpers import *
-#from constants import *
-
-DEFAULT_HOST = '172.19.63.140'
-
-PORT_CMDS_A = 5000
-PORT_CMDS_B = 5001
-PORT_CAMERA = 5002
-
-DEFAULT_CAM_W = 640
-DEFAULT_CAM_H = 480
-
-
-
-
-
+from constants import *
 
 logging.basicConfig(level=logging.DEBUG,
                       format='[%(levelname)s] (%(threadName)-9s) %(message)s',)
