@@ -35,7 +35,7 @@ class droidVision():
         self.rhoThresh = 80
         self.minLineLength = 100 * FRAME_SCALE
         self.maxLineGap = 30 * FRAME_SCALE
-        self.centreY = 1000 # Result of calibration
+        self.centreY = 2550 # Result of calibration
 
         self.frame_edited = np.empty((DEFAULT_CAM_H,DEFAULT_CAM_W,3))
 
@@ -110,7 +110,7 @@ class droidVision():
             topEdge = tuple(cnt[cnt[:,:,1].argmin()][0])
             bottomEdge = tuple(cnt[cnt[:,:,1].argmax()][0])
             # Calculate distance to object
-            obDistance = (self.centreY - bottomEdge[1])*0.04
+            obDistance = objectDistance(DEFAULT_CAM_H, DEFAULT_CAM_TILT, DEFAULT_CAM_HEIGHT, bottomEdge)
 
             # Draw outputs
             cv2.rectangle(frame,(0,bottomEdge[1]),(width,bottomEdge[1]),(0,0,255),2)
@@ -180,7 +180,7 @@ def rejectOutliers(data, m = 10.):
     return data[s<m]
 
 
-def objectDistance(VertPix,tiltAngle, Height, bottomEdge, xOffset):
+def objectDistance(VertPix,tiltAngle, Height, bottomEdge):
     
     Y = VertPix/2 - bottomEdge
 
