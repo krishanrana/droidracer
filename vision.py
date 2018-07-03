@@ -189,3 +189,24 @@ def objectDistance(VertPix,tiltAngle, Height, bottomEdge):
     obDist = Height * np.tan(tiltAngle + pxAngle - (3/2*np.pi))
     
     return obDist
+
+
+
+'''
+Use this to put a test video through the vision 
+processing algorithm to see how it performs.
+Doesn't require the droid!
+'''
+if __name__=='__main__':
+
+    cap = cv2.VideoCapture('DRC2017Short.mp4')
+    vis = droidVision()
+
+    while(cap.isOpened()):
+
+        ret, frame = cap.read()
+
+        vis.processFrame(frame)
+
+        cv2.imshow("Vision Testing", vis.frame_edited)
+        cv2.waitKey(5)
