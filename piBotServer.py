@@ -18,7 +18,8 @@ import serial
 import piVideoStream
 from socket_helpers import *
 from constants import *
-import auto
+import vision
+import navigation
 
 
 logging.basicConfig(level=logging.INFO,
@@ -42,20 +43,25 @@ class PiBotServer:
                     baud=9600,
                 ):
 
+        # Navigation inputs
+        self.avHeading = 0
+        self.avLeftOffset = 0
+        self.avRightOffset = 0
+        self.obstacle = 0
+        self.avObDist = 0
+
+        # Controller inputs
         self.speed = 0
         self.vector = 0
         self.omega = 0
+
         '''
         Robot states:
             0 = 'manual'
             1 = 'auto'
         '''
         self.state = 0
-        # Used for sending debug images
-        size = (int(cam_resolution[1]*CAM_SCALING),int(cam_resolution[0]*CAM_SCALING),3)
-        self.debug_frame = np.empty(size, 'uint8')
-        self.debug = False  
-        
+
         # Ports
         self.port_cmds_a = port_cmds_a
         self.port_cmds_b = port_cmds_b
@@ -68,11 +74,16 @@ class PiBotServer:
         self.cam = 0
         self.cam_resolution = cam_resolution
         self.__camera_flag = False
+        self.frame_available_local = False
+        self.frame_available_remote = False
+        # Used for sending debug images. 
+        # This differs from the self.cam.frame because it passes through and
+        # is edited by the CV processing
+        size = (int(cam_resolution[1]*CAM_SCALING),int(cam_resolution[0]*CAM_SCALING),3)
+        self.frame = np.empty(size, 'uint8')
 
-        # Keep track of open ports to close when server is closed
+        # Keep track of open ports to close when server is shutdown
         self.open_socks = []
-
-        
 
         logging.debug("PiBotServer instance created")
 
@@ -85,9 +96,9 @@ class PiBotServer:
 
     def StartServers(self):
         # Starts the listener servers each in a fresh thread
-        cmdsA_thr = threading.Thread(name="CmdsAListener", target=self.__Listen, args=(self.port_cmds_a,), daemon=False)
-        cmdsB_thr =threading.Thread(name="CmdsBListener", target=self.__Listen, args=(self.port_cmds_b,), daemon=False)
-        cam_thr = threading.Thread(name="CameraListener", target=self.__Listen, args=(self.port_camera,), daemon=False)
+        cmdsA_thr = threading.Thread(name="CmdsAListener", target=self.__Listen, args=(self.port_cmds_a,), daemon=True)
+        cmdsB_thr =threading.Thread(name="CmdsBListener", target=self.__Listen, args=(self.port_cmds_b,), daemon=True)
+        cam_thr = threading.Thread(name="CameraListener", target=self.__Listen, args=(self.port_camera,), daemon=True)
         cmdsA_thr.start()
         cmdsB_thr.start()
         cam_thr.start()
@@ -162,13 +173,17 @@ class PiBotServer:
 
 
         elif opCode == 2:
-            speed = float(cmds[1])
-            vector = float(cmds[2])
-            omega = float(cmds[3])
-            self.setSpeed(speed, vector, omega)
+            if self.state == 1:
+                speed = float(cmds[1])
+                vector = float(cmds[2])
+                omega = float(cmds[3])
+                self.setSpeed(speed, vector, omega)
+            else:
+                logging.warning("Tried to control speeds remotely in auto mode. Don't be naughty.")
 
         else:
             logging.warning("Ignoring unknown opCode: %d", opCode)
+
 
     def __ProcessCmdB(self, conn, addr):
         data = RecvMsg(conn)    # Receive our data
@@ -198,20 +213,39 @@ class PiBotServer:
         self.cam = piVideoStream.PiVideoStream(
                                             resolution=self.cam_resolution,
                                             vflip=True,
-                                            hflip=True
-                                            )
+                                            hflip=True )
         self.cam.start()                    # Start the capture stream
         self.__camera_flag = True
+
+        # Create the vision processing instance
+        vis = vision.droidVision()
+
+        while (self.__camera_flag): # Keep streaming
+
+            # Only process if there is a fresh frame available
+            if self.cam.frame_available:
+                self.cam.frame_available = False
+
+                # Get the frame and scale
+                self.frame = cv2.resize(self.cam.read(), 
+                                        None, 
+                                        fx=CAM_SCALING, 
+                                        fy=CAM_SCALING,
+                                        interpolation=cv2.INTER_AREA)
+
+                # Perform any CV processing required on the frame
+                self.avHeading, self.avLeftOffset, self.avRightOffset, self.obstacle, self.avObDist = vis.processFrame(self.frame)
+                self.frame = vis.frame_edited
+                
+                # Let any local and remote threads know that the frame is ready!
+                self.frame_available_local = True
+                self.frame_available_remote = True
 
 
     def __SendCameraStream(self, conn):
         while (self.__camera_flag): # Keep streaming
-            if self.cam.frame_available:
-                self.cam.frame_available = False
-                if self.debug:
-                    self.frame = self.debug_frame
-                else:
-                    self.frame = self.cam.read()
+            if self.frame_available_remote:
+                self.frame_available_remote = False
                 SendNumpy(conn, self.frame, jpeg=True) # Send an image
 
         self.cam.stop()
@@ -239,12 +273,28 @@ class PiBotServer:
     #####################################################################################
     '''
     def enterManualMode(self):
+        # Shouldn't really have to do much here. 
+        # Setting state to 0 will cancel the auto loop
         self.state = 0
-        auto.stop(self)
 
     def enterAutoMode(self):
         self.state = 1
-        auto.begin(self) # Pass the droid object so auto can grab frames and setSpeeds 
+        nav = navigation.Navigation()
+        while self.state == 1:
+
+            # If a new camera frame is all processed
+            if self.frame_available_local:
+                self.frame_available_local = False
+
+                # Calculate the variables to send to the controller
+                speed, vector, omega = nav.processNav(  self.avHeading,
+                                                        self.avLeftOffset,
+                                                        self.avRightOffset,
+                                                        self.obstacle,
+                                                        self.avObDist)
+                # Send to the Arduino
+                self.setSpeed(speed, vector, omega)
+
 
     '''
     #####################################################################################
@@ -256,11 +306,18 @@ class PiBotServer:
 
 
     def setSpeed(self, speed, vector, omega):
+        # Store the speeds just in case
+        self.speed = speed
+        self.vector = vector
+        self.omega = omega
+
+        # Send over serial to Arduino
         speed = str(speed)
         vector = str(vector)
         omega = str(omega)
         data_out = speed + "," + vector + "," + omega + "\n"
         self.ser.write(data_out.encode("ascii"))
+        
 
     '''
     #####################################################################################
@@ -268,13 +325,12 @@ class PiBotServer:
     #####################################################################################
     '''
     def getSpeed(self):
-        logging.error("Damn, receiving speed values is not implemented yet")
-        
-        return self.speed
+        logging.warning("Damn, receiving real speed values is not implemented yet. Sending target values instead.")
+        return self.speed, self.vector, self.omega
     
 
 '''
-Captures the cntl+C keyboard command to close the services and free 
+Captures the ctrl+c keyboard command to close the services and free 
 resources gracefully.
 Allows the sockets and camera to be immediately reopened on next run without
 waiting for the OS to close them on us.

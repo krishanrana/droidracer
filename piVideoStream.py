@@ -79,10 +79,7 @@ class PiVideoStream():
 
     def read(self):
         # return the frame most recently read
-        return cv2.resize(  self.frame, None, 
-                            fx=CAM_SCALING, 
-                            fy=CAM_SCALING,
-                            interpolation=cv2.INTER_AREA ) 
+        return self.frame
 
 
 if __name__ == '__main__':
