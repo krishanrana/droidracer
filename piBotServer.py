@@ -173,13 +173,13 @@ class PiBotServer:
 
 
         elif opCode == 2:
-            if self.state == 1:
+            if self.state == 0:
                 speed = float(cmds[1])
                 vector = float(cmds[2])
                 omega = float(cmds[3])
                 self.setSpeed(speed, vector, omega)
             else:
-                logging.warning("Tried to control speeds remotely in auto mode. Don't be naughty.")
+                logging.warning("Tried to control speeds remotely in auto mode.")
 
         else:
             logging.warning("Ignoring unknown opCode: %d", opCode)
