@@ -6,11 +6,19 @@ logging.basicConfig(level=logging.DEBUG,
                       format='[%(levelname)s] (%(threadName)-9s) %(message)s',)
 
 import piBotClient
+from constants import *
 
 SPEED = 3
 OMEGA = 10
 
+SAVE_VIDEO = True
+
 if __name__=='__main__':
+
+    if SAVE_VIDEO:
+        fourcc = cv2.VideoWriter_fourcc(*'XVID')
+        size = (int(DEFAULT_CAM_W*CAM_SCALING),int(DEFAULT_CAM_H*CAM_SCALING))
+        out = cv2.VideoWriter('output.avi',fourcc, 5.0, size)
 
     # Connect to the server
     droid = piBotClient.PiBotClient()
@@ -22,9 +30,19 @@ if __name__=='__main__':
     key = cv2.waitKey(10)
 
     while key != ord('q'):
-        im = droid.frame
 
-        cv2.imshow("Droid Vision", im)
+        # Grab the frame
+        if droid.frame_available:
+            im = droid.frame
+            droid.frame_available = False
+
+            if SAVE_VIDEO:
+                out.write(im)
+
+            cv2.imshow("Droid Vision", im)
+        
+
+        # Get the next key press
         key = cv2.waitKey(10)
 
         '''
@@ -74,6 +92,9 @@ if __name__=='__main__':
             droid.setMode('auto')
 
     droid.StopCamStream()
+
+    if SAVE_VIDEO:
+        out.release() # Finish the movie file off
 
     logging.info("Press any key to exit.")
     cv2.waitKey(0)
