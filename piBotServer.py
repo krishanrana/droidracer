@@ -162,9 +162,9 @@ class PiBotServer:
 
 
         elif opCode == 2:
-            speed = int(cmds[1])
-            vector = int(cmds[2])
-            omega = int(cmds[3])
+            speed = float(cmds[1])
+            vector = float(cmds[2])
+            omega = float(cmds[3])
             self.setSpeed(speed, vector, omega)
 
         else:
