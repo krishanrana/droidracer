@@ -7,7 +7,8 @@ logging.basicConfig(level=logging.DEBUG,
 
 import piBotClient
 
-SPEED = 1
+SPEED = 3
+OMEGA = 10
 
 if __name__=='__main__':
 
@@ -34,15 +35,15 @@ if __name__=='__main__':
         if droid.state == 0:
             if key == ord('w'): # Forward
                 logging.debug("Going forward")
-                droid.setSpeed(SPEED, np.pi/2, 0)
+                droid.setSpeed(SPEED, 1.571, 0)
 
             elif key == ord('s'): # Back
                 logging.debug("Going back")
-                droid.setSpeed(SPEED, 3*np.pi/2, 0)
+                droid.setSpeed(SPEED, 4.712, 0)
 
             elif key == ord('a'): # Left
                 logging.debug("Going left")
-                droid.setSpeed(SPEED, np.pi, 0)
+                droid.setSpeed(SPEED, 3.142, 0)
 
             elif key == ord('d'): # Right
                 logging.debug("Going right")
@@ -50,11 +51,11 @@ if __name__=='__main__':
             
             elif key == ord('z'): # Spin left
                 logging.debug("Spinning left")
-                droid.setSpeed(0, 0, SPEED)
+                droid.setSpeed(0, 0, OMEGA)
 
             elif key == ord('c'): # Spin right
                 logging.debug("Spinning right")
-                droid.setSpeed(0, 0, -SPEED)
+                droid.setSpeed(0, 0, -OMEGA)
 
         '''
         #####################################################################################
