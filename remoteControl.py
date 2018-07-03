@@ -56,6 +56,9 @@ if __name__=='__main__':
             elif key == ord('c'): # Spin right
                 logging.debug("Spinning right")
                 droid.setSpeed(0, 0, -OMEGA)
+                
+            else:
+                droid.setSpeed(0, 0, 0)
 
         '''
         #####################################################################################
@@ -69,9 +72,6 @@ if __name__=='__main__':
         elif key == ord('k'): # Auto mode
             logging.debug("Autonomous mode initialised")
             droid.setMode('auto')
-
-        else:
-            droid.setSpeed(0, 0, 0)
 
     droid.StopCamStream()
 
