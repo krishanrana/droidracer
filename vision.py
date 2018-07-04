@@ -113,8 +113,11 @@ class droidVision():
             obDistance = objectDistance(DEFAULT_CAM_H, DEFAULT_CAM_TILT, DEFAULT_CAM_HEIGHT, bottomEdge)
 
             # Draw outputs
-            cv2.rectangle(frame,(0,bottomEdge[1]),(width,bottomEdge[1]),(0,0,255),2)
-            cv2.circle(frame, center, 5, (0,0,255), -1)
+            try:
+                cv2.line(frame,(0,obBottom[1]),(width,bottomEdge[1]),(0,255,0),2)
+                cv2.circle(frame, center, 5, (0,0,255), -1)
+            except:
+                print('no object rect')
             obstacle = 1
             
         except:
@@ -166,6 +169,13 @@ class droidVision():
         avLeftOffset = np.nanmedian(self.histLeftOffset)
         avRightOffset = np.nanmedian(self.histRightOffset)
         avObDist = np.nanmedian(self.histObDist)
+
+        try:
+            cv2.line(frame,(int(bZeroCrossing),int(self.centreY)),(int(self.vpX),int(self.vpY)),(0,255,0),2)
+            cv2.line(frame,(int(yZeroCrossing),int(self.centreY)),(int(self.vpX),int(self.vpY)),(0,255,0),2)
+        except:
+            print('cant show lines')  
+
 
         self.frame_edited = np.copy(frame)
             
