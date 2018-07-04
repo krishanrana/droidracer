@@ -179,7 +179,7 @@ class PiBotServer:
                 vector = float(cmds[2])
                 omega = float(cmds[3])
                 self.setSpeed(speed, vector, omega)
-                self.getSpeed()
+                #self.getSpeed()
                 
             else:
                 logging.warning("Tried to control speeds remotely in auto mode.")
