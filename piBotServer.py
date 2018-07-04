@@ -329,7 +329,7 @@ class PiBotServer:
     #####################################################################################
     '''
     def getSpeed(self):
-        byteString = self.ser.read()
+        byteString = self.ser.read(12)
 
         print(byteString, struct.unpack("fff", byteString))
         logging.warning("Damn, receiving real speed values is not implemented yet. Sending target values instead.")
