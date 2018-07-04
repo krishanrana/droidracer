@@ -295,11 +295,10 @@ void M3EncoderEvent() {
 void computeVelocities(float vel, float heading, float angular_vel) {
   // 3 wheel omniwheel kinematics
   // Transforms from velocity/heading/angular velocity to motor speeds
-  int droidRadius = 0.12;
-  int wheelRadius = 0.058;
-  setspeed_M1 = vel * (-0.5 * cos(heading) - sqrt(3) / 2 * sin(heading)) + (angular_vel/(droidRadius * wheelRadius));
-  setspeed_M2 = vel * (-0.5 * cos(heading) + sqrt(3) / 2 * sin(heading)) + (angular_vel/(droidRadius * wheelRadius));
-  setspeed_M3 = vel * cos(heading) + (angular_vel/(droidRadius * wheelRadius));
+  int droidRadius = 0.15;
+  setspeed_M1 = vel * (-0.5 * cos(heading) - sqrt(3) / 2 * sin(heading)) + (2 * angular_vel * droidRadius / WHEEL_DIAMETER);
+  setspeed_M2 = vel * (-0.5 * cos(heading) + sqrt(3) / 2 * sin(heading)) + (2 * angular_vel * droidRadius / WHEEL_DIAMETER);
+  setspeed_M3 = vel * cos(heading) + (2 * angular_vel * droidRadius / WHEEL_DIAMETER);
 }
 
 double ticks2metres(int ticks) {
