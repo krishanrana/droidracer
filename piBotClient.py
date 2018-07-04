@@ -148,8 +148,8 @@ class PiBotClient:
         msg = "%d,%s" % (opCode,msg)                # Append opCode to front of the msg
         msg = msg.encode()                          # Convert to bytestring
         SendMsg(s, msg)                             # Send
-        s.close()                                   # Done
-
+        s.close() 
+        
     def __sendCmdB(self, opCode, msg=""):
         '''
         Helper function to send a command to the server.

@@ -310,6 +310,7 @@ class PiBotServer:
         self.speed = speed
         self.vector = vector
         self.omega = omega
+        print('setSpeed', speed, vector, omega)
 
         # Send over serial to Arduino
         speed = str(speed)
@@ -317,6 +318,7 @@ class PiBotServer:
         omega = str(omega)
         data_out = speed + "," + vector + "," + omega + "\n"
         self.ser.write(data_out.encode("ascii"))
+
         
 
     '''
