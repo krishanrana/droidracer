@@ -299,9 +299,10 @@ void computeVelocities(float vel, float heading, float angular_vel) {
   setspeed_M1 = (vel * (-0.5 * cos(heading) - sqrt(3) / 2 * sin(heading))/ WHEEL_DIAMETER) + (2 * angular_vel * droidRadius / WHEEL_DIAMETER);
   setspeed_M2 = (vel * (-0.5 * cos(heading) + sqrt(3) / 2 * sin(heading))/ WHEEL_DIAMETER) + (2 * angular_vel * droidRadius / WHEEL_DIAMETER);
   setspeed_M3 = (vel * cos(heading)/ WHEEL_DIAMETER) + (2 * angular_vel * droidRadius / WHEEL_DIAMETER);
-  Serial.println(setspeed_M1);
-  Serial.println(setspeed_M2);
-  Serial.println(setspeed_M3);
+
+  char buf[20] = {0};
+  snprintf(buf, 20, "%+0.2f %+0.2f %+0.2f", setspeed_M1, setspeed_M2, setspeed_M3);
+  Serial.println(buf);
 }
 
 double ticks2metres(int ticks) {
