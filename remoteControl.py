@@ -8,8 +8,8 @@ logging.basicConfig(level=logging.DEBUG,
 import piBotClient
 from constants import *
 
-SPEED = 3
-OMEGA = 10
+SPEED = 1
+OMEGA = 100
 
 SAVE_VIDEO = True
 
@@ -78,7 +78,8 @@ if __name__=='__main__':
                 
             else:
                 noPressCounter += 1
-                if noPressCounter == 5:
+                print('Counter: ', noPressCounter)
+                if noPressCounter >= 5:
                     droid.setSpeed(0, 0, 0)
                     noPressCounter = 0
 
