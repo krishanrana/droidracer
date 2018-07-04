@@ -120,7 +120,7 @@ class PiBotClient:
 
     def setSpeed(self, speed, vector, omega):
         opCode = 2
-        msg = "%d,%d,%d" % (speed,vector,omega)   # Prepare the comma-separated values
+        msg = "%.3f,%.3f,%.3f" % (speed,vector,omega)   # Prepare the comma-separated values
         self.__sendCmdA(opCode, msg)                # Use the helper function to send the cmd
 
     '''

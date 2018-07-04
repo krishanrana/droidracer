@@ -8,8 +8,8 @@ logging.basicConfig(level=logging.DEBUG,
 import piBotClient
 from constants import *
 
-SPEED = 0.5
-OMEGA = 3.1415/2
+SPEED = 1
+OMEGA = 2
 
 SAVE_VIDEO = False
 noPressCounter = 0
@@ -55,35 +55,42 @@ if __name__=='__main__':
             if key == ord('w'): # Forward
                 logging.debug("Going forward")
                 droid.setSpeed(SPEED, 1.571, 0)
+                noPressCounter = 0
 
             elif key == ord('s'): # Back
                 logging.debug("Going back")
                 droid.setSpeed(SPEED, 4.712, 0)
+                noPressCounter = 0
 
             elif key == ord('a'): # Left
                 logging.debug("Going left")
                 droid.setSpeed(SPEED, 3.142, 0)
+                noPressCounter = 0
 
             elif key == ord('d'): # Right
                 logging.debug("Going right")
                 droid.setSpeed(SPEED, 0, 0)
+                noPressCounter = 0
             
             elif key == ord('z'): # Spin left
                 logging.debug("Spinning left")
                 droid.setSpeed(0, 0, OMEGA)
+                noPressCounter = 0
 
             elif key == ord('c'): # Spin right
                 logging.debug("Spinning right")
                 droid.setSpeed(0, 0, -OMEGA)
+                noPressCounter = 0
 
-            elif key == ord('x'): # Spin right
+            elif key == ord('x'): # Stop
                 logging.debug("Stop")
                 droid.setSpeed(0, 0, 0)
+                noPressCounter = 0
                 
             else:
                 noPressCounter += 1
                 print('Counter: ', noPressCounter)
-                if noPressCounter >= 5:
+                if noPressCounter >= 10:
                     droid.setSpeed(0, 0, 0)
                     noPressCounter = 0
 
