@@ -8,8 +8,8 @@ logging.basicConfig(level=logging.DEBUG,
 import piBotClient
 from constants import *
 
-SPEED = 1
-OMEGA = 2
+SPEED = 0.5
+OMEGA = 20
 
 SAVE_VIDEO = False
 noPressCounter = 0
