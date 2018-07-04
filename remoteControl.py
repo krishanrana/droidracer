@@ -50,6 +50,7 @@ if __name__=='__main__':
             DRIVING KEYS
         #####################################################################################
         '''
+        idx = 0
         if droid.state == 0:
             if key == ord('w'): # Forward
                 logging.debug("Going forward")
@@ -76,7 +77,10 @@ if __name__=='__main__':
                 droid.setSpeed(0, 0, -OMEGA)
                 
             else:
-                droid.setSpeed(0, 0, 0)
+                idx += 1
+                if idx == 5
+                    droid.setSpeed(0, 0, 0)
+                    idx = 0
 
         '''
         #####################################################################################
