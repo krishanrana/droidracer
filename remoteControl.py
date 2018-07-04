@@ -8,10 +8,11 @@ logging.basicConfig(level=logging.DEBUG,
 import piBotClient
 from constants import *
 
-SPEED = 1
-OMEGA = 100
+SPEED = 0.5
+OMEGA = 3.1415/2
 
-SAVE_VIDEO = True
+SAVE_VIDEO = False
+noPressCounter = 0
 
 if __name__=='__main__':
 
@@ -50,7 +51,6 @@ if __name__=='__main__':
             DRIVING KEYS
         #####################################################################################
         '''
-        noPressCounter = 0
         if droid.state == 0:
             if key == ord('w'): # Forward
                 logging.debug("Going forward")
@@ -75,6 +75,10 @@ if __name__=='__main__':
             elif key == ord('c'): # Spin right
                 logging.debug("Spinning right")
                 droid.setSpeed(0, 0, -OMEGA)
+
+            elif key == ord('x'): # Spin right
+                logging.debug("Stop")
+                droid.setSpeed(0, 0, 0)
                 
             else:
                 noPressCounter += 1
