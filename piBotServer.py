@@ -180,6 +180,7 @@ class PiBotServer:
                 omega = float(cmds[3])
                 self.setSpeed(speed, vector, omega)
                 self.getSpeed()
+                
             else:
                 logging.warning("Tried to control speeds remotely in auto mode.")
 
@@ -329,9 +330,9 @@ class PiBotServer:
     #####################################################################################
     '''
     def getSpeed(self):
-        byteString = self.ser.read(12)
+        byteString = self.ser.read(18)
 
-        print(byteString, struct.unpack("fff", byteString))
+        print(byteString)
         logging.warning("Damn, receiving real speed values is not implemented yet. Sending target values instead.")
         return self.speed, self.vector, self.omega
     

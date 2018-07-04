@@ -147,7 +147,7 @@ void loop() {
 
     for (int i = 0; i < 3; i++) {
       data[i] = atof(valPosition);
-      Serial.println(data[i]);
+      //Serial.print(data[i]);
       valPosition = strtok(NULL, delimiters);
     }
 
@@ -296,9 +296,12 @@ void computeVelocities(float vel, float heading, float angular_vel) {
   // 3 wheel omniwheel kinematics
   // Transforms from velocity/heading/angular velocity to motor speeds
   int droidRadius = 0.15;
-  setspeed_M1 = vel * (-0.5 * cos(heading) - sqrt(3) / 2 * sin(heading))/ WHEEL_DIAMETER + (2 * angular_vel * droidRadius / WHEEL_DIAMETER);
-  setspeed_M2 = vel * (-0.5 * cos(heading) + sqrt(3) / 2 * sin(heading))/ WHEEL_DIAMETER + (2 * angular_vel * droidRadius / WHEEL_DIAMETER);
-  setspeed_M3 = vel * cos(heading)/ WHEEL_DIAMETER + (2 * angular_vel * droidRadius / WHEEL_DIAMETER);
+  setspeed_M1 = (vel * (-0.5 * cos(heading) - sqrt(3) / 2 * sin(heading))/ WHEEL_DIAMETER) + (2 * angular_vel * droidRadius / WHEEL_DIAMETER);
+  setspeed_M2 = (vel * (-0.5 * cos(heading) + sqrt(3) / 2 * sin(heading))/ WHEEL_DIAMETER) + (2 * angular_vel * droidRadius / WHEEL_DIAMETER);
+  setspeed_M3 = (vel * cos(heading)/ WHEEL_DIAMETER) + (2 * angular_vel * droidRadius / WHEEL_DIAMETER);
+  Serial.println(setspeed_M1);
+  Serial.println(setspeed_M2);
+  Serial.println(setspeed_M3);
 }
 
 double ticks2metres(int ticks) {
