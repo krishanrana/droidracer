@@ -243,6 +243,9 @@ class PiBotServer:
                 # Let any local and remote threads know that the frame is ready!
                 self.frame_available_local = True
                 self.frame_available_remote = True
+    
+            time.sleep(0.001) # Sleep to save CPU cycles
+
 
 
     def __SendCameraStream(self, conn):
@@ -250,6 +253,9 @@ class PiBotServer:
             if self.frame_available_remote:
                 self.frame_available_remote = False
                 SendNumpy(conn, self.frame, jpeg=True) # Send an image
+
+            time.sleep(0.001) # Sleep to save CPU cycles
+
 
         self.cam.stop()
         conn.close()
@@ -283,11 +289,29 @@ class PiBotServer:
     def enterAutoMode(self):
         self.state = 1
         nav = navigation.Navigation()
+
+        DT_NAV = 0.05 # Navigation time constant
+
+        # Get current time to maintain consistant processing times
+        t0 = time.time()
+        t0_frame = t0
+        
+        # Check we are still in auto mode
         while self.state == 1:
 
-            # If a new camera frame is all processed
+            # Use frames as soon as they have finished processing
             if self.frame_available_local:
                 self.frame_available_local = False
+
+                # Calculate frame rate
+                t = time.time()
+                logging.debug("Frame rate: %.2fHz", 1.0/(t - t0_frame))
+                t0_frame = t
+
+            # Get new time and check if min time has elapsed
+            t = time.time()
+            if t-t0 >= DT_NAV:
+                t0 = t
 
                 # Calculate the variables to send to the controller
                 speed, vector, omega = nav.processNav(  self.avHeading,
@@ -298,6 +322,7 @@ class PiBotServer:
                 # Send to the Arduino
                 self.setSpeed(speed, vector, omega)
 
+            time.sleep(DT_NAV/10) # Sleep to save CPU cycles
 
     '''
     #####################################################################################
