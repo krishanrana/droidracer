@@ -2,7 +2,7 @@ import numpy as np
 
 class Navigation():
     def __init__(   self,
-                    speed=0.01,
+                    speed=0.8,
                     Komega=0.7,
                     Kh=1):
         self.speed = speed
