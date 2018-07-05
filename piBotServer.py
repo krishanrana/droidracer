@@ -239,7 +239,7 @@ class PiBotServer:
                 # Perform any CV processing required on the frame
                 # self.avHeading, self.avLeftOffset, self.avRightOffset, self.obstacle, self.avObDist = vis.processFrame(self.frame)
                 # self.frame = vis.frame_edited
-                
+                out.write(self.frame)
                 # Let any local and remote threads know that the frame is ready!
                 self.frame_available_local = True
                 self.frame_available_remote = True
@@ -373,6 +373,10 @@ def signal_handler(signal, frame):
 
 
 if __name__ == '__main__':
+    fourcc = cv2.VideoWriter_fourcc(*'XVID')
+    size = (int(DEFAULT_CAM_W*CAM_SCALING),int(DEFAULT_CAM_H*CAM_SCALING))
+    out = cv2.VideoWriter('output.avi',fourcc, 5.0, size)
+
     signal.signal(signal.SIGINT, signal_handler)
     global pb
     pb = PiBotServer()
@@ -380,3 +384,5 @@ if __name__ == '__main__':
     pb.StartCameraStream()
     while not shutdown_flag:
         time.sleep(1)
+
+    out.release() # Finish the movie file off
