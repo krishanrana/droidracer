@@ -176,12 +176,6 @@ class droidVision():
             logging.debug('cant show lines')  
 
         self.frame_edited = np.copy(frame)
-        
-        cv2.imshow("test", clB)
-        cv2.waitKey(0)
-
-        cv2.imshow("test", blue*255)
-        cv2.waitKey(0)
 
         return avHeading, avLeftOffset, avRightOffset, obstacle, avObDist
 
