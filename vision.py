@@ -143,7 +143,8 @@ class droidVision():
             realCoords = np.dot(H, [self.vpX,self.vpY,1])
             realCoords = realCoords/realCoords[2]
             Heading = math.atan2(realCoords[1], realCoords[0])
-            logging.debug('Heading: %.2f', Heading)
+            heading_deg = Heading * 180/3.14
+            logging.debug('Heading: %.2f', heading_deg)
 
             self.dataAvailable = 1
     
