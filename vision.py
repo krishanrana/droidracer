@@ -42,7 +42,7 @@ class droidVision():
         self.rhoThresh = 80
         self.minLineLength = 100 * FRAME_SCALE
         self.maxLineGap = 30 * FRAME_SCALE
-        self.centreY = 2550 # Result of calibration
+        self.centreY = DEFAULT_CAM_H # Result of calibration
 
         self.frame_edited = np.empty((DEFAULT_CAM_H,DEFAULT_CAM_W,3))
 
@@ -50,7 +50,8 @@ class droidVision():
     def processFrame(self, frame):
         
         width = frame.shape[1]
-
+        bM = None
+        yM = None
         centreX = np.round(frame.shape[1]/2)
         processed = cv2.medianBlur(frame,5)
         processed = cv2.cvtColor(processed,cv2.COLOR_BGR2LAB) 
@@ -64,96 +65,112 @@ class droidVision():
         retY,yellow = cv2.threshold(clB,YELLOW_THRESH,1,cv2.THRESH_BINARY)
         retB,blue = cv2.threshold(clB,BLUE_THRESH,1,cv2.THRESH_BINARY)
         blue = cv2.bitwise_not(blue)-254 # invert blue line
-        try:
-            # process yellow line
-            yellow = cv2.morphologyEx(yellow, cv2.MORPH_OPEN, self.kernel)
-            #yellow = cv2.Canny(yellow,0,1,apertureSize = 5)
-            yline = np.squeeze(cv2.HoughLinesP(yellow,1,self.thetaThresh,self.rhoThresh,self.minLineLength,self.maxLineGap))#detect lines
+
+        # process yellow line
+        yellow = cv2.morphologyEx(yellow, cv2.MORPH_OPEN, self.kernel)
+        yline = np.squeeze(cv2.HoughLinesP(yellow,1,self.thetaThresh,self.rhoThresh,self.minLineLength,self.maxLineGap))#detect lines
+
+        if yline.ndim >= 2:
+
             ygrad = (yline[:,0]-yline[:,2])/(yline[:,1]-yline[:,3]+0.001)# find gradient of lines
             yfilt = rejectOutliers(ygrad, m=5)
             yM = np.median(yfilt)
             #find intersection point with baseline centreY, using gradient and mean point
             ypointX,ypointY = np.sum((yline[:,0] + yline[:,2])/(2*yline.shape[0])),np.sum((yline[:,1] + yline[:,3])/(2*yline.shape[0]))
-            yZeroCrossing = ypointX + yM*(self.centreY-ypointY)
+            yEdgeCrossing = ypointX + yM*(self.centreY-ypointY)
             for x1,y1,x2,y2 in yline: 
                 cv2.line(frame,(x1,y1),(x2,y2),(0,0,255),1)
-        except:
-            logging.debug('No yellow') 
             
-        try:   
-            # process blue line
-            blue = cv2.morphologyEx(blue, cv2.MORPH_OPEN, self.kernel)
-    #        blue = cv2.Canny(blue,0,1,apertureSize = 5)
-            bline = np.squeeze(cv2.HoughLinesP(blue,1,self.thetaThresh,self.rhoThresh,self.minLineLength,self.maxLineGap))#detect lines
-            bgrad = (bline[:,0]-bline[:,2])/(bline[:,1]-bline[:,3])# find gradient of lines
+
+        # process blue line
+        blue = cv2.morphologyEx(blue, cv2.MORPH_OPEN, self.kernel)
+        bline = np.squeeze(cv2.HoughLinesP(blue,1,self.thetaThresh,self.rhoThresh,self.minLineLength,self.maxLineGap))#detect lines
+
+        if bline.ndim >= 2:
+            bgrad = (bline[:,0]-bline[:,2])/(bline[:,1]-bline[:,3]+0.0001)# find gradient of lines
             bfilt = rejectOutliers(bgrad, m=5)
             bM = np.median(bfilt)
             #find intersection point with baseline centreY, using gradient and mean point
             bpointX,bpointY = np.sum((bline[:,0] + bline[:,2])/(2*bline.shape[0])),np.sum((bline[:,1] + bline[:,3])/(2*bline.shape[0]))
-            bZeroCrossing = bpointX + bM*(self.centreY-bpointY)
-        
+            bEdgeCrossing = bpointX + bM * (DEFAULT_CAM_H - bpointY)
+            
             for x1,y1,x2,y2 in bline:
                 cv2.line(frame,(x1,y1),(x2,y2),(0,255,0),1)
-        except:
-            logging.debug('No blue')
             
-        try:
-            # process purple objects
-            purple = cv2.morphologyEx(purple, cv2.MORPH_OPEN, self.kernel)
-            # blob detect,get centroids
-            __, contours, __ = cv2.findContours(purple,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
-            # find centroid of largest blob
+            
+        # process purple objects
+        purple = cv2.morphologyEx(purple, cv2.MORPH_OPEN, self.kernel)
+        __, contours, __ = cv2.findContours(purple,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
         
+        if contours:
+
+            # find centroid of largest blob
             blob = max(contours, key=lambda el: cv2.contourArea(el))
             M = cv2.moments(blob)
             center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
             
             # Find edges of obstacle
-            cnt = blob
-
-            leftEdge = tuple(cnt[cnt[:,:,0].argmin()][0])
-            rightEdge = tuple(cnt[cnt[:,:,0].argmax()][0])
-            topEdge = tuple(cnt[cnt[:,:,1].argmin()][0])
-            bottomEdge = tuple(cnt[cnt[:,:,1].argmax()][0])
+            leftEdge = tuple(blob[blob[:,:,0].argmin()][0])
+            rightEdge = tuple(blob[blob[:,:,0].argmax()][0])
+            topEdge = tuple(blob[blob[:,:,1].argmin()][0])
+            bottomEdge = tuple(blob[blob[:,:,1].argmax()][0])
             # Calculate distance to object
-            obDistance = objectDistance(DEFAULT_CAM_H, DEFAULT_CAM_TILT, DEFAULT_CAM_HEIGHT, bottomEdge)
+            obDistance = 100 #objectDistance(DEFAULT_CAM_H, DEFAULT_CAM_TILT, DEFAULT_CAM_HEIGHT, bottomEdge)
 
             # Draw outputs
             try:
-                cv2.line(frame,(0,obBottom[1]),(width,bottomEdge[1]),(0,255,0),2)
+                cv2.line(frame,(0,bottomEdge[1]),(width,bottomEdge[1]),(0,255,0),2)
                 cv2.circle(frame, center, 5, (0,0,255), -1)
             except:
                 logging.debug('no object rect')
-            obstacle = 1
             
-        except:
-            logging.debug('No objects, drive fast!') 
-            obstacle = 0
+            obstacle = True
+        else:
+            obstacle = False
+
+        # Conditional to create vP or virtual vP
+        # Both lines visible
+        if bM != None and yM != None:
+            
+            self.vpY = (yEdgeCrossing - bEdgeCrossing)/(bM - yM) + self.centreY
+            self.vpX = bM * (self.vpY - self.centreY) + bEdgeCrossing
+            self.dataAvailable = 1
+            # Blue line visible
+        elif bM != None:
+            self.vpY = -10000 - self.centreY
+            self.vpX = bM * self.vpY + bEdgeCrossing
+            
+            # Yellow line visible
+        elif yM != None:
+            self.vpY = -10000 - self.centreY
+            self.vpX = yM * self.vpY + yEdgeCrossing
             
 
+            
+         # No lines visible   
+        else:
+            self.dataAvailable = 0
+            
         
-        try:
-            leftOffset = (centreX-bZeroCrossing)
-            rightOffset = (yZeroCrossing - centreX)
-            centreOffset = rightOffset-leftOffset
-            self.vpY = (yZeroCrossing - bZeroCrossing)/(bM - yM) + self.centreY
-            self.vpX = bM * (self.vpY - self.centreY) + bZeroCrossing
- #           Heading = np.arctan((self.vpX - centreX)/(self.centreY - self.vpY))
+        if self.dataAvailable:     
             #Using Homography to compute heading angle
             realCoords = np.dot(H, [self.vpX,self.vpY,1])
             realCoords = realCoords/realCoords[2]
             Heading = math.atan2(-realCoords[1], -realCoords[0])
             heading_deg = Heading * 180/np.pi
-
-            self.dataAvailable = 1
-    
-        except:
-            self.dataAvailable = 0
-            
-        if self.dataAvailable:   
+            logging.debug("Heading: %.2f", heading_deg)
             self.histVPHeading.append(Heading)
-            self.histLeftOffset.append(leftOffset)
-            self.histRightOffset.append(rightOffset)
+            
+            if bM != None:
+                leftOffset = findTrackOffset([bpointX,bpointY], realCoords)
+                self.histLeftOffset.append(leftOffset)
+
+            if yM != None:
+                rightOffset = findTrackOffset([ypointX,ypointY], realCoords)
+                self.histRightOffset.append(rightOffset)
+
+            
+            
         else:
             self.failedFrame += 1
             # If lines are not detected for 10 frames, remove history
@@ -181,8 +198,8 @@ class droidVision():
         avObDist = np.nanmedian(self.histObDist)
 
         try:
-            cv2.line(frame,(int(bZeroCrossing),int(self.centreY)),(int(self.vpX),int(self.vpY)),(0,255,0),2)
-            cv2.line(frame,(int(yZeroCrossing),int(self.centreY)),(int(self.vpX),int(self.vpY)),(0,255,0),2)
+            cv2.line(frame,(int(bEdgeCrossing),int(self.centreY)),(int(self.vpX),int(self.vpY)),(0,255,0),2)
+            cv2.line(frame,(int(yEdgeCrossing),int(self.centreY)),(int(self.vpX),int(self.vpY)),(0,255,0),2)
             cv2.line(frame,(int(centreX),int(self.centreY)),(int(self.vpX),int(self.vpY)),(0,0,255),2)
         except:
             logging.debug('cant show lines')  
@@ -191,7 +208,6 @@ class droidVision():
    
         return avHeading, avLeftOffset, avRightOffset, obstacle, avObDist
 
-    #testing
 
 
             
@@ -202,7 +218,7 @@ def rejectOutliers(data, m = 10.):
     return data[s<m]
 
 
-def objectDistance(VertPix,tiltAngle, Height, bottomEdge):
+def objectDistance(VertPix, tiltAngle, Height, bottomEdge):
     
     Y = VertPix/2 - bottomEdge
 
@@ -211,6 +227,38 @@ def objectDistance(VertPix,tiltAngle, Height, bottomEdge):
     obDist = Height * np.tan(tiltAngle + pxAngle - (3/2*np.pi))
     
     return obDist
+
+def findTrackOffset(Point, realCoords):
+    
+    # Point on line
+    x1 = realCoords[0]
+    y1 = realCoords[1]
+    
+    # Vanishing point
+    x2 = Point[0]
+    y2 = Point[1]
+    
+    # Centre point of droid
+    x0 = 0
+    y0 = 0
+      
+    dx = x2 - x1
+    dy = y2 - y1
+    
+    mag = np.sqrt(dx*dx + dy*dy)
+    dx = dx/mag
+    dy = dy/mag
+    
+    # translate the point and get the dot product
+    Lambda = (dx * (x0 - x1)) + (dy * (y0 - y1))
+    
+    
+    x4 = (dx * Lambda) + x1
+    y4 = (dy * Lambda) + y1
+    
+    offset = np.sqrt((x4-x0)**2 + (y4-y0)**2)
+    
+    return offset
 
 
 
@@ -231,4 +279,5 @@ if __name__=='__main__':
         vis.processFrame(frame)
 
         cv2.imshow("Vision Testing", vis.frame_edited)
-        cv2.waitKey(50)
+
+        cv2.waitKey(5)
