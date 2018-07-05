@@ -10,9 +10,9 @@ class Navigation():
         self.Kh = Kh
 
     def processNav(self, heading, leftOffset, rightOffset, obstacle, obDist):
-        print(heading)
         # Determine angular velocity based on camera direction
         theta = (heading - np.pi/2)
+        print(theta * 180/np.pi)
         omega =  theta * self.Komega
         
         speed = self.speed
