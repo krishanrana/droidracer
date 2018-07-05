@@ -356,8 +356,6 @@ class PiBotServer:
     '''
     def getSpeed(self):
         byteString = self.ser.read(17)
-
-        print(byteString)
         logging.warning("Damn, receiving real speed values is not implemented yet. Sending target values instead.")
         return self.speed, self.vector, self.omega
     
