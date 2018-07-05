@@ -145,6 +145,7 @@ class droidVision():
             Heading = math.atan2(realCoords[1], realCoords[0])
             heading_deg = Heading * 180/3.14
             logging.debug('Heading: %.2f', heading_deg)
+            logging.debug('vpx, vpy: %.2f  %.2f', self.vpX, self.vpY)
 
             self.dataAvailable = 1
     
