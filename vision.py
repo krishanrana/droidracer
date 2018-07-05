@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import logging
+import math
 
 from collections import deque
 
@@ -9,6 +10,11 @@ from constants import *
 FRAME_SCALE = 3
 BLUE_THRESH = 110
 YELLOW_THRESH = 160
+
+H = np.array([[ -1.07693537e+01,  -1.03211106e+00,   4.41554723e+03],
+              [ -5.61158586e-02,   7.60254152e-01,  -7.36972948e+03],
+              [ -3.59519827e-04,  -5.10817084e-02,   1.00000000e+00]])
+            
 
 
 class droidVision():
@@ -132,7 +138,13 @@ class droidVision():
             centreOffset = rightOffset-leftOffset
             self.vpY = (yZeroCrossing - bZeroCrossing)/(bM - yM) + self.centreY
             self.vpX = bM * (self.vpY - self.centreY) + bZeroCrossing
-            Heading = np.arctan((self.vpX - centreX)/(self.centreY - self.vpY))
+ #           Heading = np.arctan((self.vpX - centreX)/(self.centreY - self.vpY))
+            #Using Homography to compute heading angle
+            realCoords = np.dot(H, [self.vpX,self.vpY,1])
+            realCoords = realCoords/realCoords[2]
+            Heading = math.atan2(realCoords[1], realCoords[0])
+            logging.debug('Heading: %.2f', Heading)
+
             self.dataAvailable = 1
     
         except:
