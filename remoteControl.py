@@ -2,7 +2,7 @@ import cv2
 import time
 import numpy as np
 import logging
-logging.basicConfig(level=logging.DEBUG,
+logging.basicConfig(level=logging.INFO,
                       format='[%(levelname)s] (%(threadName)-9s) %(message)s',)
 
 import piBotClient
