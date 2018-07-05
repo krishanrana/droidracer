@@ -12,9 +12,10 @@ class Navigation():
     def processNav(self, heading, leftOffset, rightOffset, obstacle, obDist):
         # Determine angular velocity based on camera direction
         theta = (heading - np.pi/2)
+        print("Theta: "+str(theta * 180/np.pi))
         print(theta * 180/np.pi)
         omega =  theta * self.Komega
-        
+        print("Omega: "+str(omega))
         speed = self.speed
             
         # Determine vehicle heading vector in radians from x right = 0
