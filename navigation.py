@@ -12,8 +12,15 @@ class Navigation():
     def processNav(self, heading, leftOffset, rightOffset, obstacle, obDist):
         # Determine angular velocity based on camera direction
         theta = (heading - np.pi/2)
+
+        # Cap theta
+        LIM = 30*np.pi/180
+        if theta > LIM:
+            theta = LIM
+        elif theta < -LIM:
+            theta = -LIM
+
         print("Theta: "+str(theta * 180/np.pi))
-        print(theta * 180/np.pi)
         omega =  theta * self.Komega
         print("Omega: "+str(omega))
         speed = self.speed
