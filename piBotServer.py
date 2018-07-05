@@ -237,8 +237,8 @@ class PiBotServer:
                                         interpolation=cv2.INTER_AREA)
 
                 # Perform any CV processing required on the frame
-                # self.avHeading, self.avLeftOffset, self.avRightOffset, self.obstacle, self.avObDist = vis.processFrame(self.frame)
-                # self.frame = vis.frame_edited
+                self.avHeading, self.avLeftOffset, self.avRightOffset, self.obstacle, self.avObDist = vis.processFrame(self.frame)
+                self.frame = vis.frame_edited
                 out.write(self.frame)
                 # Let any local and remote threads know that the frame is ready!
                 self.frame_available_local = True
@@ -305,7 +305,7 @@ class PiBotServer:
 
                 # Calculate frame rate
                 t = time.time()
-                logging.info("Frame rate: %.2fHz", 1.0/(t - t0_frame))
+                print(1.0/(t - t0_frame))
                 t0_frame = t
 
             # Get new time and check if min time has elapsed
