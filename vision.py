@@ -67,7 +67,6 @@ class droidVision():
         try:
             # process yellow line
             yellow = cv2.morphologyEx(yellow, cv2.MORPH_OPEN, self.kernel)
-            #yellow = cv2.Canny(yellow,0,1,apertureSize = 5)
             yline = np.squeeze(cv2.HoughLinesP(yellow,1,self.thetaThresh,self.rhoThresh,self.minLineLength,self.maxLineGap))#detect lines
             ygrad = (yline[:,0]-yline[:,2])/(yline[:,1]-yline[:,3]+0.001)# find gradient of lines
             yfilt = rejectOutliers(ygrad, m=5)
@@ -83,7 +82,6 @@ class droidVision():
         try:   
             # process blue line
             blue = cv2.morphologyEx(blue, cv2.MORPH_OPEN, self.kernel)
-    #        blue = cv2.Canny(blue,0,1,apertureSize = 5)
             bline = np.squeeze(cv2.HoughLinesP(blue,1,self.thetaThresh,self.rhoThresh,self.minLineLength,self.maxLineGap))#detect lines
             bgrad = (bline[:,0]-bline[:,2])/(bline[:,1]-bline[:,3])# find gradient of lines
             bfilt = rejectOutliers(bgrad, m=5)
@@ -133,8 +131,8 @@ class droidVision():
 
         
         try:
-            leftOffset = (centreX-bZeroCrossing)
-            rightOffset = (yZeroCrossing - centreX)
+            leftOffset = findTrackOffset([bpointX,bpointY], realCoords)
+            rightOffset = findTrackOffset([ypointX,ypointY], realCoords)
             centreOffset = rightOffset-leftOffset
             self.vpY = (yZeroCrossing - bZeroCrossing)/(bM - yM) + self.centreY
             self.vpX = bM * (self.vpY - self.centreY) + bZeroCrossing
@@ -212,6 +210,38 @@ def objectDistance(VertPix,tiltAngle, Height, bottomEdge):
     
     return obDist
 
+def findTrackOffset(Point, realCoords):
+    
+    # Point on line
+    x1 = realCoords[0]
+    y1 = realCoords[1]
+    
+    # Vanishing point
+    x2 = Point[0]
+    y2 = Point[1]
+    
+    # Centre point of droid
+    x0 = 0
+    y0 = 0
+      
+    dx = x2 - x1
+    dy = y2 - y1
+    
+    mag = np.sqrt(dx*dx + dy*dy)
+    dx = dx/mag
+    dy = dy/mag
+    
+    # translate the point and get the dot product
+    Lambda = (dx * (x0 - x1)) + (dy * (y0 - y1))
+    
+    
+    x4 = (dx * Lambda) + x1
+    y4 = (dy * Lambda) + y1
+    
+    offset = np.sqrt((x4-x0)**2 + (y4-y0)**2)
+    
+    return offset
+
 
 
 '''
@@ -231,4 +261,4 @@ if __name__=='__main__':
         vis.processFrame(frame)
 
         cv2.imshow("Vision Testing", vis.frame_edited)
-        cv2.waitKey(50)
+        cv2.waitKey(0)
