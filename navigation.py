@@ -1,9 +1,9 @@
-
+import numpy as np
 
 class Navigation():
     def __init__(   self,
-                    speed=1,
-                    Komega=1,
+                    speed=0.01,
+                    Komega=0.05,
                     Kh=1):
         self.speed = speed
         self.Komega = Komega
@@ -12,7 +12,7 @@ class Navigation():
     def processNav(self, heading, leftOffset, rightOffset, obstacle, obDist):
         
         # Determine angular velocity based on camera direction
-        theta = (1.5708 - heading)
+        theta = (heading - np.pi/2)
         omega =  theta * self.Komega
         
         speed = self.speed
@@ -23,6 +23,6 @@ class Navigation():
         # Create a vehicle direction vector
         #vector = (theta * Kh) + (trackOffset * Kt)
         
-        vector = (theta * self.Kh)
+        vector = (np.pi/2 * self.Kh)
         
         return speed, vector, omega
