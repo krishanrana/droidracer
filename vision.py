@@ -7,7 +7,7 @@ from collections import deque
 from constants import *
 
 FRAME_SCALE = 3
-BLUE_THRESH = 100
+BLUE_THRESH = 110
 YELLOW_THRESH = 160
 
 
@@ -171,11 +171,18 @@ class droidVision():
         try:
             cv2.line(frame,(int(bZeroCrossing),int(self.centreY)),(int(self.vpX),int(self.vpY)),(0,255,0),2)
             cv2.line(frame,(int(yZeroCrossing),int(self.centreY)),(int(self.vpX),int(self.vpY)),(0,255,0),2)
+            cv2.line(frame,(int(centreX),int(self.centreY)),(int(self.vpX),int(self.vpY)),(0,0,255),2)
         except:
             logging.debug('cant show lines')  
 
         self.frame_edited = np.copy(frame)
-            
+        
+        cv2.imshow("test", clB)
+        cv2.waitKey(0)
+
+        cv2.imshow("test", blue*255)
+        cv2.waitKey(0)
+
         return avHeading, avLeftOffset, avRightOffset, obstacle, avObDist
 
 
@@ -206,7 +213,7 @@ Doesn't require the droid!
 '''
 if __name__=='__main__':
 
-    cap = cv2.VideoCapture('test_videos/output2.avi')
+    cap = cv2.VideoCapture('test_videos/output3.avi')
     vis = droidVision()
 
     while(cap.isOpened()):
@@ -216,4 +223,4 @@ if __name__=='__main__':
         vis.processFrame(frame)
 
         cv2.imshow("Vision Testing", vis.frame_edited)
-        cv2.waitKey(5)
+        cv2.waitKey(50)
