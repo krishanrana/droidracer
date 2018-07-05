@@ -42,7 +42,7 @@ class droidVision():
         self.rhoThresh = 80
         self.minLineLength = 100 * FRAME_SCALE
         self.maxLineGap = 30 * FRAME_SCALE
-        self.centreY = 2550 # Result of calibration
+        self.centreY = DEFAULT_CAM_H # Result of calibration
 
         self.frame_edited = np.empty((DEFAULT_CAM_H,DEFAULT_CAM_W,3))
 
@@ -50,7 +50,8 @@ class droidVision():
     def processFrame(self, frame):
         
         width = frame.shape[1]
-
+        bM = None
+        yM = None
         centreX = np.round(frame.shape[1]/2)
         processed = cv2.medianBlur(frame,5)
         processed = cv2.cvtColor(processed,cv2.COLOR_BGR2LAB) 
@@ -67,7 +68,6 @@ class droidVision():
 
         # process yellow line
         yellow = cv2.morphologyEx(yellow, cv2.MORPH_OPEN, self.kernel)
-        #yellow = cv2.Canny(yellow,0,1,apertureSize = 5)
         yline = np.squeeze(cv2.HoughLinesP(yellow,1,self.thetaThresh,self.rhoThresh,self.minLineLength,self.maxLineGap))#detect lines
 
         if yline.ndim >= 2:
@@ -77,14 +77,13 @@ class droidVision():
             yM = np.median(yfilt)
             #find intersection point with baseline centreY, using gradient and mean point
             ypointX,ypointY = np.sum((yline[:,0] + yline[:,2])/(2*yline.shape[0])),np.sum((yline[:,1] + yline[:,3])/(2*yline.shape[0]))
-            yZeroCrossing = ypointX + yM*(self.centreY-ypointY)
+            yEdgeCrossing = ypointX + yM*(self.centreY-ypointY)
             for x1,y1,x2,y2 in yline: 
                 cv2.line(frame,(x1,y1),(x2,y2),(0,0,255),1)
             
 
         # process blue line
         blue = cv2.morphologyEx(blue, cv2.MORPH_OPEN, self.kernel)
-#        blue = cv2.Canny(blue,0,1,apertureSize = 5)
         bline = np.squeeze(cv2.HoughLinesP(blue,1,self.thetaThresh,self.rhoThresh,self.minLineLength,self.maxLineGap))#detect lines
 
         if bline.ndim >= 2:
@@ -93,7 +92,7 @@ class droidVision():
             bM = np.median(bfilt)
             #find intersection point with baseline centreY, using gradient and mean point
             bpointX,bpointY = np.sum((bline[:,0] + bline[:,2])/(2*bline.shape[0])),np.sum((bline[:,1] + bline[:,3])/(2*bline.shape[0]))
-            bZeroCrossing = bpointX + bM*(self.centreY-bpointY)
+            bEdgeCrossing = bpointX + bM * (DEFAULT_CAM_H - bpointY)
             
             for x1,y1,x2,y2 in bline:
                 cv2.line(frame,(x1,y1),(x2,y2),(0,255,0),1)
@@ -101,7 +100,6 @@ class droidVision():
             
         # process purple objects
         purple = cv2.morphologyEx(purple, cv2.MORPH_OPEN, self.kernel)
-        # blob detect,get centroids
         __, contours, __ = cv2.findContours(purple,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
         
         if contours:
@@ -121,7 +119,7 @@ class droidVision():
 
             # Draw outputs
             try:
-                cv2.line(frame,(0,obBottom[1]),(width,bottomEdge[1]),(0,255,0),2)
+                cv2.line(frame,(0,bottomEdge[1]),(width,bottomEdge[1]),(0,255,0),2)
                 cv2.circle(frame, center, 5, (0,0,255), -1)
             except:
                 logging.debug('no object rect')
@@ -129,33 +127,50 @@ class droidVision():
             obstacle = True
         else:
             obstacle = False
+
+        # Conditional to create vP or virtual vP
+        # Both lines visible
+        if bM != None and yM != None:
+            
+            self.vpY = (yEdgeCrossing - bEdgeCrossing)/(bM - yM) + self.centreY
+            self.vpX = bM * (self.vpY - self.centreY) + bEdgeCrossing
+            self.dataAvailable = 1
+            # Blue line visible
+        elif bM != None:
+            self.vpY = -10000 - self.centreY
+            self.vpX = bM * self.vpY + bEdgeCrossing
+            
+            # Yellow line visible
+        elif yM != None:
+            self.vpY = -10000 - self.centreY
+            self.vpX = yM * self.vpY + yEdgeCrossing
             
 
             
-
+         # No lines visible   
+        else:
+            self.dataAvailable = 0
+            
         
-        try:
-            leftOffset = findTrackOffset([bpointX,bpointY], realCoords)
-            rightOffset = findTrackOffset([ypointX,ypointY], realCoords)
-            centreOffset = rightOffset-leftOffset
-            self.vpY = (yZeroCrossing - bZeroCrossing)/(bM - yM) + self.centreY
-            self.vpX = bM * (self.vpY - self.centreY) + bZeroCrossing
- #           Heading = np.arctan((self.vpX - centreX)/(self.centreY - self.vpY))
+        if self.dataAvailable:     
             #Using Homography to compute heading angle
             realCoords = np.dot(H, [self.vpX,self.vpY,1])
             realCoords = realCoords/realCoords[2]
             Heading = math.atan2(-realCoords[1], -realCoords[0])
             heading_deg = Heading * 180/np.pi
-
-            self.dataAvailable = 1
-    
-        except:
-            self.dataAvailable = 0
-            
-        if self.dataAvailable:   
+            logging.debug("Heading: %.2f", heading_deg)
             self.histVPHeading.append(Heading)
-            self.histLeftOffset.append(leftOffset)
-            self.histRightOffset.append(rightOffset)
+            
+            if bM != None:
+                leftOffset = findTrackOffset([bpointX,bpointY], realCoords)
+                self.histLeftOffset.append(leftOffset)
+
+            if yM != None:
+                rightOffset = findTrackOffset([ypointX,ypointY], realCoords)
+                self.histRightOffset.append(rightOffset)
+
+            
+            
         else:
             self.failedFrame += 1
             # If lines are not detected for 10 frames, remove history
@@ -183,8 +198,8 @@ class droidVision():
         avObDist = np.nanmedian(self.histObDist)
 
         try:
-            cv2.line(frame,(int(bZeroCrossing),int(self.centreY)),(int(self.vpX),int(self.vpY)),(0,255,0),2)
-            cv2.line(frame,(int(yZeroCrossing),int(self.centreY)),(int(self.vpX),int(self.vpY)),(0,255,0),2)
+            cv2.line(frame,(int(bEdgeCrossing),int(self.centreY)),(int(self.vpX),int(self.vpY)),(0,255,0),2)
+            cv2.line(frame,(int(yEdgeCrossing),int(self.centreY)),(int(self.vpX),int(self.vpY)),(0,255,0),2)
             cv2.line(frame,(int(centreX),int(self.centreY)),(int(self.vpX),int(self.vpY)),(0,0,255),2)
         except:
             logging.debug('cant show lines')  
@@ -193,7 +208,6 @@ class droidVision():
    
         return avHeading, avLeftOffset, avRightOffset, obstacle, avObDist
 
-    #testing
 
 
             
