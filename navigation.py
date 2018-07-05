@@ -15,7 +15,7 @@ class Navigation():
         # Determine angular velocity based on camera direction
         theta = (heading - np.pi/2)
         omega =  theta * self.Komega
-        temp = (heading*3.14/2)
+        temp = (heading*180/(np.pi/2))
         logging.debug('heading: %.2f', temp) 
         
         speed = self.speed
