@@ -215,8 +215,8 @@ class PiBotServer:
         # Start the capture stream
         self.cam = piVideoStream.PiVideoStream(
                                             resolution=self.cam_resolution,
-                                            vflip=True,
-                                            hflip=True )
+                                            vflip=False,
+                                            hflip=False )
         self.cam.start()                    # Start the capture stream
         self.__camera_flag = True
 
