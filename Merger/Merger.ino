@@ -153,7 +153,7 @@ void loop() {
     }
 
     // Update the measured motor speeds
-    computeVelocities(data[0], data[1], data[2]);
+    computeVelocities(data[0], data[1], data[2]);    
 
   }
   
@@ -182,7 +182,8 @@ void loop() {
   //  Serial.println(setspeed_M3);
   //  Serial.println("");
 
-  
+  Serial.println(speed_M1);
+    
   PID_M1.Compute();
   PID_M2.Compute();
   PID_M3.Compute();
@@ -226,9 +227,9 @@ ISR(TIMER2_COMPA_vect) // timer compare interrupt service routine - fires every 
   // Ticks per second
   // Don't know why but M2 and M3 counts are backwards.
   // Possible swapped wiring of encoders or swapped pin defs?
-  speed_M1 = ticks2metres(M1_Count / 0.01632);
-  speed_M2 = ticks2metres(-M2_Count / 0.01632);
-  speed_M3 = ticks2metres(-M3_Count / 0.01632);
+  speed_M1 = ticks2metres(-M1_Count / 0.01632);
+  speed_M2 = ticks2metres(M2_Count / 0.01632);
+  speed_M3 = ticks2metres(M3_Count / 0.01632);
 
   M1_Count = 0;
   M2_Count = 0;
