@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import logging
 
 from collections import deque
 
@@ -44,7 +45,6 @@ class droidVision():
         
         width = frame.shape[1]
 
-        
         centreX = np.round(frame.shape[1]/2)
         processed = cv2.medianBlur(frame,5)
         processed = cv2.cvtColor(processed,cv2.COLOR_BGR2LAB) 
@@ -72,7 +72,7 @@ class droidVision():
             for x1,y1,x2,y2 in yline: 
                 cv2.line(frame,(x1,y1),(x2,y2),(0,0,255),1)
         except:
-            print('No yellow') 
+            logging.debug('No yellow') 
             
         try:   
             # process blue line
@@ -89,7 +89,7 @@ class droidVision():
             for x1,y1,x2,y2 in bline:
                 cv2.line(frame,(x1,y1),(x2,y2),(0,255,0),1)
         except:
-            print('No blue')
+            logging.debug('No blue')
             
         try:
             # process purple objects
@@ -117,11 +117,11 @@ class droidVision():
                 cv2.line(frame,(0,obBottom[1]),(width,bottomEdge[1]),(0,255,0),2)
                 cv2.circle(frame, center, 5, (0,0,255), -1)
             except:
-                print('no object rect')
+                logging.debug('no object rect')
             obstacle = 1
             
         except:
-            print('No objects, drive fast!') 
+            logging.debug('No objects, drive fast!') 
             obstacle = 0
             
 
@@ -134,10 +134,8 @@ class droidVision():
             self.vpX = bM * (self.vpY - self.centreY) + bZeroCrossing
             Heading = np.arctan((self.vpX - centreX)/(self.centreY - self.vpY))
             self.dataAvailable = 1
-
     
         except:
-            print('all fucked right now')
             self.dataAvailable = 0
             
         if self.dataAvailable:   
@@ -151,7 +149,7 @@ class droidVision():
             self.histVPHeading = deque([0],10)
             self.histLeftOffset = deque([0],10)
             self.histRightOffset = deque([0],10)
-            print('10 failed frames')
+            logging.debug('10 failed frames')
         
         if obstacle:
             self.obMissing = 0
@@ -162,7 +160,7 @@ class droidVision():
             
         if self.obMissing >= 10:
             self.histObDist = deque([0],10)
-            print('Lost the obstacle')
+            logging.debug('Lost the obstacle')
                 
             
         avHeading = np.nanmedian(self.histVPHeading)
@@ -174,8 +172,7 @@ class droidVision():
             cv2.line(frame,(int(bZeroCrossing),int(self.centreY)),(int(self.vpX),int(self.vpY)),(0,255,0),2)
             cv2.line(frame,(int(yZeroCrossing),int(self.centreY)),(int(self.vpX),int(self.vpY)),(0,255,0),2)
         except:
-            print('cant show lines')  
-
+            logging.debug('cant show lines')  
 
         self.frame_edited = np.copy(frame)
             
