@@ -35,15 +35,22 @@ char dataString[50] = {0};
 
 
 // PID variables
-#define KP 15
-#define KI 250
-#define KD 0
+#define KP_AGG 15
+#define KI_AGG 250
+#define KD_AGG 0
+
+#define KP_CON 10
+#define KI_CON 0
+#define KD_CON 0.01
+
+#define CON_THRESH 0.2
+
 volatile double speed_M1, speed_M2, speed_M3;         // Used for input measurement to PID
 double out_M1, out_M2, out_M3;                        // Output from PID to power motors
 double setspeed_M1, setspeed_M2, setspeed_M3;         // Target speed for motors
-PID PID_M1(&speed_M1, &out_M1, &setspeed_M1, KP, KI, KD, DIRECT);
-PID PID_M2(&speed_M2, &out_M2, &setspeed_M2, KP, KI, KD, DIRECT);
-PID PID_M3(&speed_M3, &out_M3, &setspeed_M3, KP, KI, KD, DIRECT);
+PID PID_M1(&speed_M1, &out_M1, &setspeed_M1, KP_AGG, KI_AGG, KD_AGG, DIRECT);
+PID PID_M2(&speed_M2, &out_M2, &setspeed_M2, KP_AGG, KI_AGG, KD_AGG, DIRECT);
+PID PID_M3(&speed_M3, &out_M3, &setspeed_M3, KP_AGG, KI_AGG, KD_AGG, DIRECT);
 
 
 // variables to store the number of encoder pulses
@@ -157,32 +164,35 @@ void loop() {
 
   }
   
-  //Serial.println(setspeed_M1);
-  //      Serial.println(setspeed_M2);
-  //      Serial.println(setspeed_M3);
 
-  // Process the PIDs
-  //  Serial.print("Motor 1: ");
-  //  Serial.print(speed_M1);
-  //  Serial.print(", ");
-  //  Serial.print(out_M1);
-  //  Serial.print(", ");
-  //  Serial.println(setspeed_M1);
-  //  Serial.print("Motor 2: ");
-  //  Serial.print(speed_M2);
-  //  Serial.print(", ");
-  //  Serial.print(out_M2);
-  //  Serial.print(", ");
-  //  Serial.println(setspeed_M2);
-  //  Serial.print("Motor 3: ");
-  //  Serial.print(speed_M3);
-  //  Serial.print(", ");
-  //  Serial.print(out_M3);
-  //  Serial.print(", ");
-  //  Serial.println(setspeed_M3);
-  //  Serial.println("");
+  // Check if need to switch between aggressive/conservative PID tuning values
+  if (abs(speed_M1 - setspeed_M1) < CON_THRESH){
+    PID_M1.SetTunings(KP_CON, KI_CON, KD_CON);
+    // Clear the integral buildup
+    PID_M1.SetMode(MANUAL);
+    PID_M1.SetMode(AUTOMATIC);  
+  } else {
+    PID_M1.SetTunings(KP_AGG, KI_AGG, KD_AGG);
+  }
+  
+  if (abs(speed_M2 - setspeed_M2) < CON_THRESH){
+    PID_M2.SetTunings(KP_CON, KI_CON, KD_CON);
+    // Clear the integral buildup
+    PID_M2.SetMode(MANUAL);
+    PID_M2.SetMode(AUTOMATIC);  
+    } else {
+    PID_M2.SetTunings(KP_AGG, KI_AGG, KD_AGG);
+  }
+  
+  if (abs(speed_M3 - setspeed_M3) < CON_THRESH){
+    // Clear the integral buildup
+    PID_M3.SetTunings(KP_CON, KI_CON, KD_CON);
+    PID_M3.SetMode(MANUAL);
+    PID_M3.SetMode(AUTOMATIC);  
+  } else {
+    PID_M3.SetTunings(KP_AGG, KI_AGG, KD_AGG);
+  }
 
-  Serial.println(speed_M1);
     
   PID_M1.Compute();
   PID_M2.Compute();
@@ -190,9 +200,15 @@ void loop() {
 
   // Write to the motor directions and pwm power
   if (setspeed_M1==0 && setspeed_M2==0 && setspeed_M3==0){
+    PID_M1.SetMode(MANUAL);
+    PID_M2.SetMode(MANUAL);
+    PID_M3.SetMode(MANUAL);
     analogWrite(PWM_M1, 0);
     analogWrite(PWM_M2, 0);
     analogWrite(PWM_M3, 0);
+    PID_M1.SetMode(AUTOMATIC);
+    PID_M2.SetMode(AUTOMATIC);
+    PID_M3.SetMode(AUTOMATIC);
 
   } else {
     if (out_M1 < 0) {
