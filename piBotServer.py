@@ -305,7 +305,7 @@ class PiBotServer:
 
                 # Calculate frame rate
                 t = time.time()
-                logging.info("Frame rate: %.2fHz", 1.0/(t - t0_frame))
+                print(1.0/(t - t0_frame))
                 t0_frame = t
 
             # Get new time and check if min time has elapsed
