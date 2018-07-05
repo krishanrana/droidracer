@@ -298,9 +298,10 @@ void computeVelocities(float vel, float heading, float angular_vel) {
   // 3 wheel omniwheel kinematics
   // Transforms from velocity/heading/angular velocity to motor speeds
   
-  setspeed_M1 = (vel * (-0.5 * cos(heading) - sqrt(3) / 2 * sin(heading))) + (2 * angular_vel * DROIDRADIUS);
-  setspeed_M2 = (vel * (-0.5 * cos(heading) + sqrt(3) / 2 * sin(heading))) + (2 * angular_vel * DROIDRADIUS);
-  setspeed_M3 = vel * cos(heading) + (2 * angular_vel * DROIDRADIUS);
+  setspeed_M1 = -((vel * (-0.5 * cos(heading) - sqrt(3) / 2 * sin(heading))) + (2 * angular_vel * DROIDRADIUS));
+  setspeed_M2 = -((vel * (-0.5 * cos(heading) + sqrt(3) / 2 * sin(heading))) + (2 * angular_vel * DROIDRADIUS));
+  setspeed_M3 = -(vel * cos(heading) + (2 * angular_vel * DROIDRADIUS));
+
 
 }
 
