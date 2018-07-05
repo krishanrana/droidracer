@@ -142,10 +142,10 @@ class droidVision():
             #Using Homography to compute heading angle
             realCoords = np.dot(H, [self.vpX,self.vpY,1])
             realCoords = realCoords/realCoords[2]
-            Heading = math.atan2(realCoords[1], realCoords[0])
+            Heading = math.atan2(-realCoords[1], -realCoords[0])
             heading_deg = Heading * 180/3.14
             logging.debug('Heading: %.2f', heading_deg)
-            logging.debug('vpx, vpy: %.2f  %.2f', self.vpX, self.vpY)
+            logging.debug('realx, realy: %.2f  %.2f', realCoords[0], realCoords[1])
 
             self.dataAvailable = 1
     
