@@ -209,7 +209,7 @@ Doesn't require the droid!
 '''
 if __name__=='__main__':
 
-    cap = cv2.VideoCapture('DRC2017Short.mp4')
+    cap = cv2.VideoCapture('output.avi')
     vis = droidVision()
 
     while(cap.isOpened()):
