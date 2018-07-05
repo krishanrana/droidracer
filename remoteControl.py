@@ -89,7 +89,6 @@ if __name__=='__main__':
                 
             else:
                 noPressCounter += 1
-                print('Counter: ', noPressCounter)
                 if noPressCounter >= 10:
                     droid.setSpeed(0, 0, 0)
                     noPressCounter = 0
@@ -100,12 +99,16 @@ if __name__=='__main__':
         #####################################################################################
         '''
         if key == ord('m'): # Manual mode
-            logging.debug("Manual mode initialised")
+            logging.info("Manual mode initialised")
             droid.setMode('manual')
 
         elif key == ord('k'): # Auto mode
-            logging.debug("Autonomous mode initialised")
+            logging.info("Autonomous mode initialised")
             droid.setMode('auto')
+        
+        elif key == ord('y'): # Take photo
+            logging.info("Taking photo")
+            cv2.imwrite('test_videos/image.jpg', im)
 
     droid.StopCamStream()
 
