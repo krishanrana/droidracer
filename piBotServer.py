@@ -237,8 +237,8 @@ class PiBotServer:
                                         interpolation=cv2.INTER_AREA)
 
                 # Perform any CV processing required on the frame
-                # self.avHeading, self.avLeftOffset, self.avRightOffset, self.obstacle, self.avObDist = vis.processFrame(self.frame)
-                # self.frame = vis.frame_edited
+                self.avHeading, self.avLeftOffset, self.avRightOffset, self.obstacle, self.avObDist = vis.processFrame(self.frame)
+                self.frame = vis.frame_edited
                 out.write(self.frame)
                 # Let any local and remote threads know that the frame is ready!
                 self.frame_available_local = True
