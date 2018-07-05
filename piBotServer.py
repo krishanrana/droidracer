@@ -23,7 +23,7 @@ import vision
 import navigation
 
 
-logging.basicConfig(level=logging.INFO,
+logging.basicConfig(level=logging.DEBUG,
                       format='[%(levelname)s] (%(threadName)-9s) %(message)s',)
 shutdown_flag = False
 
@@ -338,7 +338,6 @@ class PiBotServer:
         self.speed = speed
         self.vector = vector
         self.omega = omega
-        print('setSpeed', speed, vector, omega)
 
         # Send over serial to Arduino
         speed = str(speed)
