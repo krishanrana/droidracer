@@ -206,7 +206,7 @@ Doesn't require the droid!
 '''
 if __name__=='__main__':
 
-    cap = cv2.VideoCapture('output.avi')
+    cap = cv2.VideoCapture('test_videos/output2.avi')
     vis = droidVision()
 
     while(cap.isOpened()):
