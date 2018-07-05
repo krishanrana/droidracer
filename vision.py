@@ -158,7 +158,7 @@ class droidVision():
             realCoords = realCoords/realCoords[2]
             Heading = math.atan2(-realCoords[1], -realCoords[0])
             heading_deg = Heading * 180/np.pi
-            logging.debug("Heading: %.2f", heading_deg)
+            # logging.debug("Heading: %.2f", heading_deg)
             self.histVPHeading.append(Heading)
             
             if bM != None:
@@ -178,7 +178,7 @@ class droidVision():
             self.histVPHeading = deque([0],10)
             self.histLeftOffset = deque([0],10)
             self.histRightOffset = deque([0],10)
-            logging.debug('10 failed frames')
+            # logging.debug('10 failed frames')
         
         if obstacle:
             self.obMissing = 0
@@ -189,7 +189,7 @@ class droidVision():
             
         if self.obMissing >= 10:
             self.histObDist = deque([0],10)
-            logging.debug('Lost the obstacle')
+            # logging.debug('Lost the obstacle')
                 
             
         avHeading = np.nanmedian(self.histVPHeading)
