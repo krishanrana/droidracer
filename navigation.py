@@ -2,8 +2,8 @@ import numpy as np
 
 class Navigation():
     def __init__(   self,
-                    speed=0.8,
-                    Komega=0.7,
+                    speed=0.5,
+                    Komega=0.4,
                     Kh=1):
         self.speed = speed
         self.Komega = Komega
