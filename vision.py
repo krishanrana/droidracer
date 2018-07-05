@@ -172,7 +172,7 @@ class droidVision():
             
         if self.obMissing >= 10:
             self.histObDist = deque([0],10)
-            logging.debug('Lost the obstacle')
+            pass
                 
             
         avHeading = np.nanmedian(self.histVPHeading)
@@ -185,14 +185,12 @@ class droidVision():
             cv2.line(frame,(int(yZeroCrossing),int(self.centreY)),(int(self.vpX),int(self.vpY)),(0,255,0),2)
             cv2.line(frame,(int(centreX),int(self.centreY)),(int(self.vpX),int(self.vpY)),(0,0,255),2)
         except:
-            logging.debug('cant show lines')  
+            pass
 
         self.frame_edited = np.copy(frame)
-   
+
+        logging.debug(avHeading)
         return avHeading, avLeftOffset, avRightOffset, obstacle, avObDist
-
-    #testing
-
 
             
 def rejectOutliers(data, m = 10.):
