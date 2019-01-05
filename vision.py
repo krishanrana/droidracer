@@ -204,10 +204,16 @@ class droidVision():
             # logging.debug('Lost the obstacle')
                 
             
-        avHeading = np.nanmedian(self.histVPHeading)
-        avLeftOffset = np.nanmedian(self.histLeftOffset)
-        avRightOffset = np.nanmedian(self.histRightOffset)
-        avObDist = np.nanmedian(self.histObDist)
+#        avHeading = np.nanmedian(self.histVPHeading)
+#        avLeftOffset = np.nanmedian(self.histLeftOffset)
+#        avRightOffset = np.nanmedian(self.histRightOffset)
+#        avObDist = np.nanmedian(self.histObDist)
+        
+        
+        avHeading = np.nanmean(self.histVPHeading)
+        avLeftOffset = np.nanmean(self.histLeftOffset)
+        avRightOffset = np.nanmean(self.histRightOffset)
+        avObDist = np.nanmean(self.histObDist)
 
         try:
             cv2.line(frame,(int(bEdgeCrossing),int(self.centreY)),(int(self.vpX),int(self.vpY)),(0,255,0),2)
@@ -233,7 +239,7 @@ def rejectOutliers(data, m = 10.):
 
 def objectDistance(VertPix, tiltAngle, Height, bottomEdge):
     
-    Y = VertPix/2.0 - bottomEdge
+    Y = VertPix/2.0 - bottomEdge[1]
 
     fieldAngle = 0.8517
     pxAngle = ((Y * fieldAngle)/(VertPix))

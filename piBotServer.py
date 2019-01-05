@@ -4,6 +4,7 @@ PiBotServer class
     This PiBotServer class is run on the raspberry pi.
 
 '''
+from __future__ import division
 
 import threading
 import socket
@@ -15,7 +16,6 @@ import numpy as np
 import os
 import serial
 import struct
-
 import piVideoStream
 from fractions import Fraction
 from socket_helpers import *
@@ -98,9 +98,18 @@ class PiBotServer:
 
     def StartServers(self):
         # Starts the listener servers each in a fresh thread
-        cmdsA_thr = threading.Thread(name="CmdsAListener", target=self.__Listen, args=(self.port_cmds_a,), daemon=True)
-        cmdsB_thr =threading.Thread(name="CmdsBListener", target=self.__Listen, args=(self.port_cmds_b,), daemon=True)
-        cam_thr = threading.Thread(name="CameraListener", target=self.__Listen, args=(self.port_camera,), daemon=True)
+#        cmdsA_thr = threading.Thread(name="CmdsAListener", target=self.__Listen, args=(self.port_cmds_a,), daemon=True)
+#        cmdsB_thr =threading.Thread(name="CmdsBListener", target=self.__Listen, args=(self.port_cmds_b,), daemon=True)
+#        cam_thr = threading.Thread(name="CameraListener", target=self.__Listen, args=(self.port_camera,), daemon=True)
+        # For python 2.7
+        cmdsA_thr = threading.Thread(name="CmdsAListener", target=self.__Listen, args=(self.port_cmds_a,))
+        cmdsB_thr =threading.Thread(name="CmdsBListener", target=self.__Listen, args=(self.port_cmds_b,))
+        cam_thr = threading.Thread(name="CameraListener", target=self.__Listen, args=(self.port_camera,))
+        cmdsA_thr.daemon = True
+        cmdsB_thr.daemon = True
+        cam_thr.daemon = True
+        
+        
         cmdsA_thr.start()
         cmdsB_thr.start()
         cam_thr.start()

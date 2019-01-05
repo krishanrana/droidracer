@@ -10,6 +10,7 @@ Doug added manual white balance and decreased resolution, up fps
 
 
 # Import the required modules
+from fractions import Fraction
 from picamera.array import PiRGBArray
 from picamera import PiCamera
 from picamera.exc import PiCameraValueError
@@ -58,7 +59,10 @@ class PiVideoStream():
 
     def start(self):
         # start the thread to read frames from the video stream
-        threading.Thread(name="Camera", target=self.__update, args=(), daemon=False).start()
+#        threading.Thread(name="Camera", target=self.__update, args=(), daemon=False).start()
+        cam_thr = threading.Thread(name="Camera", target=self.__update, args=())
+        cam_thr.daemon = False
+        cam_thr.start()
         return self
 
     def stop(self):
@@ -106,7 +110,7 @@ if __name__ == '__main__':
                 im is a size[w,h,3] numpy array in the bgr format'''
 
             cv2.imshow("Test window", im)
-            cv2.waitKey(0.01)
+            cv2.waitKey(5)
             cam.frame_available = False
             frame_count = frame_count + 1
 
