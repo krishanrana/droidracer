@@ -17,6 +17,7 @@ import serial
 import struct
 
 import piVideoStream
+from fractions import Fraction
 from socket_helpers import *
 from constants import *
 import vision
@@ -230,11 +231,12 @@ class PiBotServer:
                 self.cam.frame_available = False
 
                 # Get the frame and scale
-                self.frame = cv2.resize(self.cam.read(), 
-                                        None, 
-                                        fx=CAM_SCALING, 
-                                        fy=CAM_SCALING,
-                                        interpolation=cv2.INTER_AREA)
+#                self.frame = cv2.resize(self.cam.read(), 
+#                                        None, 
+#                                        fx=CAM_SCALING, 
+#                                        fy=CAM_SCALING,
+#                                        interpolation=cv2.INTER_AREA)
+                self.frame = self.cam.read()
 
                 # Perform any CV processing required on the frame
                 self.avHeading, self.avLeftOffset, self.avRightOffset, self.obstacle, self.avObDist = vis.processFrame(self.frame)

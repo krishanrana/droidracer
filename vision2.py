@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import logging
 import math
-
+import time
 from collections import deque
 
 from constants import *
@@ -61,7 +61,15 @@ class droidVision():
             self.failedFrame +=1
                 
 
-
+    def thresholdFrame(self, clA, clB):
+        thresh,purple = cv2.threshold(clA,160,1,cv2.THRESH_BINARY)
+        retY,yellow = cv2.threshold(clB,YELLOW_THRESH,1,cv2.THRESH_BINARY)
+        retB,blue = cv2.threshold(clB,BLUE_THRESH,1,cv2.THRESH_BINARY)
+        blue = cv2.bitwise_not(blue)-254 # invert blue line
+        
+        return purple, yellow, blue
+        
+        
     def processFrame(self, frame):
         
         width = frame.shape[1]
@@ -70,14 +78,7 @@ class droidVision():
         centreX = np.round(frame.shape[1]/2)
         clA,clB = self.raw2Frame(frame)
         
-        thresh,purple = cv2.threshold(clA,160,1,cv2.THRESH_BINARY)
         
-       
-        # Split into yellow and blue lines
-        retY,yellow = cv2.threshold(clB,YELLOW_THRESH,1,cv2.THRESH_BINARY)
-        retB,blue = cv2.threshold(clB,BLUE_THRESH,1,cv2.THRESH_BINARY)
-        blue = cv2.bitwise_not(blue)-254 # invert blue line
-
         # process yellow line
         yellow = cv2.morphologyEx(yellow, cv2.MORPH_OPEN, self.kernel)
         yline = np.squeeze(cv2.HoughLinesP(yellow,1,self.thetaThresh,self.rhoThresh,self.minLineLength,self.maxLineGap))#detect lines
@@ -91,7 +92,7 @@ class droidVision():
             ypointX,ypointY = np.sum((yline[:,0] + yline[:,2])/(2*yline.shape[0])),np.sum((yline[:,1] + yline[:,3])/(2*yline.shape[0]))
             yEdgeCrossing = ypointX + yM*(self.centreY-ypointY)
             for x1,y1,x2,y2 in yline: 
-                cv2.line(frame,(x1,y1),(x2,y2),(0,0,255),1)
+                cv2.line(self.frame,(x1,y1),(x2,y2),(0,0,255),1)
             
 
         # process blue line
@@ -104,41 +105,11 @@ class droidVision():
             bM = np.median(bfilt)
             #find intersection point with baseline centreY, using gradient and mean point
             bpointX,bpointY = np.sum((bline[:,0] + bline[:,2])/(2*bline.shape[0])),np.sum((bline[:,1] + bline[:,3])/(2*bline.shape[0]))
-            bEdgeCrossing = bpointX + bM * (DEFAULT_CAM_H - bpointY)
+            bEdgeCrossing = bpointX + bM * (self.centreY - bpointY)
             
             for x1,y1,x2,y2 in bline:
                 cv2.line(frame,(x1,y1),(x2,y2),(0,255,0),1)
-            
-            
-        # process purple objects
-        purple = cv2.morphologyEx(purple, cv2.MORPH_OPEN, self.kernel)
-        __, contours, __ = cv2.findContours(purple,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
         
-        if contours:
-
-            # find centroid of largest blob
-            blob = max(contours, key=lambda el: cv2.contourArea(el))
-            M = cv2.moments(blob)
-            center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
-            
-            # Find edges of obstacle
-            leftEdge = tuple(blob[blob[:,:,0].argmin()][0])
-            rightEdge = tuple(blob[blob[:,:,0].argmax()][0])
-            topEdge = tuple(blob[blob[:,:,1].argmin()][0])
-            bottomEdge = tuple(blob[blob[:,:,1].argmax()][0])
-            # Calculate distance to object
-            obDistance = objectDistance(DEFAULT_CAM_H, DEFAULT_CAM_TILT, DEFAULT_CAM_HEIGHT, bottomEdge)
-
-            # Draw outputs
-            try:
-                cv2.line(frame,(0,bottomEdge[1]),(width,bottomEdge[1]),(0,255,0),2)
-                cv2.circle(frame, center, 5, (0,0,255), -1)
-            except:
-                logging.debug('no object rect')
-            
-            obstacle = True
-        else:
-            obstacle = False
 
         # Conditional to create vP or virtual vP
         # Both lines visible
@@ -166,8 +137,7 @@ class droidVision():
         
         if self.dataAvailable:     
             # Using Homography to compute heading angle
-            realCoords = np.dot(H, [self.vpX,self.vpY,1])
-            realCoords = realCoords/realCoords[2]
+            realCoords = robotFrame([self.vpX,self.vpY],H)
             Heading = math.atan2(-realCoords[1], -realCoords[0])
             heading_deg = Heading * 180/np.pi
             # logging.debug("Heading: %.2f", heading_deg)
@@ -210,18 +180,61 @@ class droidVision():
         avObDist = np.nanmedian(self.histObDist)
 
         try:
-            cv2.line(frame,(int(bEdgeCrossing),int(self.centreY)),(int(self.vpX),int(self.vpY)),(0,255,0),2)
-            cv2.line(frame,(int(yEdgeCrossing),int(self.centreY)),(int(self.vpX),int(self.vpY)),(0,255,0),2)
+            cv2.line(self.frame_edited,(int(bEdgeCrossing),int(self.centreY)),(int(self.vpX),int(self.vpY)),(0,255,0),2)
+            cv2.line(self.frame_edited,(int(yEdgeCrossing),int(self.centreY)),(int(self.vpX),int(self.vpY)),(0,255,0),2)
             # Show direction to vanishing point
-            cv2.line(frame,(int(centreX),int(self.centreY)),(int(self.vpX),int(self.vpY)),(0,0,255),2)
+            cv2.line(self.frame_edited,(int(centreX),int(self.centreY)),(int(self.vpX),int(self.vpY)),(0,0,255),2)
         except:
-            logging.debug('cant show lines')  
-
-        self.frame_edited = np.copy(frame)
+            print('cant show lines')  
    
         return avHeading, avLeftOffset, avRightOffset, obstacle, avObDist
 
-
+    def detectLine(self,channel):
+            channel = cv2.morphologyEx(channel, cv2.MORPH_OPEN, self.kernel)
+            lines = np.squeeze(cv2.HoughLinesP(channel,1,self.thetaThresh,self.rhoThresh,self.minLineLength,self.maxLineGap))#detect lines
+    
+            if lines.ndim >= 2:
+                grad = (lines[:,0]-lines[:,2])/(lines[:,1]-lines[:,3]+0.0001)# find gradient of lines
+                filt = rejectOutliers(grad, m=5)
+                M = np.median(filt)
+                #find intersection point with baseline centreY, using gradient and mean point
+                pointX,pointY = np.sum((lines[:,0] + lines[:,2])/(2*lines.shape[0])),np.sum((lines[:,1] + lines[:,3])/(2*lines.shape[0]))
+                EdgeCrossing = pointX + M * (self.centreY - pointY)
+                
+                for x1,y1,x2,y2 in lines:
+                    cv2.line(frame,(x1,y1),(x2,y2),(0,255,0),1)
+                    
+    def detectObjects(self,purple):    
+            # process purple objects
+            purple = cv2.morphologyEx(purple, cv2.MORPH_OPEN, self.kernel)
+            __, contours, __ = cv2.findContours(purple,cv2.RETR_LIST,cv2.CHAIN_APPROX_SIMPLE)
+            
+            if contours:
+    
+                # find centroid of largest blob
+                blob = max(contours, key=lambda el: cv2.contourArea(el))
+                M = cv2.moments(blob)
+                center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+                
+                # Find edges of obstacle
+                leftEdge = tuple(blob[blob[:,:,0].argmin()][0])
+                rightEdge = tuple(blob[blob[:,:,0].argmax()][0])
+                topEdge = tuple(blob[blob[:,:,1].argmin()][0])
+                bottomEdge = tuple(blob[blob[:,:,1].argmax()][0])
+                # Calculate distance to object
+                obDistance = objectDistance(DEFAULT_CAM_H, DEFAULT_CAM_TILT, DEFAULT_CAM_HEIGHT, bottomEdge)
+    
+                # Draw outputs
+                try:
+                    cv2.line(frame,(0,bottomEdge[1]),(width,bottomEdge[1]),(0,255,0),2)
+                    cv2.circle(frame, center, 5, (0,0,255), -1)
+                except:
+                    logging.debug('no object rect')
+                
+                obstacle = True
+            else:
+                obstacle = False
+                
 
             
 def rejectOutliers(data, m = 10.):
@@ -233,7 +246,7 @@ def rejectOutliers(data, m = 10.):
 
 def objectDistance(VertPix, tiltAngle, Height, bottomEdge):
     
-    Y = VertPix/2.0 - bottomEdge
+    Y = VertPix/2.0 - bottomEdge[1]
 
     fieldAngle = 0.8517
     pxAngle = ((Y * fieldAngle)/(VertPix))
@@ -273,6 +286,12 @@ def findTrackOffset(Point, realCoords):
     
     return offset
 
+def robotFrame(cPoint,H):
+    rPoint = np.dot(H, [cPoint[0],cPoint[1],1])
+    rPoint = rPoint/rPoint[2]
+    
+    return rPoint
+
 
 
 '''
@@ -287,14 +306,17 @@ if __name__=='__main__':
 
 
     while(cap.isOpened()):
-
+        t0 = time.time()
         ret, frame = cap.read()
         if frame is not None:
             vis.processFrame(frame)
+            print('fps, ',1.0/(time.time() - t0))
 
             cv2.imshow("Vision Testing", vis.frame_edited)
 
-        cv2.waitKey(5)
-        
-    cap.release()
-    cv2.destroyAllWindows()
+            cv2.waitKey(5)
+        else:        
+            print ('releasing resources') 
+            cap.release()
+            cv2.destroyAllWindows()
+            break

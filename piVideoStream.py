@@ -5,6 +5,7 @@ any other processing required.
 
 Adapted from: https://www.pyimagesearch.com/2015/12/28/increasing-raspberry-pi-fps-with-python-and-opencv/
 Sam
+Doug added manual white balance and decreased resolution, up fps
 '''
 
 
@@ -21,8 +22,8 @@ from constants import *
 
 class PiVideoStream():
     def __init__(self, 
-                resolution=(3280,2464), 
-                framerate=10,
+                resolution=(416,304), 
+                framerate=40,
                 vflip=False,
                 hflip=False,
                 use_video_port=True):
@@ -33,6 +34,10 @@ class PiVideoStream():
         # Is the picamera a V1? Try the max v1 resolution just incase.
         except PiCameraValueError:
             self.camera.resolution = (2592,1944)
+            
+        self.camera.sensor_mode = 4
+        self.camera.awb_mode='off'
+        self.camera.awb_gains = Fraction(8,5)
         self.camera.framerate = framerate
         self.camera.vflip = vflip
         self.camera.hflip = hflip
