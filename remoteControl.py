@@ -12,13 +12,13 @@ from constants import *
 SPEED = 1.0
 OMEGA = 1.0
 
-SAVE_VIDEO = True
+SAVE_VIDEO = False
 noPressCounter = 0
 
 if __name__=='__main__':
 
     pygame.init()
-    screen = pygame.display.set_mode((100,50))
+    screen = pygame.display.set_mode((DEFAULT_CAM_W,DEFAULT_CAM_H))
 
     keys = pygame.key.get_pressed()
 
