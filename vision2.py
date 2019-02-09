@@ -29,6 +29,7 @@ class droidVision():
         self.histRightOffset = deque([0],3)
         self.histObDist = deque([0],3)
         self.obMissing = 0
+        self.obstacle = False
 
         self.frameNo = 0
         self.kernel = np.ones((5,5),np.uint8)
@@ -59,8 +60,6 @@ class droidVision():
         self.vanishingPoint(yM,yEdgeCrossing,bM,bEdgeCrossing)
         self.robotHeading(yM,yEdgeCrossing,bM,bEdgeCrossing)
         
-        
-        
         goalHeading = np.nanmedian(self.histVPHeading)
         trackLeftOffset = np.nanmedian(self.histLeftOffset)
         trackRightOffset = np.nanmedian(self.histRightOffset)
@@ -81,10 +80,6 @@ class droidVision():
         except:
             logging.debug('no object rect')
             
-        
-   
-        
-        
         
         return goalHeading, trackLeftOffset, trackRightOffset, self.obstacle, obstacleDist
            
@@ -130,6 +125,7 @@ class droidVision():
                 print('VS209: HoughLines not found')
                 M = None
                 EdgeCrossing = None
+                meanPoint = None
                 
                     
             return M,EdgeCrossing,meanPoint
@@ -155,9 +151,7 @@ class droidVision():
             self.vpY = -10000 - self.centreY
             self.vpX = yM * self.vpY + yEdgeCrossing
             self.dataAvailable = 1
-            
-
-            
+                      
          # No lines visible   
         else:
             self.dataAvailable = 0
@@ -198,10 +192,6 @@ class droidVision():
             self.histObDist = deque([0],3)
             # logging.debug('Lost the obstacle')
                 
-            
-        
-
-        
 
     
     def detectObjects(self,purple):    
@@ -217,15 +207,13 @@ class droidVision():
                 center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
                 
                 # Find edges of obstacle
-                leftEdge = tuple(blob[blob[:,:,0].argmin()][0])
-                rightEdge = tuple(blob[blob[:,:,0].argmax()][0])
-                topEdge = tuple(blob[blob[:,:,1].argmin()][0])
+#                leftEdge = tuple(blob[blob[:,:,0].argmin()][0])
+#                rightEdge = tuple(blob[blob[:,:,0].argmax()][0])
+#                topEdge = tuple(blob[blob[:,:,1].argmin()][0])
                 bottomEdge = tuple(blob[blob[:,:,1].argmax()][0])
                 # Calculate distance to object
                 obDistance = objectDistance(DEFAULT_CAM_H, DEFAULT_CAM_TILT, DEFAULT_CAM_HEIGHT, bottomEdge)
-    
-                
-                
+               
                 self.obstacle = True
             else:
                 self.obstacle = False
