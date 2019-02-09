@@ -32,6 +32,7 @@ class PiVideoStream():
         self.camera = PiCamera()
         try:
             self.camera.resolution = resolution
+        
         # Is the picamera a V1? Try the max v1 resolution just incase.
         except PiCameraValueError:
             self.camera.resolution = (2592,1944)
@@ -94,7 +95,6 @@ class PiVideoStream():
 if __name__ == '__main__':
     '''Example program
         Needs a screen'''
-    import cv2
     #import piVideoStream   # When using in a different .py file
 
     cam = PiVideoStream()   # `cam = piVideoStream.PiVideoStream()` when using a different .py file
@@ -104,13 +104,16 @@ if __name__ == '__main__':
     frame_count = 0
     while (frame_count < 100):
         if cam.frame_available:
+            t0= time.time()
             im = cam.read()
 
             '''Do image processing here.
                 im is a size[w,h,3] numpy array in the bgr format'''
 
             cv2.imshow("Test window", im)
-            cv2.waitKey(5)
+            cv2.waitKey(1)
+            fps = 1.0/(time.time() - t0);
+            print('fps:', fps)
             cam.frame_available = False
             frame_count = frame_count + 1
 

@@ -1,5 +1,7 @@
 # Communications settings
 DEFAULT_HOST = '192.168.0.6'
+DEFAULT_HOST = '172.20.10.7'
+
 
 PORT_CMDS_A = 5000
 PORT_CMDS_B = 5001

@@ -20,7 +20,7 @@ import piVideoStream
 from fractions import Fraction
 from socket_helpers import *
 from constants import *
-import vision
+import vision2
 import navigation
 
 
@@ -231,7 +231,7 @@ class PiBotServer:
         self.__camera_flag = True
 
         # Create the vision processing instance
-        vis = vision.droidVision()
+        vis = vision2.droidVision()
 
         while (self.__camera_flag): # Keep streaming
 
