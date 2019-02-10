@@ -42,15 +42,15 @@ char dataString[50] = {0};
 //#define KP_CON 10
 //#define KI_CON 0
 //#define KD_CON 0.01
-#define KP_AGG 5
-#define KI_AGG 25
+#define KP_AGG 100
+#define KI_AGG 100
 #define KD_AGG 0
 
-#define KP_CON 2
-#define KI_CON 0
-#define KD_CON 0.01
+#define KP_CON 100
+#define KI_CON 25
+#define KD_CON 10
 
-#define CON_THRESH 0.2
+#define CON_THRESH 0.05
 
 volatile double speed_M1, speed_M2, speed_M3;         // Used for input measurement to PID
 double out_M1, out_M2, out_M3;                        // Output from PID to power motors
@@ -197,6 +197,7 @@ void loop() {
     PID_M1.SetMode(AUTOMATIC);  
   } else {
     PID_M1.SetTunings(KP_AGG, KI_AGG, KD_AGG);
+    Serial.println("M1 aggressive");
   }
   
   if (abs(speed_M2 - setspeed_M2) < CON_THRESH){
@@ -206,6 +207,7 @@ void loop() {
     PID_M2.SetMode(AUTOMATIC);  
     } else {
     PID_M2.SetTunings(KP_AGG, KI_AGG, KD_AGG);
+    Serial.println("M2 aggressive");
   }
   
   if (abs(speed_M3 - setspeed_M3) < CON_THRESH){
@@ -215,13 +217,19 @@ void loop() {
     PID_M3.SetMode(AUTOMATIC);  
   } else {
     PID_M3.SetTunings(KP_AGG, KI_AGG, KD_AGG);
+    Serial.println("M3 aggressive");
   }
 
     
   PID_M1.Compute();
   PID_M2.Compute();
   PID_M3.Compute();
+  // Overwrite for testing
+//  out_M1 = 0;
+//  out_M2 = -40;
+//  out_M3 = -40;
 
+  
   // Write to the motor directions and pwm power
   // Set to 0,0,0 for dead stop
   if (setspeed_M1==0 && setspeed_M2==0 && setspeed_M3==0){
@@ -242,6 +250,8 @@ void loop() {
       digitalWrite(DIR_M1, HIGH);
     }
     analogWrite(PWM_M1, int(abs(out_M1)));
+    Serial.print("PWM M1: ");
+    Serial.println(out_M1);
   
     if (out_M2 < 0) {
       digitalWrite(DIR_M2, LOW);
@@ -256,6 +266,7 @@ void loop() {
       digitalWrite(DIR_M3, HIGH);
     }
     analogWrite(PWM_M3, int(abs(out_M3)));
+    
   }
 }
 
@@ -266,12 +277,12 @@ void loop() {
 ISR(TIMER2_COMPA_vect) // timer compare interrupt service routine - fires every 0.01632 seconds
 {
   // Ticks per second
-  // Don't know why but M2 and M3 counts are backwards.
-  // Possible swapped wiring of encoders or swapped pin defs?
+  // Negative sign added to ensure encoder is + for + pwm rotation CW.
+  // Droid rotation set CCW = positive, therefore (viewed) wheel rotation is opposite 
   speed_M1 = ticks2metres(-M1_Count / 0.01632);
-  speed_M2 = ticks2metres(M2_Count / 0.01632);
-  speed_M3 = ticks2metres(M3_Count / 0.01632);
-
+  speed_M2 = ticks2metres(-M2_Count / 0.01632);
+  speed_M3 = ticks2metres(-M3_Count / 0.01632);
+  
   M1_Count = 0;
   M2_Count = 0;
   M3_Count = 0;
@@ -337,11 +348,12 @@ void M3EncoderEvent() {
 
 void computeVelocities(float vel, float heading, float angular_vel) {
   // 3 wheel omniwheel kinematics
-  // Transforms from velocity/heading/angular velocity to motor speeds
+  // Transforms from velocity/heading/angular velocity to motor speeds (0 rad is straight right)
   
-  setspeed_M1 = -((vel * (-0.5 * cos(heading) - sqrt(3) / 2 * sin(heading))) + (2 * angular_vel * DROIDRADIUS));
-  setspeed_M2 = -((vel * (-0.5 * cos(heading) + sqrt(3) / 2 * sin(heading))) + (2 * angular_vel * DROIDRADIUS));
-  setspeed_M3 = -(vel * cos(heading) + (2 * angular_vel * DROIDRADIUS));
+  setspeed_M1 = ((vel * (-0.5 * cos(heading) - sqrt(3) / 2 * sin(heading))) + (2 * angular_vel * DROIDRADIUS));
+  setspeed_M2 = ((vel * (-0.5 * cos(heading) + sqrt(3) / 2 * sin(heading))) + (2 * angular_vel * DROIDRADIUS));
+  setspeed_M3 = (vel * cos(heading) + (2 * angular_vel * DROIDRADIUS));
+
 
 
 }
