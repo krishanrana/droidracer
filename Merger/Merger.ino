@@ -14,7 +14,7 @@
 #define M3_ENCODER_B 7
 
 //Motors
-#define TICKS_PER_REV 108
+#define TICKS_PER_REV 980
 #define WHEEL_DIAMETER 0.058
 #define DROIDRADIUS 0.15
 // L9958 DIRection pins
@@ -35,11 +35,18 @@ char dataString[50] = {0};
 
 
 // PID variables
-#define KP_AGG 15
-#define KI_AGG 250
+//#define KP_AGG 15
+//#define KI_AGG 250
+//#define KD_AGG 0
+//
+//#define KP_CON 10
+//#define KI_CON 0
+//#define KD_CON 0.01
+#define KP_AGG 5
+#define KI_AGG 25
 #define KD_AGG 0
 
-#define KP_CON 10
+#define KP_CON 2
 #define KI_CON 0
 #define KD_CON 0.01
 
@@ -163,8 +170,25 @@ void loop() {
     computeVelocities(data[0], data[1], data[2]);    
 
   }
-  
+  // Print some diagnostics
+  Serial.print("M1 set: ");
+  Serial.println(setspeed_M1);
+  Serial.print("M1 speed: ");
+  Serial.println(speed_M1);
 
+  Serial.print("M2 set: ");
+  Serial.println(setspeed_M2);
+  Serial.print("M2 speed: ");
+  Serial.println(speed_M2);
+  
+  Serial.print("M3 set: ");
+  Serial.println(setspeed_M3);
+  Serial.print("M3 speed: ");
+  Serial.println(speed_M3);
+
+
+  
+  
   // Check if need to switch between aggressive/conservative PID tuning values
   if (abs(speed_M1 - setspeed_M1) < CON_THRESH){
     PID_M1.SetTunings(KP_CON, KI_CON, KD_CON);
@@ -199,6 +223,7 @@ void loop() {
   PID_M3.Compute();
 
   // Write to the motor directions and pwm power
+  // Set to 0,0,0 for dead stop
   if (setspeed_M1==0 && setspeed_M2==0 && setspeed_M3==0){
     PID_M1.SetMode(MANUAL);
     PID_M2.SetMode(MANUAL);
