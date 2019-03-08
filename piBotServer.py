@@ -20,7 +20,7 @@ import piVideoStream
 from fractions import Fraction
 from socket_helpers import *
 from constants import *
-import vision
+import vision2 as vision
 import navigation
 
 

@@ -8,7 +8,7 @@ from collections import deque
 
 from constants import *
 
-FRAME_SCALE = 3
+FRAME_SCALE = 0.3
 BLUE_THRESH = 110
 YELLOW_THRESH = 160
 
@@ -58,12 +58,12 @@ class droidVision():
         yM,yEdgeCrossing,yMeanPoint = self.detectLine(yellow)
         bM,bEdgeCrossing,bMeanPoint = self.detectLine(blue)
         self.vanishingPoint(yM,yEdgeCrossing,bM,bEdgeCrossing)
-        self.robotHeading(yM,yEdgeCrossing,bM,bEdgeCrossing)
+        self.robotHeading(yM,yMeanPoint,bM,bMeanPoint)
         
-        goalHeading = np.nanmedian(self.histVPHeading)
-        trackLeftOffset = np.nanmedian(self.histLeftOffset)
-        trackRightOffset = np.nanmedian(self.histRightOffset)
-        obstacleDist = np.nanmedian(self.histObDist)
+        goalHeading = np.nanmean(self.histVPHeading)
+        trackLeftOffset = np.nanmean(self.histLeftOffset)
+        trackRightOffset = np.nanmean(self.histRightOffset)
+        obstacleDist = np.nanmean(self.histObDist)
         
         
         try:
@@ -119,8 +119,8 @@ class droidVision():
                 EdgeCrossing = meanPoint[0] + M * (self.centreY - meanPoint[1])
                 #crossingPoint = [pointX,pointY]
             
-                for x1,y1,x2,y2 in lines:
-                    cv2.line(self.frame_edited,(x1,y1),(x2,y2),(0,255,0),1)
+#                for x1,y1,x2,y2 in lines:
+#                    cv2.line(self.frame_edited,(x1,y1),(x2,y2),(0,255,0),1)
             else:
                 print('VS209: HoughLines not found')
                 M = None
@@ -156,7 +156,7 @@ class droidVision():
         else:
             self.dataAvailable = 0
   # Temporary only, use potential field system          
-    def robotHeading(self,yM,yEdgeCrossing,bM,bEdgeCrossing):
+    def robotHeading(self,yM,yMeanPoint,bM,bMeanPoint):
         if self.dataAvailable:     
             # Using Homography to compute heading angle
             realCoords = robotFrame([self.vpX,self.vpY],H)
@@ -165,11 +165,11 @@ class droidVision():
             self.histVPHeading.append(Heading)
             
             if bM != None:
-                leftOffset = findTrackOffset([bpointX,bpointY], realCoords)
+                leftOffset = findTrackOffset(bMeanPoint, realCoords)
                 self.histLeftOffset.append(leftOffset)
 
             if yM != None:
-                rightOffset = findTrackOffset([ypointX,ypointY], realCoords)
+                rightOffset = findTrackOffset(yMeanPoint, realCoords)
                 self.histRightOffset.append(rightOffset)
            
         else:
@@ -181,7 +181,7 @@ class droidVision():
             self.histRightOffset = deque([0],3)
             # logging.debug('10 failed frames')
         
-        if obstacle:
+        if self.obstacle:
             self.obMissing = 0
             self.histObDist.append(obDistance)
             
@@ -212,6 +212,7 @@ class droidVision():
 #                topEdge = tuple(blob[blob[:,:,1].argmin()][0])
                 bottomEdge = tuple(blob[blob[:,:,1].argmax()][0])
                 # Calculate distance to object
+                                
                 obDistance = objectDistance(DEFAULT_CAM_H, DEFAULT_CAM_TILT, DEFAULT_CAM_HEIGHT, bottomEdge)
                
                 self.obstacle = True
@@ -297,7 +298,7 @@ if __name__=='__main__':
 
             cv2.imshow("Vision Testing", vis.frame_edited)
 
-            cv2.waitKey(5)
+            cv2.waitKey(1)
         else:        
             print ('releasing resources') 
             cap.release()
