@@ -8,7 +8,7 @@ from collections import deque
 
 from constants import *
 
-FRAME_SCALE = 1
+FRAME_SCALE = 0.3
 BLUE_THRESH = 110
 YELLOW_THRESH = 160
 
@@ -24,11 +24,10 @@ class droidVision():
         
         self.dataAvailable = 0
         self.failedFrame = 0
-        self.DEQUELENGTH = 3
-        self.histVPHeading = deque([np.nan],self.DEQUELENGTH)
-        self.histLeftOffset = deque([np.nan],self.DEQUELENGTH)
-        self.histRightOffset = deque([np.nan],self.DEQUELENGTH)
-        self.histObDist = deque([np.nan],self.DEQUELENGTH)
+        self.histVPHeading = deque([0],3)
+        self.histLeftOffset = deque([0],3)
+        self.histRightOffset = deque([0],3)
+        self.histObDist = deque([0],3)
         self.obMissing = 0
         self.obstacle = False
 
@@ -54,46 +53,30 @@ class droidVision():
         
         centreX = np.round(frame.shape[1]/2)
         clA,clB = self.raw2Frame(frame)
-        # Threshold image: blue, purple, yellow    
+            
         purple, yellow, blue = self.thresholdFrame(clA, clB)
-        # Find yellow and blue lines; gradient, baseline crossing point, middle
         yM,yEdgeCrossing,yMeanPoint = self.detectLine(yellow)
         bM,bEdgeCrossing,bMeanPoint = self.detectLine(blue)
-        obCentre, obBottom = self.detectObjects(purple)
-        # Find vanishing point (goal)
         self.vanishingPoint(yM,yEdgeCrossing,bM,bEdgeCrossing)
+        self.robotHeading(yM,yMeanPoint,bM,bMeanPoint)
         
-        if self.failedFrame >= self.DEQUELENGTH:
-            self.histVPHeading = deque([np.nan],self.DEQUELENGTH)
-            self.histLeftOffset = deque([np.nan],self.DEQUELENGTH)
-            self.histRightOffset = deque([np.nan],self.DEQUELENGTH)
-            self.failedFrame = 0
-        if self.obMissing >= self.DEQUELENGTH:
-            self.histObDist = deque([np.nan],self.DEQUELENGTH)
-            self.obMissing = 0
-            # logging.debug('10 failed frames')
-        self.goalHeading(yM,bM,bMeanPoint,yMeanPoint)
-        self.obstacleHeading(obCentre, obBottom)
-        
-        goalHeading = np.nanmedian(self.histVPHeading)
-        trackLeftOffset = np.nanmedian(self.histLeftOffset)
-        trackRightOffset = np.nanmedian(self.histRightOffset)
-        print('histOBDist',self.histObDist)
-        obstacleDist = np.nanmedian(self.histObDist)
+        goalHeading = np.nanmean(self.histVPHeading)
+        trackLeftOffset = np.nanmean(self.histLeftOffset)
+        trackRightOffset = np.nanmean(self.histRightOffset)
+        obstacleDist = np.nanmean(self.histObDist)
         
         
-        if bM is not None:
+        try:
             cv2.line(self.frame_edited,(int(bEdgeCrossing),int(self.centreY)),(int(self.vpX),int(self.vpY)),(0,255,0),2)
-        if yM is not None:
             cv2.line(self.frame_edited,(int(yEdgeCrossing),int(self.centreY)),(int(self.vpX),int(self.vpY)),(0,255,0),2)
-        if self.vpX is not None:# Show direction to vanishing point
+            # Show direction to vanishing point
             cv2.line(self.frame_edited,(int(centreX),int(self.centreY)),(int(self.vpX),int(self.vpY)),(0,0,255),2)
-        else:
+        except:
             print('cant show lines')  
         # Draw outputs
         try:
-            cv2.line(self.frame_edited,(0,obBottom[1]),(DEFAULT_CAM_W,obBottom[1]),(0,255,0),2)
-            cv2.circle(self.frame_edited, obCentre, 5, (0,0,255), -1)
+            cv2.line(self.frame_edited,(0,bottomEdge[1]),(width,bottomEdge[1]),(0,255,0),2)
+            cv2.circle(self.frame_edited, center, 5, (0,0,255), -1)
         except:
             logging.debug('no object rect')
             
@@ -136,10 +119,10 @@ class droidVision():
                 EdgeCrossing = meanPoint[0] + M * (self.centreY - meanPoint[1])
                 #crossingPoint = [pointX,pointY]
             
-                for x1,y1,x2,y2 in lines:
-                    cv2.line(self.frame_edited,(x1,y1),(x2,y2),(0,255,0),1)
+#                for x1,y1,x2,y2 in lines:
+#                    cv2.line(self.frame_edited,(x1,y1),(x2,y2),(0,255,0),1)
             else:
-                print('VS130: HoughLines not found')
+                print('VS209: HoughLines not found')
                 M = None
                 EdgeCrossing = None
                 meanPoint = None
@@ -172,42 +155,42 @@ class droidVision():
          # No lines visible   
         else:
             self.dataAvailable = 0
-            
   # Temporary only, use potential field system          
-    def goalHeading(self,yM,bM,bMeanPoint,yMeanPoint):
+    def robotHeading(self,yM,yMeanPoint,bM,bMeanPoint):
         if self.dataAvailable:     
             # Using Homography to compute heading angle
-            Vanishing_R = robotFrame([self.vpX,self.vpY],H)          
-            Heading = math.atan2(-Vanishing_R[1], -Vanishing_R[0])
+            realCoords = robotFrame([self.vpX,self.vpY],H)
+            Heading = math.atan2(-realCoords[1], -realCoords[0])
             # logging.debug("Heading: %.2f", heading_deg)
             self.histVPHeading.append(Heading)
-            # THIS CODE NEEDS WORK
+            
             if bM != None:
-                BlueCentre_R = robotFrame([bMeanPoint[0],bMeanPoint[1]],H)
-                leftOffset = findTrackOffset(BlueCentre_R, Vanishing_R)
+                leftOffset = findTrackOffset(bMeanPoint, realCoords)
                 self.histLeftOffset.append(leftOffset)
-            else: self.histLeftOffset.append(np.nan)
 
             if yM != None:
-                YellowCentre_R = robotFrame([yMeanPoint[0],yMeanPoint[1]],H)
-                rightOffset = findTrackOffset(YellowCentre_R, Vanishing_R)
+                rightOffset = findTrackOffset(yMeanPoint, realCoords)
                 self.histRightOffset.append(rightOffset)
-            else: self.histRightOffset.append(np.nan)
            
         else:
             self.failedFrame += 1
             # If lines are not detected for N frames, remove history
+        if self.failedFrame >= 3:
+            self.histVPHeading = deque([0],3)
+            self.histLeftOffset = deque([0],3)
+            self.histRightOffset = deque([0],3)
+            # logging.debug('10 failed frames')
         
-            
-    def obstacleHeading(self,obCentre, obBottom):          
         if self.obstacle:
             self.obMissing = 0
-            print('obBottom',obBottom)
-            self.histObDist.append(obBottom[1])
+            self.histObDist.append(obDistance)
             
         else:
             self.obMissing +=1
-            self.histObDist.append(np.nan)
+            
+        if self.obMissing >= 3:
+            self.histObDist = deque([0],3)
+            # logging.debug('Lost the obstacle')
                 
 
     
@@ -221,25 +204,20 @@ class droidVision():
                 # find centroid of largest blob
                 blob = max(contours, key=lambda el: cv2.contourArea(el))
                 M = cv2.moments(blob)
-                centre = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
+                center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
                 
                 # Find edges of obstacle
 #                leftEdge = tuple(blob[blob[:,:,0].argmin()][0])
 #                rightEdge = tuple(blob[blob[:,:,0].argmax()][0])
 #                topEdge = tuple(blob[blob[:,:,1].argmin()][0])
                 bottomEdge = tuple(blob[blob[:,:,1].argmax()][0])
-                
                 # Calculate distance to object
-                obCentre = robotFrame(centre,H)
-                obBottom = robotFrame([centre[0],bottomEdge[1]],H)
-                               
+                                
+                obDistance = objectDistance(DEFAULT_CAM_H, DEFAULT_CAM_TILT, DEFAULT_CAM_HEIGHT, bottomEdge)
+               
                 self.obstacle = True
             else:
                 self.obstacle = False
-                obCentre = None
-                obBottom = None
-                
-            return obCentre, obBottom
                 
 
             
@@ -249,7 +227,16 @@ def rejectOutliers(data, m = 10.):
     s = d/(mdev if mdev else 1.)
     return data[s<m]
 
+# Remove this function
+def objectDistance(VertPix, tiltAngle, Height, bottomEdge):
+    
+    Y = VertPix/2.0 - bottomEdge[1]
 
+    fieldAngle = 0.8517
+    pxAngle = ((Y * fieldAngle)/(VertPix))
+    obDist = Height * np.tan(tiltAngle + pxAngle - (3/2*np.pi))
+    print('Object!:',obDist)
+    return obDist
 # Remove this function
 def findTrackOffset(Point, realCoords):
     
@@ -305,14 +292,13 @@ if __name__=='__main__':
     while(cap.isOpened()):
         t0 = time.time()
         ret, frame = cap.read()
-#        frame = cv2.resize(frame, (DEFAULT_CAM_W,DEFAULT_CAM_H))
         if frame is not None:
             vis.processFrame(frame)
             print('fps, ',1.0/(time.time() - t0))
 
             cv2.imshow("Vision Testing", vis.frame_edited)
 
-            cv2.waitKey(5)
+            cv2.waitKey(1)
         else:        
             print ('releasing resources') 
             cap.release()
