@@ -77,4 +77,5 @@ while count < 10000:
             print('roll: ' + str(roll_pitch_yaw.x))
             print('pitch: ' + str(roll_pitch_yaw.y))
             print('yaw: ' + str(roll_pitch_yaw.z))
+            print('gravitiy:' + str(grav))
         count += 1

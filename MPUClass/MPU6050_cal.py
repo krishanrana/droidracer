@@ -72,7 +72,7 @@ z_gyro_offset_avg = [0]*100
 gxindex = 0
 gyindex = 0
 gzindex = 0
-
+print('Initializing')
 try:
     while True:
         accel_reading = mpu.get_acceleration()
