@@ -15,6 +15,7 @@
 #!/usr/bin/python
 import smbus
 import math
+import time
  
 # Register
 power_mgmt_1 = 0x6b
@@ -55,7 +56,7 @@ bus.write_byte_data(address, power_mgmt_1, 0)
  
 print "Gyroscope"
 print "--------"
-while(1)
+while True:
     t0 = time.time()
     
     gyroscope_xout = read_word_2c(0x43)
