@@ -63,6 +63,7 @@ class PiBotServer:
         self.displacement = 0
         self.direction = 0
         self.rotation = 0
+        self.t0 = 0
 
         # Current robot orientation in world frame
         self.curr_position = 0
@@ -208,15 +209,11 @@ class PiBotServer:
 
         elif opCode == 2:
             if self.state == 0:
+                self.t0 = time.time()
                 speed = float(cmds[1])
                 vector = float(cmds[2])
                 omega = float(cmds[3])
-                self.setSpeed(speed, vector, omega)
-                # Safety in case of dropped connection, may fuck with threading
-                time.sleep(1)
-                self.setSpeed(0, 0, 0)
-
- 
+                self.setSpeed(speed, vector, omega)                
             else:
                 logging.warning("Tried to control speeds remotely in auto mode.")
 
@@ -430,6 +427,9 @@ if __name__ == '__main__':
     pb.StartServers()
     pb.StartCameraStream()
     while not shutdown_flag:
+        t = time.time()
+        if t-t0 > 2
+            pb.setSpeed(0, 0, 0)
         time.sleep(1)
 
     out.release() # Finish the movie file off
