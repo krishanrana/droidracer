@@ -428,7 +428,7 @@ if __name__ == '__main__':
     pb.StartCameraStream()
     while not shutdown_flag:
         t = time.time()
-        if t-t0 > 2
+        if t-t0 > 2:
             pb.setSpeed(0, 0, 0)
         time.sleep(1)
 
