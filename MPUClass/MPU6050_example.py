@@ -28,12 +28,12 @@ i2c_bus = 1
 device_address = 0x68
 # The offsets are different for each device and should be changed
 # accordingly using a calibration procedure
-x_accel_offset = -5489
-y_accel_offset = -1441
-z_accel_offset = 1305
-x_gyro_offset = -2
-y_gyro_offset = -72
-z_gyro_offset = -5
+x_accel_offset = -483
+y_accel_offset = 2133
+z_accel_offset = 2860
+x_gyro_offset = 108
+y_gyro_offset = -44
+z_gyro_offset = -39
 enable_debug_output = True
 
 mpu = MPU6050(i2c_bus, device_address, x_accel_offset, y_accel_offset,
@@ -41,6 +41,11 @@ mpu = MPU6050(i2c_bus, device_address, x_accel_offset, y_accel_offset,
               enable_debug_output)
 
 mpu.dmp_initialize()
+
+mpu.set_full_scale_accel_range(0x00) 
+mpu.set_full_scale_gyro_range(0x00)
+#98Hz low pass filter
+mpu.set_DLF_mode(0x02)
 mpu.set_DMP_enabled(True)
 mpu_int_status = mpu.get_int_status()
 print(hex(mpu_int_status))
@@ -54,7 +59,7 @@ count = 0
 FIFO_buffer = [0]*64
 
 FIFO_count_list = list()
-while count < 10000:
+while count < 1000:
     FIFO_count = mpu.get_FIFO_count()
     mpu_int_status = mpu.get_int_status()
 

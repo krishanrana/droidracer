@@ -3,8 +3,22 @@ __author__ = 'Geir'
 from MPU6050 import MPU6050
 from time import clock
 
-mpu = mpu = MPU6050(1, 0x68, -5489, -1441, 1305, -2, -72, -5, True)
+#mpu = mpu = MPU6050(1, 0x68, -5489, -1441, 1305, -2, -72, -5, True)
+i2c_bus = 1
+device_address = 0x68
+# The offsets are different for each device and should be changed
+# accordingly using a calibration procedure
+x_accel_offset = -483
+y_accel_offset = 2133
+z_accel_offset = 2860
+x_gyro_offset = 108
+y_gyro_offset = -44
+z_gyro_offset = -39
+enable_debug_output = True
 
+mpu = MPU6050(i2c_bus, device_address, x_accel_offset, y_accel_offset,
+              z_accel_offset, x_gyro_offset, y_gyro_offset, z_gyro_offset,
+              enable_debug_output)
 mpu.dmp_initialize()
 mpu.set_DMP_enabled(True)
 mpu_int_status = mpu.get_int_status()
@@ -40,13 +54,13 @@ while count < 10000:
         print('count: ' + str(count) + ' overflow: ' + str(overflow))
     else:
         no_overflow += 1
-        FIFO_buffer = mpu.get_FIFO_bytes(FIFO_buffer, packet_size)
+        FIFO_buffer = mpu.get_FIFO_bytes(FIFO_count)
         # print(FIFO_buffer)
         accel = mpu.DMP_get_acceleration_int16(FIFO_buffer)
         # print(str(accel.x) + " " + str(accel.y) + " " + str(accel.z))
         if (accel.x > 12000) or (accel.x < -12000) or (accel.y > 12000) or \
                 (accel.y < -12000) or (accel.z > 12000) or (accel.z < -12000):
-            crazy_high += 1
+            crazy_high_number += 1
 
 end_time = clock()
 delta_time = end_time - start_time
