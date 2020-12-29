@@ -807,13 +807,13 @@ class MPU6050:
     def DMP_get_linear_accel_int16(self, a_v_raw, a_grav):
         x = ctypes.c_int16(a_v_raw.x - (a_grav.x*8192)).value
         y = ctypes.c_int16(a_v_raw.y - (a_grav.y*8192)).value
-        y = ctypes.c_int16(a_v_raw.y - (a_grav.y*8192)).value
+        z = ctypes.c_int16(a_v_raw.z - (a_grav.z*8192)).value
         return V(x, y, z)
 
     def DMP_get_euler(self, a_quat):
         psi = math.atan2(2*a_quat.x*a_quat.y - 2*a_quat.w*a_quat.z,
                          2*a_quat.w*a_quat.w + 2*a_quat.x*a_quat.x - 1)
-        theta = -asin(2*a_quat.x*a_quat.z + 2*a_quat.w*a_quat.y)
+        theta = -math.asin(2*a_quat.x*a_quat.z + 2*a_quat.w*a_quat.y)
         phi = math.atan2(2*a_quat.y*a_quat.z - 2*a_quat.w*a_quat.x,
                          2*a_quat.w*a_quat.w + 2*a_quat.z*a_quat.z - 1)
         return V(psi, theta, phi)
