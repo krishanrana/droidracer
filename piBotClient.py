@@ -4,7 +4,7 @@ PiBotClient class
     This PiBotClient class is used to connect to a remote 
     piBotServer instance running on the raspberry pi.
 '''
-
+from __future__ import division
 import threading
 import socket
 import logging
@@ -67,7 +67,10 @@ class PiBotClient:
     #####################################################################################
     '''
     def StartCameraStream(self):
-        threading.Thread(name="CameraStreamReceiver", target=self.__StartCamStream, daemon=False).start()
+        #threading.Thread(name="CameraStreamReceiver", target=self.__StartCamStream, daemon=False).start()
+        CameraStreamReceiver = threading.Thread(target=self.__StartCamStream)
+        CameraStreamReceiver.daemon = False
+        CameraStreamReceiver.start()
         
     def __StartCamStream(self):
         '''
@@ -110,13 +113,11 @@ class PiBotClient:
         elif mode.lower() == 'auto':
             self.state = 1
 
-
-
-    def setRawSpeed(self, motor1, motor2, motor3):
+    def setMotion(self, displacement, direction, rotation):
         opCode = 1
-        msg = "%d,%d,%d" % (motor1,motor2,motor3)   # Prepare the comma-separated values
+        msg = "%.3f,%.3f,%.3f" % (displacement, direction, rotation)   # Prepare the comma-separated values
         self.__sendCmdA(opCode, msg)                # Use the helper function to send the cmd
-
+       
 
     def setSpeed(self, speed, vector, omega):
         opCode = 2
@@ -133,6 +134,10 @@ class PiBotClient:
         data = self.__sendCmdB(opCode)  # Doesn't need a msg. Server will know by port and opCode what to do
         return data
 
+    def getCurrStatus(self):
+        opCode = 1
+        data = self.__sendCmdB(opCode)  # Doesn't need a msg. Server will know by port and opCode what to do
+        return data
 
     '''
     #####################################################################################

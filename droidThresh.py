@@ -9,13 +9,13 @@ from __future__ import division
 import cv2
 import numpy as np
 import time
-import vision2
+import vision
 
 
 
 # Setup classes
 cap = cv2.VideoCapture('test_videos/output3.avi')
-vis = vision2.droidVision()
+vis = vision.droidVision()
 
 class droidThresh():
 
@@ -71,13 +71,13 @@ class droidThresh():
      
         
 	
-    k = cv2.waitKey(5) & 0xFF
-    if k == 27:
-        break
-    print('fps - ', 1/(time.time() - timeCheck))
+    # k = cv2.waitKey(5) & 0xFF
+    # if k == 27:
+    #     break
+    # print('fps - ', 1/(time.time() - timeCheck))
     
-cv2.destroyAllWindows()
-vidCapture.release()
+# cv2.destroyAllWindows()
+# vidCapture.release()
 
 
 # Open frame
