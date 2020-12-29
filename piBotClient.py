@@ -189,13 +189,22 @@ if __name__ == '__main__':
     import cv2
     shutdown_sig = False
     signal.signal(signal.SIGINT, signal_handler)
-
-    pb = PiBotClient(host=DEFAULT_HOST)
-    pb.StartCamStream()
+    pb = PiBotClient(host = DEFAULT_HOST)
+    pb.StartCameraStream()
 
     while not shutdown_sig:
         if pb.frame_available:
             pb.frame_available = False
             cv2.imshow('This is my window', pb.frame)
             cv2.waitKey(100)
-    input()
+        pb.setSpeed(1,1.571,0)
+        time.sleep(1)
+        data = pb.getCurrStatus()
+        print('Current status, %f,%f,%f',data)
+        pb.setSpeed(0,0,0)
+        time.sleep(1)
+        pb.setSpeed(1,4.712,0)
+        time.sleep(1)
+        pb.setSpeed(0,0,0)
+        
+    
