@@ -112,8 +112,8 @@ class droidVision():
                 
     def BGR2invariant(self,frame,alpha):
         #G - B - R BGR
-        invariant = 0.5 + np.log(frame[:,:,1]) - alpha * np.log(image(:,:,2)) - (1-alpha) * np.log(image(:,:,0));
-        
+        invariant = 0.5 + np.log(frame[:,:,1]) - alpha * np.log(frame[:,:,2]) - (1-alpha) * np.log(frame[:,:,0]);
+        return invariant
         
         
     def thresholdFrame(self, clA, clB):

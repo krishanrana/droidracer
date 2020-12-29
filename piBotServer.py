@@ -53,9 +53,22 @@ class PiBotServer:
         self.avObDist = 0
 
         # Controller inputs
+
+        # Velocity controller
         self.speed = 0
         self.vector = 0
         self.omega = 0
+
+        # Displacement controller
+        self.displacement = 0
+        self.direction = 0
+        self.rotation = 0
+
+        # Current robot orientation in world frame
+        self.curr_position = 0
+        self.curr_direction = 0
+        self.curr_rotation = 0
+        
 
         '''
         Robot states:
@@ -161,7 +174,7 @@ class PiBotServer:
         '''
         opCodes for commands A are:
             0   Mode selection ('auto','manual')
-            1   Control raw motor powers            # NOT IMPLEMENTED
+            1   Control displacement/heading/omega            # NOT IMPLEMENTED
             2   Control speed/heading/omega
 
         '''
@@ -177,10 +190,20 @@ class PiBotServer:
                 
 
         elif opCode == 1:
-            motor1 = int(cmds[1])
-            motor2 = int(cmds[2])
-            motor3 = int(cmds[3])
-            self.setPower(motor1, motor2, motor3)
+            if self.state == 0:
+                # Save user data 
+                self.displacement = float(cmds[1])
+                self.vector = float(cmds[2])
+                self.omega = float(cmds[3])
+
+
+                self.setSpeed(speed, vector, omega)
+                #self.getSpeed()
+                wait()
+
+                
+            else:
+                logging.warning("Tried to control displacement remotely in auto mode.")
 
 
         elif opCode == 2:
@@ -189,8 +212,11 @@ class PiBotServer:
                 vector = float(cmds[2])
                 omega = float(cmds[3])
                 self.setSpeed(speed, vector, omega)
-                #self.getSpeed()
-                
+                # Safety in case of dropped connection, may fuck with threading
+                time.sleep(1)
+                self.setSpeed(0, 0, 0)
+
+ 
             else:
                 logging.warning("Tried to control speeds remotely in auto mode.")
 
@@ -210,10 +236,18 @@ class PiBotServer:
         '''
         opCodes for commands B are:
             0   Get the motor speeds
+            1   Get current position
 
         '''
         if opCode == 0:
             logging.error("getSpeed not implemented yet")
+
+        if opCode == 1:
+            msg = "%.3f,%.3f,%.3f" % (self.curr_position, self.curr_direction, self.curr_rotation)
+            msg = msg.encode()
+            SendMsg(conn,msg)
+            logging.debug('Sent status data: %s', msg)
+
 
         else:
             logging.warning("Ignoring unknown opCode: %d", opCode)
@@ -350,12 +384,14 @@ class PiBotServer:
         self.vector = vector
         self.omega = omega
 
+
         # Send over serial to Arduino
         speed = str(speed)
         vector = str(vector)
         omega = str(omega)
         data_out = speed + "," + vector + "," + omega + "\n"
         self.ser.write(data_out.encode("ascii"))
+
 
         
 

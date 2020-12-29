@@ -49,7 +49,9 @@ class PS4Controller(object):
                 self.hat_data[i] = (0, 0)
 
         while True:
+            
             for event in pygame.event.get():
+
                 if event.type == pygame.JOYAXISMOTION:
                     self.axis_data[event.axis] = round(event.value,2)
                 elif event.type == pygame.JOYBUTTONDOWN:
@@ -61,7 +63,8 @@ class PS4Controller(object):
 
                 # Insert your code on what you would like to happen for each event here!
                 # In the current setup, I have the state simply printing out to the screen.
-                
+
+
                 os.system('clear')
                 pprint.pprint(self.button_data)
                 pprint.pprint(self.axis_data)
