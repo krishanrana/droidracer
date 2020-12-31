@@ -23,6 +23,7 @@ SOFTWARE.
 """
 
 from MPU6050 import MPU6050
+import time
 
 i2c_bus = 1
 device_address = 0x68
@@ -56,7 +57,7 @@ print(FIFO_count)
 
 count = 0
 FIFO_buffer = [0]*42
-
+t0 = time.time()
 FIFO_count_list = list()
 while count < 10000:
     FIFO_count = mpu.get_FIFO_count()
@@ -72,11 +73,16 @@ while count < 10000:
         # is 42 bytes
         while FIFO_count < packet_size:
             FIFO_count = mpu.get_FIFO_count()
-            
+        t = time.time()
+        print(t-t0)
+        t0 = t   
         FIFO_buffer = mpu.get_FIFO_bytes(packet_size)
+        accel = mpu.DMP_get_acceleration_int16(FIFO_buffer)
         quat = mpu.DMP_get_quaternion(FIFO_buffer)
         grav = mpu.DMP_get_gravity(quat)
         roll_pitch_yaw = mpu.DMP_get_roll_pitch_yaw(quat, grav)
+        linearAccel = mpu.DMP_get_linear_accel(accel,grav)
+        
         
         
         if count % 100 == 0:

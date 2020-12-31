@@ -105,6 +105,7 @@ t0 = time.time()
 print'Initializing'
 try:
     while np.any(Error > allowableError): 
+        
         accel_reading = mpu.get_acceleration()
         x_accel_reading = accel_reading[0]
         y_accel_reading = accel_reading[1]
@@ -133,6 +134,7 @@ try:
                 xAcHist.append(int(xAcAvg))
                 #Update Offset value 
                 mpu.set_x_accel_offset(int(xAcOffAvg))
+                
                 
                 
                       
