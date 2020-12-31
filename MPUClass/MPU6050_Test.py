@@ -66,28 +66,31 @@ while count < 10000:
     # If overflow is detected by status or fifo count we want to reset
     if (FIFO_count == 1024) or (mpu_int_status & 0x10):
         mpu.reset_FIFO()
-        print('overflow!')
+        #print('overflow!')
     # Check if fifo data is ready
     elif (mpu_int_status & 0x02):
         # Wait until packet_size number of bytes are ready for reading, default
         # is 42 bytes
         while FIFO_count < packet_size:
             FIFO_count = mpu.get_FIFO_count()
-        t = time.time()
-        print(t-t0)
-        t0 = t   
+        #t = time.time()
+        #print(t-t0)
+        #t0 = t   
         FIFO_buffer = mpu.get_FIFO_bytes(packet_size)
-        accel = mpu.DMP_get_acceleration_int16(FIFO_buffer)
+        accel = mpu.DMP_get_acceleration(FIFO_buffer)
         quat = mpu.DMP_get_quaternion(FIFO_buffer)
         grav = mpu.DMP_get_gravity(quat)
         roll_pitch_yaw = mpu.DMP_get_roll_pitch_yaw(quat, grav)
-        linearAccel = mpu.DMP_get_linear_accel(accel,grav)
         
         
         
         if count % 100 == 0:
+            print('accel - x:' + str(accel.x))
+            print('accel - y:' + str(accel.y))
+            print('accel - z:' + str(accel.z))
             print('roll: ' + str(roll_pitch_yaw.x))
             print('pitch: ' + str(roll_pitch_yaw.y))
             print('yaw: ' + str(roll_pitch_yaw.z))
-            print('gravitiy:' + str(grav))
+            print('gravity:' + str(grav.z))
+            
         count += 1
