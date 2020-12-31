@@ -951,4 +951,3 @@ class MPU6050IRQHandler:
                     print('yaw: ' + str(roll_pitch_yaw.z))
                 self.__count += 1
                 FIFO_count -= self.__packet_size
-v
