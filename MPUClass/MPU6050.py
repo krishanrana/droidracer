@@ -797,6 +797,13 @@ class MPU6050:
         z = ctypes.c_int16(a_FIFO_buffer[36] << 8 | a_FIFO_buffer[37]).value
         return V(x, y, z)
 
+    def DMP_get_acceleration(self, a_FIFO_buffer):
+        vect = self.DMP_get_acceleration_int16(a_FIFO_buffer)
+        x = vect.x / 16384.0
+        y = vect.y / 16384.0
+        z = vect.z / 16384.0
+        return V(x, y, z)
+
     def DMP_get_gravity(self, a_quat):
         x = 2.0 * (a_quat.x * a_quat.z - a_quat.w * a_quat.y)
         y = 2.0 * (a_quat.w * a_quat.x + a_quat.y * a_quat.z)
@@ -944,3 +951,4 @@ class MPU6050IRQHandler:
                     print('yaw: ' + str(roll_pitch_yaw.z))
                 self.__count += 1
                 FIFO_count -= self.__packet_size
+v
