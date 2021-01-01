@@ -36,16 +36,23 @@ x_gyro_offset = 105
 y_gyro_offset = -43
 z_gyro_offset = -39
 enable_debug_output = True
+# Standard Gravity  ms-2/g
+Cg = 9.80665
 
 mpu = MPU6050(i2c_bus, device_address, x_accel_offset, y_accel_offset,
               z_accel_offset, x_gyro_offset, y_gyro_offset, z_gyro_offset,
               enable_debug_output)
 
 mpu.dmp_initialize()
-
+# Acelerometer set to 2g full scala
 mpu.set_full_scale_accel_range(0x00) 
+# Gyro set to 250 deg/sec full scale
 mpu.set_full_scale_gyro_range(0x00)
+# Set sample rate to 1000/(1 + rate)
+mpu.set_rate(9)
 #98Hz low pass filter
+mpu.set_DLF_mode(0x02)
+
 mpu.set_DMP_enabled(True)
 mpu_int_status = mpu.get_int_status()
 print(hex(mpu_int_status))
@@ -73,24 +80,25 @@ while count < 10000:
         # is 42 bytes
         while FIFO_count < packet_size:
             FIFO_count = mpu.get_FIFO_count()
-        #t = time.time()
-        #print(t-t0)
-        #t0 = t   
+        t = time.time()
+        step = (t-t0)
+        t0 = t   
         FIFO_buffer = mpu.get_FIFO_bytes(packet_size)
-        accel = mpu.DMP_get_acceleration(FIFO_buffer)
+        accel = mpu.DMP_get_acceleration(FIFO_buffer) 
         quat = mpu.DMP_get_quaternion(FIFO_buffer)
         grav = mpu.DMP_get_gravity(quat)
-        roll_pitch_yaw = mpu.DMP_get_roll_pitch_yaw(quat, grav)
+        roll_pitch_yaw = mpu.DMP_get_euler_roll_pitch_yaw(quat, grav)
         
         
         
         if count % 100 == 0:
-            print('accel - x:' + str(accel.x))
-            print('accel - y:' + str(accel.y))
-            print('accel - z:' + str(accel.z))
-            print('roll: ' + str(roll_pitch_yaw.x))
+            print('aX (ms-2):' + str(accel.x * Cg))
+            print('aY:' + str(accel.y * Cg))
+            print('aZ:' + str(accel.z * Cg))
+            print('roll (deg/s): ' + str(roll_pitch_yaw.x))
             print('pitch: ' + str(roll_pitch_yaw.y))
             print('yaw: ' + str(roll_pitch_yaw.z))
             print('gravity:' + str(grav.z))
+            print('Step size:' + str(step))
             
         count += 1

@@ -36,12 +36,12 @@ kp = 0.03125
 ki = 0.25
 kd = 0
 
-pidax = SimplePID(0, -15000, 15000, kp, ki, kd, 10, True)
-piday = SimplePID(0, -15000, 15000, kp, ki, kd, 10, True)
-pidaz = SimplePID(0, -15000, 15000, kp, ki, kd, 10, True)
-pidgx = SimplePID(0, -15000, 15000, kp, ki, kd, 10, True)
-pidgy = SimplePID(0, -15000, 15000, kp, ki, kd, 10, True)
-pidgz = SimplePID(0, -15000, 15000, kp, ki, kd, 10, True)
+pidax = SimplePID(0, -15000, 15000, kp, ki, kd, 20, True)
+piday = SimplePID(0, -15000, 15000, kp, ki, kd, 20, True)
+pidaz = SimplePID(0, -15000, 15000, kp, ki, kd, 20, True)
+pidgx = SimplePID(0, -15000, 15000, kp, ki, kd, 20, True)
+pidgy = SimplePID(0, -15000, 15000, kp, ki, kd, 20, True)
+pidgz = SimplePID(0, -15000, 15000, kp, ki, kd, 20, True)
 
 accel_reading = mpu.get_acceleration()
 
