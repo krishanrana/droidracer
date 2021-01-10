@@ -30,6 +30,7 @@ mpu = MPU6050(i2c_bus, device_address, x_accel_offset, y_accel_offset,
 # Set IMU sensitivity from MPUConstants.py           
 mpu.set_full_scale_accel_range(0x00) 
 mpu.set_full_scale_gyro_range(0x00)
+mpu.set_rate(9)
              
 
 kp = 0.03125
@@ -236,6 +237,9 @@ try:
 
 except KeyboardInterrupt:
     pass
+
+
+
 
 print('runIDX:'+ str(runIDX))  
 print('elapsed time:'+ str(time.time()-t0)) 

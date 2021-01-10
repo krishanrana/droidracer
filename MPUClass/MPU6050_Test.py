@@ -24,6 +24,9 @@ SOFTWARE.
 
 from MPU6050 import MPU6050
 import time
+import numpy as np
+import matplotlib.pyplot as plt
+
 
 i2c_bus = 1
 device_address = 0x68
@@ -66,14 +69,18 @@ count = 0
 FIFO_buffer = [0]*42
 t0 = time.time()
 FIFO_count_list = list()
-while count < 10000:
+
+MPUOut = []
+TimeOut = [t0]
+print('Waiting for gyro to stabilize.')
+while count < 2000:
     FIFO_count = mpu.get_FIFO_count()
     mpu_int_status = mpu.get_int_status()
 
     # If overflow is detected by status or fifo count we want to reset
     if (FIFO_count == 1024) or (mpu_int_status & 0x10):
         mpu.reset_FIFO()
-        #print('overflow!')
+        print('overflow!')
     # Check if fifo data is ready
     elif (mpu_int_status & 0x02):
         # Wait until packet_size number of bytes are ready for reading, default
@@ -84,12 +91,16 @@ while count < 10000:
         step = (t-t0)
         t0 = t   
         FIFO_buffer = mpu.get_FIFO_bytes(packet_size)
-        accel = mpu.DMP_get_acceleration(FIFO_buffer) 
+        accel = mpu.DMP_get_acceleration(FIFO_buffer)
         quat = mpu.DMP_get_quaternion(FIFO_buffer)
         grav = mpu.DMP_get_gravity(quat)
         roll_pitch_yaw = mpu.DMP_get_euler_roll_pitch_yaw(quat, grav)
-        
-        
+ 
+        MPUnow = [accel.x,accel.y,accel.z,roll_pitch_yaw.x,roll_pitch_yaw.y,roll_pitch_yaw.z,t]
+        MPUOut.append(MPUnow)
+        TimeOut.append(t)
+            
+
         
         if count % 100 == 0:
             print('aX (ms-2):' + str(accel.x * Cg))
@@ -98,7 +109,27 @@ while count < 10000:
             print('roll (deg/s): ' + str(roll_pitch_yaw.x))
             print('pitch: ' + str(roll_pitch_yaw.y))
             print('yaw: ' + str(roll_pitch_yaw.z))
-            print('gravity:' + str(grav.z))
+            print('gravity:' + str(grav.z)) 
             print('Step size:' + str(step))
             
+        
         count += 1
+
+
+#  convert to numpy
+MPUOutNp = np.array(MPUOut)
+TimeOutNp = np.array(TimeOut)
+
+TimeOutNp = TimeOutNp - TimeOutNp[0]
+np.savetxt('MPUOut.csv',MPUOutNp,delimiter=',')        
+np.savetxt('TimeOut.csv',TimeOut)        
+
+# Plot acceleration
+fig = plt.figure()
+ax = fig.add_subplot(1,1,1)                    
+ax.plot(MPUOutNp[:,0]) 
+
+
+fig2 = plt.figure()
+ax2 = fig2.add_subplot(1,1,1)                    
+ax2.plot(MPUOutNp[:,5]) 
