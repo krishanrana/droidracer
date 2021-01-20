@@ -469,20 +469,24 @@ class MPU6050:
                 self.set_int_enable(0x12)
 
                 if self.__debug:
-                    print('Setting sample rate to 200Hz')
-                self.set_rate(4)
+                    print('Setting sample rate to 100Hz')
+                self.set_rate(9) # Changed by DP
 
                 if self.__debug:
                     print('Setting external frame sync to TEMP_OUT_L[0]')
                 self.set_external_frame_sync(C.MPU6050_EXT_SYNC_TEMP_OUT_L)
 
                 if self.__debug:
-                    print('Setting DLPF bandwidth to 42Hz')
-                self.set_DLF_mode(C.MPU6050_DLPF_BW_42)
+                    print('Setting DLPF bandwidth to 98Hz')
+                self.set_DLF_mode(C.MPU6050_DLPF_BW_98)
 
                 if self.__debug:
-                    print('Setting gyro sensitivity to +/- 2000 deg/sec')
-                self.set_full_scale_gyro_range(C.MPU6050_GYRO_FS_2000)
+                    print('Setting gyro sensitivity to +/- 250 deg/sec')
+                self.set_full_scale_gyro_range(C.MPU6050_GYRO_FS_250)# Changed by DP
+                
+                if self.__debug:
+                    print('Setting accelorometer sensitivity to +/- 2g/sec')
+                self.set_full_scale_accel_range(C.MPU6050_ACCEL_FS_2) # Added by DP
 
                 if self.__debug:
                     print('Setting DMP configuration bytes (function unknown)')

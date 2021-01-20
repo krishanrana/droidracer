@@ -26,26 +26,38 @@ from MPU6050 import MPU6050
 import time
 import numpy as np
 import matplotlib.pyplot as plt
+from Quaternion import Quaternion
 
+
+def rollavg_cumsum(a,n):
+    assert n%2==1
+    cumsum_vec = np.cumsum(np.insert(a, 0, 0)) 
+    return (cumsum_vec[n:] - cumsum_vec[:-n]) / n
 
 i2c_bus = 1
 device_address = 0x68
 # The offsets are different for each device and should be changed
 # accordingly using a calibration procedure
-x_accel_offset = -481
-y_accel_offset = 2130
-z_accel_offset = 2863
-x_gyro_offset = 105
-y_gyro_offset = -43
-z_gyro_offset = -39
+
+#[x_accel_offset, y_accel_offset,
+#              z_accel_offset, x_gyro_offset, y_gyro_offset, z_gyro_offset] = np.loadtxt('./imuOffsets.csv', delimiter=',', dtype = "int")
+
+[x_accel_offset, y_accel_offset,
+              z_accel_offset, x_gyro_offset, y_gyro_offset, z_gyro_offset] = [0,0,0,0,0,0]
+#x_accel_offset = -481
+#y_accel_offset = 2130
+#z_accel_offset = 2863
+#x_gyro_offset = 105
+#y_gyro_offset = -43
+#z_gyro_offset = -39
 enable_debug_output = True
 # Standard Gravity  ms-2/g
 Cg = 9.80665
 
+
 mpu = MPU6050(i2c_bus, device_address, x_accel_offset, y_accel_offset,
               z_accel_offset, x_gyro_offset, y_gyro_offset, z_gyro_offset,
               enable_debug_output)
-
 mpu.dmp_initialize()
 # Acelerometer set to 2g full scala
 mpu.set_full_scale_accel_range(0x00) 
@@ -73,7 +85,7 @@ FIFO_count_list = list()
 MPUOut = []
 TimeOut = [t0]
 print('Waiting for gyro to stabilize.')
-while count < 2000:
+while count < 3000:
     FIFO_count = mpu.get_FIFO_count()
     mpu_int_status = mpu.get_int_status()
 
@@ -122,14 +134,33 @@ TimeOutNp = np.array(TimeOut)
 
 TimeOutNp = TimeOutNp - TimeOutNp[0]
 np.savetxt('MPUOut.csv',MPUOutNp,delimiter=',')        
-np.savetxt('TimeOut.csv',TimeOut)        
+np.savetxt('TimeOut.csv',TimeOut)    
 
+# moving average window size
+wSize = 33
 # Plot acceleration
 fig = plt.figure()
-ax = fig.add_subplot(1,1,1)                    
-ax.plot(MPUOutNp[:,0]) 
+ax = fig.add_subplot(3,1,1)                    
+ax.plot(rollavg_cumsum(MPUOutNp[:,0],wSize)) 
+ax.set_ylabel('x - ms2')
+ax = fig.add_subplot(3,1,2)                    
+ax.plot(rollavg_cumsum(MPUOutNp[:,1],wSize)) 
+ax.set_ylabel('y - ms2')
+ax = fig.add_subplot(3,1,3)                    
+ax.plot(rollavg_cumsum(MPUOutNp[:,2],wSize)) 
+ax.set_ylabel('y - ms2')
+ax.set_title('Accelerometer readings - Acceleration')
 
-
+# Plot angular velocity
 fig2 = plt.figure()
-ax2 = fig2.add_subplot(1,1,1)                    
-ax2.plot(MPUOutNp[:,5]) 
+ax2 = fig2.add_subplot(3,1,1)                    
+ax2.plot(rollavg_cumsum(MPUOutNp[:,3],wSize)) 
+ax2.set_ylabel('Roll - degrees')
+ax2 = fig2.add_subplot(3,1,2)                    
+ax2.plot(rollavg_cumsum(MPUOutNp[:,4],wSize)) 
+ax2.set_ylabel('Pitch - degrees')
+ax2 = fig2.add_subplot(3,1,3)                    
+ax2.plot(rollavg_cumsum(MPUOutNp[:,5],wSize)) 
+ax2.set_ylabel('Yaw - degrees')
+ax2.set_title('Gyro readings - Angular velocity')
+

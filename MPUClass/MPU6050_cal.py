@@ -232,7 +232,10 @@ try:
             Error = np.abs(np.array([xAcAvg, yAcAvg, zAcAvg,xGyAvg, yGyAvg, zGyAvg ]))
             runIDX += 1
         except:  
-            runIDX += 1                
+            runIDX += 1
+            
+        if runIDX %1000 == 0:
+            print".",               
                 
 
 except KeyboardInterrupt:
@@ -286,5 +289,7 @@ ax2.plot(xGyHist)
 ax2.plot(xGyHist)  
 ax2.plot(xGyHist)  
  
-                    
-            
+ImuOffsets = np.array([xAcOffAvg,yAcOffAvg,zAcOffAvg,xGyOffAvg,yGyOffAvg,zGyOffAvg ])
+ 
+np.savetxt('imuOffsets.csv',ImuOffsets,delimiter=',')
+print('IMU offsets saved to file')              
