@@ -60,13 +60,13 @@ mpu = MPU6050(i2c_bus, device_address, x_accel_offset, y_accel_offset,
               enable_debug_output)
 mpu.dmp_initialize()
 # Acelerometer set to 2g full scala
-mpu.set_full_scale_accel_range(0x00) 
-# Gyro set to 250 deg/sec full scale
-mpu.set_full_scale_gyro_range(0x00)
-# Set sample rate to 1000/(1 + rate)
-mpu.set_rate(9)
-#98Hz low pass filter
-mpu.set_DLF_mode(0x02)
+#mpu.set_full_scale_accel_range(0x00) 
+## Gyro set to 250 deg/sec full scale
+#mpu.set_full_scale_gyro_range(0x00)
+## Set sample rate to 1000/(1 + rate)
+#mpu.set_rate(9)
+##98Hz low pass filter
+#mpu.set_DLF_mode(0x02)
 
 mpu.set_DMP_enabled(True)
 mpu_int_status = mpu.get_int_status()
@@ -126,9 +126,16 @@ while count < 3000:
             
         
         count += 1
-
-
+print('Reading gyro offet TC values')
+x_g_offset_TC = mpu.get_x_gyro_offset_TC()
+y_g_offset_TC = mpu.get_y_gyro_offset_TC()
+z_g_offset_TC = mpu.get_z_gyro_offset_TC()
+print("X gyro offset = ", repr(x_g_offset_TC))
+print("Y gyro offset = ", repr(y_g_offset_TC))
+print("Z gyro offset = ", repr(z_g_offset_TC))
 #  convert to numpy
+
+
 MPUOutNp = np.array(MPUOut)
 TimeOutNp = np.array(TimeOut)
 
