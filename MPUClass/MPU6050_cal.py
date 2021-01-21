@@ -96,8 +96,8 @@ xGyHist = []
 yGyHist = []
 zGyHist = []
 
-accelError = 10
-gyroError = 10
+accelError = 2
+gyroError = 8
 Error = np.abs(np.array(accel_reading + gyro_reading))
 allowableError = np.array([accelError,accelError,accelError,gyroError,gyroError,gyroError])
 

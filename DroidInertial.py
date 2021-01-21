@@ -57,6 +57,17 @@ class droidInertial(MPU6050):
         self.TimeK = time.time()
         self.gravity = 9.80665
         self.FIFO_buffer = [0]*42
+        #self.dmpAccel = [0,0,0]
+        self.dmpAccel = np.array([[0,0,0]])
+        self.rawAccel = np.array([[0,0,0]])
+        self.velocity = np.array([[0,0,0]])
+        self.displacement = np.array([[0,0,0]])
+        self.accelBias = np.array([[0,0,0]])
+        
+        self.rawOmega = np.array([[0,0,0]])
+        self.theta = np.array([[0,0,0]])
+        self.omegaBias = np.array([[0,0,0]])
+        
         
         
         debug_output = False
@@ -104,20 +115,23 @@ class droidInertial(MPU6050):
         
     def readIMUraw(self):
         self.TimeKminus1 = self.TimeK
+        self.rawAccelMinus1 = self.rawAccel
+        self.rawOmegaMinus1 = self.rawOmega
         self.TimeK = time.time()
-        self.rawAccel = self.get_acceleration()
-        self.rawOmega = self.get_rotation()
+        self.rawAccel = (np.array([self.get_acceleration()]) * (self.gravity / 16384.0)) - self.accelBias
+        self.rawOmega = (np.array([self.get_rotation()]) / 131.0) - self.omegaBias
         
     def readDMP(self):
         self.TimeKminus1 = self.TimeK
-        self.TimeK = time.time()
         FIFO_count = self.get_FIFO_count()
         mpu_int_status = self.get_int_status()
-
+        
+        while FIFO_count < self.FIFO_packet_size:
+                FIFO_count = self.get_FIFO_count()
         # If overflow is detected by status or fifo count we want to reset
         if (FIFO_count == 1024) or (mpu_int_status & 0x10):
             self.reset_FIFO()
-            print('overflow!')
+            logger.warning('FIFO overflow')
         # Check if fifo data is ready
         elif (mpu_int_status & 0x02):
             # Wait until packet_size number of bytes are ready for reading, default
@@ -125,18 +139,22 @@ class droidInertial(MPU6050):
             while FIFO_count < self.FIFO_packet_size:
                 FIFO_count = self.get_FIFO_count()
             
+            self.TimeK = time.time()
             self.FIFO_buffer = self.get_FIFO_bytes(self.FIFO_packet_size)
             self.reset_FIFO()
             Accel = self.DMP_get_acceleration(self.FIFO_buffer)
-            self.dmpAccel = [Accel.x,Accel.y,Accel.z]
+            self.dmpAccel = np.array([[Accel.x,Accel.y,Accel.z]])
             self.dmpQuaternion = self.DMP_get_quaternion(self.FIFO_buffer)
             self.dmpGrav = self.DMP_get_gravity(self.dmpQuaternion)
             Omega = self.DMP_get_euler_roll_pitch_yaw(self.dmpQuaternion, self.dmpGrav)
-            self.dmpEulerOmega = [Omega.x, Omega.y, Omega.z]
-            
-            
-            
-        
+            self.dmpEulerOmega = np.array([[Omega.x, Omega.y, Omega.z]])
+    
+    def propagateLinear(self):
+        dt = self.TimeK - self.TimeKminus1
+        self.velocityMinus1 = self.velocity
+        self.displacementMinus1 = self.displacement
+        self.velocity = (self.rawAccel + self.rawAccelMinus1)/2 * dt + self.velocityMinus1
+        self.displacement = (self.rawAccel + self.rawAccelMinus1)/4 * (dt**2) + (self.velocity + self.velocityMinus1)/2 * dt + self.displacementMinus1
         
 if __name__ == "__main__":
     di = droidInertial()
@@ -148,21 +166,31 @@ if __name__ == "__main__":
     accelRaw = di.rawAccel
     while counter < 100:
         di.readIMUraw()
-        accelRaw.append(di.rawAccel)
+        accelRaw = np.concatenate((accelRaw, di.rawAccel),axis=0)
+        time.sleep(0.008)
         counter += 1
     print('100 Raw values in: %f' % (di.TimeK - t0))
     print('Average read time: %f' % ((di.TimeK - t0) / 100))
     
     counter = 0
+    di.reset_FIFO()
     t0 = time.time()
     di.readDMP()
     accelDmp = di.dmpAccel
     while counter < 100:
         di.readDMP()
-        accelDmp.append(di.dmpAccel)
+        accelDmp = np.concatenate((accelDmp, di.dmpAccel),axis=0)
         counter += 1
     print('100 DMP values in: %f' % (di.TimeK - t0))
     print('Average read time: %f' % ((di.TimeK - t0) / 100))
+    
+    
+    counter = 0
+    while counter < 100:
+        di.readIMUraw()
+        di.propagateLinear()
+        counter +=1
+    print('Total displacement: %s ' % di.displacement)
     
     
 
