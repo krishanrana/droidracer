@@ -17,8 +17,6 @@ from MPU6050 import MPU6050 # Rewrite class using native numpy
 import logging
 import time
 
-
-
 # Setup logging (Use droidlogging.conf as alternative)
 
 # Log file location
@@ -155,7 +153,13 @@ class droidInertial(MPU6050):
         self.displacementMinus1 = self.displacement
         self.velocity = (self.rawAccel + self.rawAccelMinus1)/2 * dt + self.velocityMinus1
         self.displacement = (self.rawAccel + self.rawAccelMinus1)/4 * (dt**2) + (self.velocity + self.velocityMinus1)/2 * dt + self.displacementMinus1
-        
+
+    def calibrateIMU (self):
+        print("Calibration routine not yet implemented")
+        self.accelBias = np.array([[0,0,0]])
+        self.omegaBias = np.array([[0,0,0]])
+
+
 if __name__ == "__main__":
     di = droidInertial()
 
