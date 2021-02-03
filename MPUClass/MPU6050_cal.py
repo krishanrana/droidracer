@@ -37,12 +37,13 @@ kp = 0.03125
 ki = 0.25
 kd = 0
 
-pidax = SimplePID(0, -15000, 15000, kp, ki, kd, 20, True)
-piday = SimplePID(0, -15000, 15000, kp, ki, kd, 20, True)
-pidaz = SimplePID(0, -15000, 15000, kp, ki, kd, 20, True)
-pidgx = SimplePID(0, -15000, 15000, kp, ki, kd, 20, True)
-pidgy = SimplePID(0, -15000, 15000, kp, ki, kd, 20, True)
-pidgz = SimplePID(0, -15000, 15000, kp, ki, kd, 20, True)
+delay = 20
+pidax = SimplePID(0, -15000, 15000, kp, ki, kd, delay, True)
+piday = SimplePID(0, -15000, 15000, kp, ki, kd, delay, True)
+pidaz = SimplePID(0, -15000, 15000, kp, ki, kd, delay, True)
+pidgx = SimplePID(0, -15000, 15000, kp, ki, kd, delay, True)
+pidgy = SimplePID(0, -15000, 15000, kp, ki, kd, delay, True)
+pidgz = SimplePID(0, -15000, 15000, kp, ki, kd, delay, True)
 
 accel_reading = mpu.get_acceleration()
 
@@ -118,7 +119,7 @@ try:
         z_gyro_reading = gyro_reading[2]
         
         
-        # For each valid reading (>100ms)
+        # For each valid reading (>delay ms)
         if pidax.check_time():
             x_accel_offset = pidax.get_output_value(x_accel_reading)
 
@@ -136,10 +137,6 @@ try:
                 #Update Offset value 
                 mpu.set_x_accel_offset(int(xAcOffAvg))
                 
-                
-                
-                      
-
         if piday.check_time():
             y_accel_offset = piday.get_output_value(y_accel_reading)
 
@@ -291,5 +288,5 @@ ax2.plot(xGyHist)
  
 ImuOffsets = np.array([xAcOffAvg,yAcOffAvg,zAcOffAvg,xGyOffAvg,yGyOffAvg,zGyOffAvg ])
  
-np.savetxt('imuOffsets.csv',ImuOffsets,delimiter=',')
-print('IMU offsets saved to file')              
+np.savetxt('imuBiases.csv',ImuOffsets,delimiter=',')
+print('IMU biases saved to file')              

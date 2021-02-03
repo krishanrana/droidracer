@@ -16,6 +16,7 @@ import numpy as np
 from MPU6050 import MPU6050 # Rewrite class using native numpy
 import logging
 import time
+from DroidControl import droidControl
 
 # Setup logging (Use droidlogging.conf as alternative)
 
@@ -55,32 +56,44 @@ class droidInertial(MPU6050):
         self.TimeK = time.time()
         self.gravity = 9.80665
         self.FIFO_buffer = [0]*42
-        #self.dmpAccel = [0,0,0]
-        self.dmpAccel = np.array([[0,0,0]])
-        self.rawAccel = np.array([[0,0,0]])
-        self.velocity = np.array([[0,0,0]])
-        self.displacement = np.array([[0,0,0]])
-        self.accelBias = np.array([[0,0,0]])
+        self.dmpAccel = np.array([0,0,0])
+        self.rawAccel = np.array([0,0,0])
+        self.velocity = np.array([0,0,0])
+        self.displacement = np.array([0,0,0])
+        self.accelBias = np.array([0,0,0])
         
-        self.rawOmega = np.array([[0,0,0]])
-        self.theta = np.array([[0,0,0]])
-        self.omegaBias = np.array([[0,0,0]])
+        self.rawOmega = np.array([0,0,0])
+        self.theta = np.array([0,0,0])
+        self.omegaBias = np.array([0,0,0])
         
+        self.imuOut = []
         
         
         debug_output = False
         i2c_bus = 1
         device_address = 0x68
 
-        # Check for Offset file
+        # Check for IMU bias file
         try:
             [x_accel_offset, y_accel_offset,
-              z_accel_offset, x_gyro_offset, y_gyro_offset, z_gyro_offset] = np.loadtxt('/home/pi/droidracer/MPUClass/imuOffsets.csv', delimiter=',', dtype = "int")
-            logger.info('Initialising offsets to file.')  
+              z_accel_offset, x_gyro_offset, y_gyro_offset, z_gyro_offset] = np.loadtxt('/home/pi/droidracer/MPUClass/imuBiases.csv', delimiter=',', dtype = "int")
+            logger.info('Initialising IMU biases to file.') 
+            # Use existing IMU bias estimates
+            self.accelBias = np.array([[x_accel_offset, y_accel_offset,z_accel_offset]])
+            self.omegaBias = np.array([[x_gyro_offset, y_gyro_offset, z_gyro_offset]])
+        
         except:
             [x_accel_offset, y_accel_offset,
               z_accel_offset, x_gyro_offset, y_gyro_offset, z_gyro_offset] = np.array([0,0,0,0,0,0]) # Placeholder, run cal routine
-            logger.info('No Offset file found. Initialising to Zero')
+            logger.info('No Bias file found. Static Calibration required')
+
+        # Check for IMU Offset file (Not yet implemented)
+        try:
+            self.imuOffset = np.loadtxt('/home/pi/droidracer/MPUClass/imuOffsets.csv', delimiter=',', dtype = "int")
+            logger.info('Initialising IMU offsets to file.')
+        except:
+            self.imuOffset = np.array([0,0,0]) # Placeholder, run cal routine
+            logger.warning('No Offset file found. Dynamic calibration required')
              
         # Setup thread safe timer
         
@@ -116,8 +129,11 @@ class droidInertial(MPU6050):
         self.rawAccelMinus1 = self.rawAccel
         self.rawOmegaMinus1 = self.rawOmega
         self.TimeK = time.time()
+        # Remove constant bias;
+        # : Store as numpy arrays as we will be using matrix operations for Kalman filter
         self.rawAccel = (np.array([self.get_acceleration()]) * (self.gravity / 16384.0)) - self.accelBias
         self.rawOmega = (np.array([self.get_rotation()]) / 131.0) - self.omegaBias
+        
         
     def readDMP(self):
         self.TimeKminus1 = self.TimeK
@@ -148,17 +164,45 @@ class droidInertial(MPU6050):
             self.dmpEulerOmega = np.array([[Omega.x, Omega.y, Omega.z]])
     
     def propagateLinear(self):
+        # Replace as part of Kalman filter
         dt = self.TimeK - self.TimeKminus1
         self.velocityMinus1 = self.velocity
         self.displacementMinus1 = self.displacement
         self.velocity = (self.rawAccel + self.rawAccelMinus1)/2 * dt + self.velocityMinus1
         self.displacement = (self.rawAccel + self.rawAccelMinus1)/4 * (dt**2) + (self.velocity + self.velocityMinus1)/2 * dt + self.displacementMinus1
 
-    def calibrateIMU (self):
-        print("Calibration routine not yet implemented")
-        self.accelBias = np.array([[0,0,0]])
-        self.omegaBias = np.array([[0,0,0]])
+    def storeIMUdata(self):
+        temp = self.rawAccel.tolist() + self.rawOmega.tolist() +  [self.TimeK]
+        self.imuOut.append(temp)
+    
+    
+    def calFindOffsets (self,calTime, calOmega,saveData = False):
+        # Dynamic calibration
+        if self.accelBias == [0,0,0]:
+            logger.warning('No Bias file found. Static Calibration required')
+        
+        else:
+            # Set motor control as (speed,direction,omega)
+            dc = droidControl()
+            t0 = time.time()
+            idx = int(0)
+            dc.setSpeed(0,0,calOmega)
+            while time.time() - t0 < calTime:
+                # Get raw IMU data
+                self.readIMUraw()
+                self.storeIMUdata()
+                idx +=1
 
+            dc.setSpeed(0,0,0)
+            dc.close()
+            if saveData:
+                np.savetxt('dynamicData.csv',np.array(self.imuOut),delimiter=',')
+                logger.info('Saving dynamic data to file: %s entries' % idx)
+            
+            
+            logger.info('Dynamic data gathering complete.')
+
+            self.imuOffset = np.array([0,0,0])
 
 if __name__ == "__main__":
     di = droidInertial()
