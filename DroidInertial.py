@@ -16,6 +16,7 @@ import numpy as np
 from MPU6050 import MPU6050 # Rewrite class using native numpy
 import logging
 import time
+import matplotlib.pyplot as plt
 
 
 
@@ -160,37 +161,54 @@ if __name__ == "__main__":
     di = droidInertial()
 
     print("Class Initialised")
-    counter = 0
+    print("Test read time - RAW")
+    
+#    counter = 0
+#    t0 = time.time()
+#    di.readIMUraw()
+#    accelRaw = di.rawAccel
+#    while counter < 100:
+#        di.readIMUraw()
+#        accelRaw = np.concatenate((accelRaw, di.rawAccel),axis=0)
+#        time.sleep(0.008)
+#        counter += 1
+#    print('100 Raw values in: %f' % (di.TimeK - t0))
+#    print('Average read time: %f' % ((di.TimeK - t0) / 100))
+#    
+#    print("Test read time - DMP")
+#    counter = 0
+#    di.reset_FIFO()
+#    t0 = time.time()
+#    di.readDMP()
+#    accelDmp = di.dmpAccel
+#    while counter < 100:
+#        di.readDMP()
+#        accelDmp = np.concatenate((accelDmp, di.dmpAccel),axis=0)
+#        counter += 1
+#    print('100 DMP values in: %f' % (di.TimeK - t0))
+#    print('Average read time: %f' % ((di.TimeK - t0) / 100))
+    
+    print("Test linear propagation")
+    
     t0 = time.time()
-    di.readIMUraw()
-    accelRaw = di.rawAccel
-    while counter < 100:
-        di.readIMUraw()
-        accelRaw = np.concatenate((accelRaw, di.rawAccel),axis=0)
-        time.sleep(0.008)
-        counter += 1
-    print('100 Raw values in: %f' % (di.TimeK - t0))
-    print('Average read time: %f' % ((di.TimeK - t0) / 100))
-    
+    dispRaw = np.array([[0,0,0]])
     counter = 0
-    di.reset_FIFO()
-    t0 = time.time()
-    di.readDMP()
-    accelDmp = di.dmpAccel
-    while counter < 100:
-        di.readDMP()
-        accelDmp = np.concatenate((accelDmp, di.dmpAccel),axis=0)
-        counter += 1
-    print('100 DMP values in: %f' % (di.TimeK - t0))
-    print('Average read time: %f' % ((di.TimeK - t0) / 100))
-    
-    
-    counter = 0
-    while counter < 100:
+    while counter < 5000:
         di.readIMUraw()
         di.propagateLinear()
+        dispRaw = np.concatenate((dispRaw, di.displacement),axis=0)
         counter +=1
-    print('Total displacement: %s ' % di.displacement)
+        
+    tend = time.time() 
+    print('Time: %f' % (tend-t0))
+    fig = plt.figure()
+    ax = fig.add_subplot(311)
+    ax.plot(dispRaw[:,0])
+    ax = fig.add_subplot(312)
+    ax.plot(dispRaw[:,1])
+    ax = fig.add_subplot(313)
+    ax.plot(dispRaw[:,2])
+    
     
     
 
