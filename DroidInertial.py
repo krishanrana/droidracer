@@ -179,7 +179,7 @@ class droidInertial(MPU6050):
         self.imuOut.append(temp)
     
     
-    def calFindOffsets (self,calTime, calOmega,saveData = False):
+    def calFindOffsets (self,calTime = 5, calOmega = 0.5,saveData = False):
         # Dynamic calibration
         if self.accelBias == [0,0,0]:
             logger.warning('No Bias file found. Static Calibration required')

@@ -32,6 +32,7 @@ class droidControl:
 
         # Open serial comms to Arduino
         self.ser = serial.Serial(serial_port, baud)
+        print('Class initialised')
 
 
     def setSpeed(self, speed, vector, omega):
@@ -73,16 +74,18 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)
 
     global dc
-    runTime = 5
+    runTime = 10
     dc = droidControl()
-    dc.setSpeed(0,0,0.5)
-    t0 = time.time()
-
-    t = time.time()
+    t0 = time.time()        
+    while time.time()-t0 < runTime:
+        dc.setSpeed(0, 0, 1)
+        byteString = dc.ser.read(78)
+        print(byteString)
+        #time.sleep(0.017)
         
-    if t-t0 > runTime:
-        dc.setSpeed(0, 0, 0)
-        dc.close()
+    print('out of loop')
+    dc.setSpeed(0, 0, 0)
+    dc.close()
 
     print('All done')
         
