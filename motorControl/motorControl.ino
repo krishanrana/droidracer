@@ -42,15 +42,15 @@ char dataString[50] = {0};
 //#define KP_CON 10
 //#define KI_CON 0
 //#define KD_CON 0.01
-#define KP_AGG 15
-#define KI_AGG 250
+#define KP_AGG 50
+#define KI_AGG 100
 #define KD_AGG 0
 
 #define KP_CON 2
 #define KI_CON 10
 #define KD_CON 0.01
 
-//#define CON_THRESH 0.2
+#define CON_THRESH 0.2
 #define CON_THRESH 1000.0
 
 volatile double speed_M1, speed_M2, speed_M3;         // Used for input measurement to PID
@@ -77,6 +77,11 @@ char delimiters[] = ",";
 char* valPosition;
 char charData[50];
 
+// Variables for testing, delete after use
+float driveTime = 0;
+float type = 0;
+float endspeed = 0;
+float cycleTime = 0; 
 unsigned long loopTime = 0;
 unsigned long oldTime = 0;
 
@@ -149,7 +154,10 @@ void setup() {
   Serial.begin(9600);
 
   delay(2000);
+  // Test stuff, delete when finished
+  
   oldTime = millis();
+   
 }
 
 
@@ -178,18 +186,24 @@ void loop() {
     }
 
     // Update the measured motor speeds
-    computeVelocities(data[0], data[1], data[2]);    
+    //computeVelocities(data[0], data[1], data[2]);
+    
+    type = data[0];
+    endspeed = data[1];
+    cycleTime = data[2];
+   
+  }  
+  
+//loopVelocities(0,0.3, 300);
+loopVelocities(0,0,0);
+ 
 
-  }
   // Print some diagnostics
 //  Serial.print("M1 set: ");
 //  Serial.print(setspeed_M1);
 //  Serial.print("M1 speed: ");
 //  Serial.print(speed_M1);
-  Serial.print(PID_M2.GetOutputSum());
-  Serial.print("M2 speed: ");
-  Serial.println(out_M2);
-
+  
 //  Serial.print("M2 set: ");
 //  Serial.println(setspeed_M2);
 //  Serial.print("M2 speed: ");
@@ -242,21 +256,26 @@ void loop() {
   // Write to the motor directions and pwm power
   // Set to 0,0,0 for dead stop
   if (setspeed_M1==0 && setspeed_M2==0 && setspeed_M3==0){
-    
-    PID_M1.SetMode(MANUAL);
-    PID_M2.SetMode(MANUAL);
-    PID_M3.SetMode(MANUAL);
-    PID_M2.ResetOutputSum();
-    analogWrite(PWM_M1, 0);
-    analogWrite(PWM_M2, 0);
-    analogWrite(PWM_M3, 0);
-    PID_M1.SetMode(AUTOMATIC);
-    PID_M2.SetMode(AUTOMATIC);
-    PID_M3.SetMode(AUTOMATIC);
-    
-    
-    
 
+    // Aggressively drive PID to 0,0,0 and park
+    PID_M1.SetTunings(KP_AGG, KI_AGG, KD_AGG);
+      
+    if (abs(out_M1) <= 1){
+
+      PID_M1.SetMode(MANUAL);
+      PID_M2.SetMode(MANUAL);
+      PID_M3.SetMode(MANUAL);
+      analogWrite(PWM_M1, 0);
+      analogWrite(PWM_M2, 0);
+      analogWrite(PWM_M3, 0);
+
+      PID_M1.SetMode(AUTOMATIC);
+      PID_M2.SetMode(AUTOMATIC);
+      PID_M3.SetMode(AUTOMATIC);}
+    
+    
+    
+// Allow for negative (Reverse) velocity
   } else {
     if (out_M1 < 0) {
       digitalWrite(DIR_M1, LOW);
@@ -372,7 +391,46 @@ void computeVelocities(float vel, float heading, float angular_vel) {
   setspeed_M1 = vel;
   setspeed_M2 = heading;
   setspeed_M3 = angular_vel;
+}
 
+void loopVelocities(float type, float endspeed, float cycleTime) {
+  Serial.print(setspeed_M1 *100);
+  Serial.print("\t");
+  Serial.print(speed_M1 *100);
+  Serial.print("\t");
+  Serial.print(out_M1);
+  
+
+  driveTime += 1;
+  
+  // Test PID using synthetic input
+  if (driveTime < cycleTime){
+    // Step input to endSpeed
+    if (type == 0){
+      setspeed_M1 = endspeed;
+    }
+    else if (type == 1){
+      setspeed_M1 += endspeed/cycleTime;
+    }
+    else{setspeed_M1 = 0;}     
+  }
+  
+  else if (driveTime < 2 * cycleTime){
+    // Step input to -endSpeed
+    if (type == 0){
+      setspeed_M1 = -endspeed;
+    }
+    else if (type == 1){
+      setspeed_M1 -= endspeed/cycleTime;
+    }
+    else{setspeed_M1 = 0;}     
+  }
+
+  else if (driveTime > 2*cycleTime){
+    setspeed_M1 = 0;
+    driveTime = 0;
+    delay(10);
+  }
 
 }
 
