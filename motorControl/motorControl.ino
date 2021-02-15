@@ -42,28 +42,27 @@ char dataString[50] = {0};
 //#define KP_CON 10
 //#define KI_CON 0
 //#define KD_CON 0.01
-#define KP_AGG 50
-#define KI_AGG 100
+#define KP_AGG 15
+#define KI_AGG 50
 #define KD_AGG 0
 
-#define KP_CON 2
-#define KI_CON 10
-#define KD_CON 0.01
-
-#define CON_THRESH 0.2
-#define CON_THRESH 1000.0
+#define KP_CON 10
+#define KI_CON 0
+#define KD_CON 0.1
+// Set threshold for change in controller parameters. Defined as absolute error from setpoint (motor speed in m/s)
+#define CON_THRESH 0.1
 
 volatile double speed_M1, speed_M2, speed_M3;         // Used for input measurement to PID
 double out_M1, out_M2, out_M3;                        // Output from PID to power motors
 double setspeed_M1, setspeed_M2, setspeed_M3;         // Target speed for motors
 double pidSampleRate;
-// Constructor 
+
+// PID Constructor 
 PID PID_M1(&speed_M1, &out_M1, &setspeed_M1, KP_AGG, KI_AGG, KD_AGG,P_ON_M, DIRECT);
 PID PID_M2(&speed_M2, &out_M2, &setspeed_M2, KP_AGG, KI_AGG, KD_AGG,P_ON_M, DIRECT);
 PID PID_M3(&speed_M3, &out_M3, &setspeed_M3, KP_AGG, KI_AGG, KD_AGG,P_ON_M, DIRECT);
 
-
-// variables to store the number of encoder pulses
+// Variables to store the number of encoder pulses
 // for each motor
 volatile signed long M1_Count = 0;
 volatile signed long M2_Count = 0;
@@ -77,13 +76,6 @@ char delimiters[] = ",";
 char* valPosition;
 char charData[50];
 
-// Variables for testing, delete after use
-float driveTime = 0;
-float type = 0;
-float endspeed = 0;
-float cycleTime = 0; 
-unsigned long loopTime = 0;
-unsigned long oldTime = 0;
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 // SETUP ////////////////////////////////////////////////////////////////////////////////////
@@ -154,10 +146,8 @@ void setup() {
   Serial.begin(9600);
 
   delay(2000);
-  // Test stuff, delete when finished
-  
-  oldTime = millis();
-   
+ 
+     
 }
 
 
@@ -186,46 +176,39 @@ void loop() {
     }
 
     // Update the measured motor speeds
-    //computeVelocities(data[0], data[1], data[2]);
+    computeVelocities(data[0], data[1], data[2]);
     
-    type = data[0];
-    endspeed = data[1];
-    cycleTime = data[2];
-   
   }  
   
-//loopVelocities(0,0.3, 300);
-loopVelocities(0,0,0);
- 
-
   // Print some diagnostics
-//  Serial.print("M1 set: ");
-//  Serial.print(setspeed_M1);
-//  Serial.print("M1 speed: ");
-//  Serial.print(speed_M1);
+  Serial.print(setspeed_M1 *100);
+  Serial.print("\t");
+  Serial.print(speed_M1 *100);
+  Serial.print("\t");
+  Serial.println(out_M1);
   
 //  Serial.print("M2 set: ");
-//  Serial.println(setspeed_M2);
-//  Serial.print("M2 speed: ");
-//  Serial.print(speed_M2);
-  
+//  Serial.print(setspeed_M2);
+//  Serial.print(" PWM: ");
+//  Serial.print(out_M2);
+//  Serial.print(" spd: ");
+//  Serial.println(speed_M2);
+//  
 //  Serial.print("M3 set: ");
-//  Serial.println(setspeed_M3);
-//  Serial.print("M3 speed: ");
+//  Serial.print(setspeed_M3);
+//  Serial.print(" PWM: ");
+//  Serial.print(out_M3);
+//  Serial.print(" spd: ");
 //  Serial.println(speed_M3);
-
+ 
+  // This seems really hacky, look at better way of achieving this
   
-
-
-//  
-//  // This seems really hacky, look at better way of achieving this
-//  
-//  // Check if need to switch between aggressive/conservative PID tuning values
+  // Check if need to switch between aggressive/conservative PID tuning values
 //  if (abs(speed_M1 - setspeed_M1) < CON_THRESH){
 //    PID_M1.SetTunings(KP_CON, KI_CON, KD_CON);
 //    // Clear the integral buildup (CHECK THIS!!)
-////    PID_M1.SetMode(MANUAL);
-////    PID_M1.SetMode(AUTOMATIC);  
+//    PID_M1.SetMode(MANUAL);
+//    PID_M1.SetMode(AUTOMATIC);  
 //  } else {
 //    PID_M1.SetTunings(KP_AGG, KI_AGG, KD_AGG);
 //  }
@@ -233,8 +216,8 @@ loopVelocities(0,0,0);
 //  if (abs(speed_M2 - setspeed_M2) < CON_THRESH){
 //    PID_M2.SetTunings(KP_CON, KI_CON, KD_CON);
 //    // Clear the integral buildup
-////    PID_M2.SetMode(MANUAL);
-////    PID_M2.SetMode(AUTOMATIC);  
+//    PID_M2.SetMode(MANUAL);
+//    PID_M2.SetMode(AUTOMATIC);  
 //    } else {
 //    PID_M2.SetTunings(KP_AGG, KI_AGG, KD_AGG);
 //  }
@@ -242,8 +225,8 @@ loopVelocities(0,0,0);
 //  if (abs(speed_M3 - setspeed_M3) < CON_THRESH){
 //    // Clear the integral buildup
 //    PID_M3.SetTunings(KP_CON, KI_CON, KD_CON);
-////    PID_M3.SetMode(MANUAL);
-////    PID_M3.SetMode(AUTOMATIC);  
+//    PID_M3.SetMode(MANUAL);
+//    PID_M3.SetMode(AUTOMATIC);  
 //  } else {
 //    PID_M3.SetTunings(KP_AGG, KI_AGG, KD_AGG);
 //  }
@@ -268,7 +251,6 @@ loopVelocities(0,0,0);
       analogWrite(PWM_M1, 0);
       analogWrite(PWM_M2, 0);
       analogWrite(PWM_M3, 0);
-
       PID_M1.SetMode(AUTOMATIC);
       PID_M2.SetMode(AUTOMATIC);
       PID_M3.SetMode(AUTOMATIC);}
@@ -298,11 +280,6 @@ loopVelocities(0,0,0);
     }
     analogWrite(PWM_M3, int(abs(out_M3)));
   }
-//  Serial.print("Loop frequency: ");
-//  loopTime = millis();
-//  Serial.println(loopTime - oldTime);
-//  oldTime = loopTime;
-
 }
 
 
@@ -391,46 +368,6 @@ void computeVelocities(float vel, float heading, float angular_vel) {
   setspeed_M1 = vel;
   setspeed_M2 = heading;
   setspeed_M3 = angular_vel;
-}
-
-void loopVelocities(float type, float endspeed, float cycleTime) {
-  Serial.print(setspeed_M1 *100);
-  Serial.print("\t");
-  Serial.print(speed_M1 *100);
-  Serial.print("\t");
-  Serial.print(out_M1);
-  
-
-  driveTime += 1;
-  
-  // Test PID using synthetic input
-  if (driveTime < cycleTime){
-    // Step input to endSpeed
-    if (type == 0){
-      setspeed_M1 = endspeed;
-    }
-    else if (type == 1){
-      setspeed_M1 += endspeed/cycleTime;
-    }
-    else{setspeed_M1 = 0;}     
-  }
-  
-  else if (driveTime < 2 * cycleTime){
-    // Step input to -endSpeed
-    if (type == 0){
-      setspeed_M1 = -endspeed;
-    }
-    else if (type == 1){
-      setspeed_M1 -= endspeed/cycleTime;
-    }
-    else{setspeed_M1 = 0;}     
-  }
-
-  else if (driveTime > 2*cycleTime){
-    setspeed_M1 = 0;
-    driveTime = 0;
-    delay(10);
-  }
 
 }
 

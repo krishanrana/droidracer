@@ -42,9 +42,9 @@ char dataString[50] = {0};
 //#define KP_CON 10
 //#define KI_CON 0
 //#define KD_CON 0.01
-#define KP_AGG 50
+#define KP_AGG 75
 #define KI_AGG 100
-#define KD_AGG 0
+#define KD_AGG 10
 
 #define KP_CON 2
 #define KI_CON 10
@@ -194,7 +194,7 @@ void loop() {
    
   }  
   
-//loopVelocities(0,0.3, 300);
+//loopVelocities(0,1, 500);
 loopVelocities(0,0,0);
  
 
@@ -398,7 +398,7 @@ void loopVelocities(float type, float endspeed, float cycleTime) {
   Serial.print("\t");
   Serial.print(speed_M1 *100);
   Serial.print("\t");
-  Serial.print(out_M1);
+  Serial.println(out_M1);
   
 
   driveTime += 1;
