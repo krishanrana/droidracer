@@ -51,7 +51,7 @@ char charData[60];
 // Variables for testing
 float driveTime = 0;
 int testNumber = 0;
-int testDuration = 5;
+int testDuration = 2;
 
 // PID Constructor 
 PID PID_M1(&speed_M1, &out_M1, &setspeed_M1, 50, 100, 0, P_ON_M, DIRECT);
@@ -124,6 +124,7 @@ void loop() {
   Kprop = data[3];
   Kint = data[4];
   Kder = data[5];
+  
 
    
   
@@ -135,25 +136,38 @@ void loop() {
     // Update test input parameters
     inputWaveform(testType,testMag,testPeriod);
   
-    // Compute PID values 
+    // Compute PID values
+    PID_M1.SetTunings(Kprop, Kint, Kder); 
     PID_M1.Compute();
    
     // Write to the motor directions and pwm power   
     // Allow for negative (Reverse) velocity
  
     setMotorSpeed(out_M1);
+    Serial.print("Running no.");
+    Serial.println(testNumber);
+    sendMsg();
     }
   else{
     // Test is ended, slow motor to zero and turn off while waiting for new input 
-    setspeed_M1 = 0;
-    PID_M1.SetTunings(50, 100, 2);
-    while(abs(out_M1) > 1){
+    setspeed_M1 = 0;  
+    if(abs(out_M1) > 3){
+      PID_M1.SetTunings(5, 1, 0);
       PID_M1.Compute();
-      setMotorSpeed(out_M1); 
+      setMotorSpeed(out_M1);
+      Serial.print("Slowing no.");
+      Serial.println(testNumber);
+      sendMsg(); 
     }
-    // Set output to 0 and park
-    PID_M1.SetMode(MANUAL);
-    analogWrite(PWM_M1, 0);
+    // When motor is not running, this state may not be enetered into.. FIX
+    else{
+      // Set output to 0 and park
+      PID_M1.SetMode(MANUAL);
+      analogWrite(PWM_M1, 0);
+      Serial.print("Stopped no.");
+      Serial.println(testNumber);
+      sendMsg();
+    }
   }
 }
 
@@ -222,6 +236,7 @@ void readMSG(float *data){
       valPosition = strtok(NULL, delimiters);
     }
     testNumber = 0;
+    Serial.print(testNumber);
   }
 return;
 }
