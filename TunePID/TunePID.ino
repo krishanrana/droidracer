@@ -4,14 +4,9 @@
 //Use for PID control of motors
 #include <PID_v1.h>
 
-
 // Encoders
 #define M1_ENCODER_A A0
 #define M1_ENCODER_B A1
-#define M2_ENCODER_A 11
-#define M2_ENCODER_B 13
-#define M3_ENCODER_A 6
-#define M3_ENCODER_B 7
 
 //Motors
 #define TICKS_PER_REV 980 // Using Pololu 20.4:1 25D gearmotor 48 tick/rev
@@ -19,77 +14,52 @@
 #define DROIDRADIUS 0.15
 // L9958 DIRection pins
 #define DIR_M1 2
-#define DIR_M2 3
-#define DIR_M3 4
+
 // L9958 PWM pins
 #define PWM_M1 9
-#define PWM_M2 10    // Timer1
-#define PWM_M3 5
+
 // L9958 Enable for all 4 motors
 #define ENABLE_MOTORS 8
 
+// Motor PWM variables
 int pwm1, pwm2, pwm3;
 int dir1, dir2, dir3;
-
 char dataString[50] = {0};
 
+volatile double speed_M1;         // Used for input measurement to PID
+double out_M1;                        // Output from PID to power motors
+double setspeed_M1;         // Target speed for motors
+float pidSampleRate;
 
-// PID variables
-//#define KP_AGG 15
-//#define KI_AGG 250
-//#define KD_AGG 0
-//
-//#define KP_CON 10
-//#define KI_CON 0
-//#define KD_CON 0.01
-#define KP_AGG 75
-#define KI_AGG 100
-#define KD_AGG 10
-
-#define KP_CON 2
-#define KI_CON 10
-#define KD_CON 0.01
-
-#define CON_THRESH 0.2
-#define CON_THRESH 1000.0
-
-volatile double speed_M1, speed_M2, speed_M3;         // Used for input measurement to PID
-double out_M1, out_M2, out_M3;                        // Output from PID to power motors
-double setspeed_M1, setspeed_M2, setspeed_M3;         // Target speed for motors
-double pidSampleRate;
-// Constructor 
-PID PID_M1(&speed_M1, &out_M1, &setspeed_M1, KP_AGG, KI_AGG, KD_AGG,P_ON_M, DIRECT);
-PID PID_M2(&speed_M2, &out_M2, &setspeed_M2, KP_AGG, KI_AGG, KD_AGG,P_ON_M, DIRECT);
-PID PID_M3(&speed_M3, &out_M3, &setspeed_M3, KP_AGG, KI_AGG, KD_AGG,P_ON_M, DIRECT);
-
-
-// variables to store the number of encoder pulses
-// for each motor
+// Variables to store the number of encoder pulses
 volatile signed long M1_Count = 0;
-volatile signed long M2_Count = 0;
-volatile signed long M3_Count = 0;
 
-volatile float heading_angle = 0;
+// Input Variables 
+int testType = 0;
+float testMag = 0;
+float testPeriod = 0;
+float Kprop = 0;
+float Kint = 0;
+float Kder = 0;
 
 volatile float val = 0;
-volatile float data[] = {0, 0, 0};
+volatile float data[] = {0, 0, 0, 0, 0, 0};
 char delimiters[] = ",";
 char* valPosition;
-char charData[50];
+char charData[60];
 
-// Variables for testing, delete after use
+// Variables for testing
 float driveTime = 0;
-float type = 0;
-float endspeed = 0;
-float cycleTime = 0; 
-unsigned long loopTime = 0;
-unsigned long oldTime = 0;
+int testNumber = 0;
+int testDuration = 5;
 
+// PID Constructor 
+PID PID_M1(&speed_M1, &out_M1, &setspeed_M1, 50, 100, 0, P_ON_M, DIRECT);
 /////////////////////////////////////////////////////////////////////////////////////////////
 // SETUP ////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
 void setup() {
-
+   
   //initialize Timer2
   noInterrupts(); // disable all interrupts
   TCCR2A = 0;
@@ -106,47 +76,29 @@ void setup() {
 
   pinMode(M1_ENCODER_A, INPUT);
   pinMode(M1_ENCODER_B, INPUT);
-  pinMode(M2_ENCODER_A, INPUT);
-  pinMode(M2_ENCODER_B, INPUT);
-  pinMode(M3_ENCODER_A, INPUT);
-  pinMode(M3_ENCODER_B, INPUT);
-
+  
   // initialize hardware interrupts
   attachPinChangeInterrupt(M1_ENCODER_A, M1EncoderEvent, CHANGE);
-  attachPinChangeInterrupt(M2_ENCODER_A, M2EncoderEvent, CHANGE);
-  attachPinChangeInterrupt(M3_ENCODER_A, M3EncoderEvent, CHANGE);
-
-  //Motor stuff
-
+  
   // PID variable setup
   speed_M1 = 0;
-  speed_M2 = 0;
-  speed_M3 = 0;
-  setspeed_M1 = 0;
-  setspeed_M2 = 0;
-  setspeed_M3 = 0;
-
+  setspeed_M1 = 0; 
+  
   //Set PID compute rate in milliseconds (default = 100)
   pidSampleRate = 20;
   PID_M1.SetSampleTime(pidSampleRate);
   // Configure for backwards values too
   PID_M1.SetOutputLimits(-255, 255);
-  PID_M2.SetOutputLimits(-255, 255);
-  PID_M3.SetOutputLimits(-255, 255);
+  
   // Turn the PIDs on
   PID_M1.SetMode(AUTOMATIC);
-  PID_M2.SetMode(AUTOMATIC);
-  PID_M3.SetMode(AUTOMATIC);
-
+  
   // L9958 DIRection pins
   pinMode(DIR_M1, OUTPUT);
-  pinMode(DIR_M2, OUTPUT);
-  pinMode(DIR_M3, OUTPUT);
-
+  
   // L9958 PWM pins
   pinMode(PWM_M1, OUTPUT);  digitalWrite(PWM_M1, LOW);
-  pinMode(PWM_M2, OUTPUT);  digitalWrite(PWM_M2, LOW);
-  pinMode(PWM_M3, OUTPUT);  digitalWrite(PWM_M3, LOW);
+  
 
   // L9958 Enable for all 4 motors
   pinMode(ENABLE_MOTORS, OUTPUT);  digitalWrite(ENABLE_MOTORS, LOW);   // HIGH = disabled
@@ -154,155 +106,55 @@ void setup() {
   Serial.begin(9600);
 
   delay(2000);
-  // Test stuff, delete when finished
-  
-  oldTime = millis();
-   
+ 
 }
-
-
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 // LOOP /////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
 void loop() {
   
-  // Check serial comms for new vel/heading/angular_vel
-  if (Serial.available() > 0)
-  {
+  // Check serial comms for new message
+  readMSG(data);
 
-    //Store the data in to the varaible data
-    String str = Serial.readStringUntil('\n');
-    str.toCharArray(charData, 50);
-    valPosition = strtok(charData, delimiters);
-    data[0] = 0;
-    data[1] = 0;
-    data[2] = 0;
+  // Get test waveform and PID parameters
+  testType = int(data[0]);
+  testMag = data[1];
+  testPeriod = data[2];
+  Kprop = data[3];
+  Kint = data[4];
+  Kder = data[5];
 
-    for (int i = 0; i < 3; i++) {
-      data[i] = atof(valPosition);
-      //Serial.print(data[i]);
-      valPosition = strtok(NULL, delimiters);
-    }
-
-    // Update the measured motor speeds
-    //computeVelocities(data[0], data[1], data[2]);
-    
-    type = data[0];
-    endspeed = data[1];
-    cycleTime = data[2];
    
-  }  
   
-//loopVelocities(0,1, 500);
-loopVelocities(0,0,0);
- 
-
-  // Print some diagnostics
-//  Serial.print("M1 set: ");
-//  Serial.print(setspeed_M1);
-//  Serial.print("M1 speed: ");
-//  Serial.print(speed_M1);
-  
-//  Serial.print("M2 set: ");
-//  Serial.println(setspeed_M2);
-//  Serial.print("M2 speed: ");
-//  Serial.print(speed_M2);
-  
-//  Serial.print("M3 set: ");
-//  Serial.println(setspeed_M3);
-//  Serial.print("M3 speed: ");
-//  Serial.println(speed_M3);
-
-  
-
-
-//  
-//  // This seems really hacky, look at better way of achieving this
-//  
-//  // Check if need to switch between aggressive/conservative PID tuning values
-//  if (abs(speed_M1 - setspeed_M1) < CON_THRESH){
-//    PID_M1.SetTunings(KP_CON, KI_CON, KD_CON);
-//    // Clear the integral buildup (CHECK THIS!!)
-////    PID_M1.SetMode(MANUAL);
-////    PID_M1.SetMode(AUTOMATIC);  
-//  } else {
-//    PID_M1.SetTunings(KP_AGG, KI_AGG, KD_AGG);
-//  }
-//  
-//  if (abs(speed_M2 - setspeed_M2) < CON_THRESH){
-//    PID_M2.SetTunings(KP_CON, KI_CON, KD_CON);
-//    // Clear the integral buildup
-////    PID_M2.SetMode(MANUAL);
-////    PID_M2.SetMode(AUTOMATIC);  
-//    } else {
-//    PID_M2.SetTunings(KP_AGG, KI_AGG, KD_AGG);
-//  }
-//  
-//  if (abs(speed_M3 - setspeed_M3) < CON_THRESH){
-//    // Clear the integral buildup
-//    PID_M3.SetTunings(KP_CON, KI_CON, KD_CON);
-////    PID_M3.SetMode(MANUAL);
-////    PID_M3.SetMode(AUTOMATIC);  
-//  } else {
-//    PID_M3.SetTunings(KP_AGG, KI_AGG, KD_AGG);
-//  }
-
-    
-  PID_M1.Compute();
-  PID_M2.Compute();
-  PID_M3.Compute();
-
-  // Write to the motor directions and pwm power
-  // Set to 0,0,0 for dead stop
-  if (setspeed_M1==0 && setspeed_M2==0 && setspeed_M3==0){
-
-    // Aggressively drive PID to 0,0,0 and park
-    PID_M1.SetTunings(KP_AGG, KI_AGG, KD_AGG);
-      
-    if (abs(out_M1) <= 1){
-
-      PID_M1.SetMode(MANUAL);
-      PID_M2.SetMode(MANUAL);
-      PID_M3.SetMode(MANUAL);
-      analogWrite(PWM_M1, 0);
-      analogWrite(PWM_M2, 0);
-      analogWrite(PWM_M3, 0);
-
+  if (testNumber <= testDuration){
+    if (PID_M1.GetMode() == MANUAL){
       PID_M1.SetMode(AUTOMATIC);
-      PID_M2.SetMode(AUTOMATIC);
-      PID_M3.SetMode(AUTOMATIC);}
-    
-    
-    
-// Allow for negative (Reverse) velocity
-  } else {
-    if (out_M1 < 0) {
-      digitalWrite(DIR_M1, LOW);
-    } else {
-      digitalWrite(DIR_M1, HIGH);
     }
-    analogWrite(PWM_M1, int(abs(out_M1)));
+    
+    // Update test input parameters
+    inputWaveform(testType,testMag,testPeriod);
   
-    if (out_M2 < 0) {
-      digitalWrite(DIR_M2, LOW);
-    } else {
-      digitalWrite(DIR_M2, HIGH);
+    // Compute PID values 
+    PID_M1.Compute();
+   
+    // Write to the motor directions and pwm power   
+    // Allow for negative (Reverse) velocity
+ 
+    setMotorSpeed(out_M1);
     }
-    analogWrite(PWM_M2, int(abs(out_M2)));
-  
-    if (out_M3 < 0) {
-      digitalWrite(DIR_M3, LOW);
-    } else {
-      digitalWrite(DIR_M3, HIGH);
+  else{
+    // Test is ended, slow motor to zero and turn off while waiting for new input 
+    setspeed_M1 = 0;
+    PID_M1.SetTunings(50, 100, 2);
+    while(abs(out_M1) > 1){
+      PID_M1.Compute();
+      setMotorSpeed(out_M1); 
     }
-    analogWrite(PWM_M3, int(abs(out_M3)));
+    // Set output to 0 and park
+    PID_M1.SetMode(MANUAL);
+    analogWrite(PWM_M1, 0);
   }
-//  Serial.print("Loop frequency: ");
-//  loopTime = millis();
-//  Serial.println(loopTime - oldTime);
-//  oldTime = loopTime;
-
 }
 
 
@@ -315,12 +167,9 @@ ISR(TIMER2_COMPA_vect) // timer compare interrupt service routine - fires every 
   // Don't know why but M2 and M3 counts are backwards.
   // Possible swapped wiring of encoders or swapped pin defs?
   speed_M1 = ticks2metres(-M1_Count / 0.01632);
-  speed_M2 = ticks2metres(M2_Count / 0.01632);
-  speed_M3 = ticks2metres(M3_Count / 0.01632);
-
+  
   M1_Count = 0;
-  M2_Count = 0;
-  M3_Count = 0;
+  
 }
 
 
@@ -341,98 +190,88 @@ void M1EncoderEvent() {
   }
 }
 
-
-// encoder event for the interrupt call
-void M2EncoderEvent() {
-  if (digitalRead(M2_ENCODER_A) == HIGH) {
-    if (digitalRead(M2_ENCODER_B) == LOW) {
-      M2_Count++;
-    } else {
-      M2_Count--;
-    }
-  } else {
-    if (digitalRead(M2_ENCODER_B) == LOW) {
-      M2_Count--;
-    } else {
-      M2_Count++;
-    }
-  }
-}
-
-// encoder event for the interrupt call
-void M3EncoderEvent() {
-  if (digitalRead(M3_ENCODER_A) == HIGH) {
-    if (digitalRead(M3_ENCODER_B) == LOW) {
-      M3_Count++;
-    } else {
-      M3_Count--;
-    }
-  } else {
-    if (digitalRead(M3_ENCODER_B) == LOW) {
-      M3_Count--;
-    } else {
-      M3_Count++;
-    }
-  }
-}
-
-
 /////////////////////////////////////////////////////////////////////////////////////////////
 // OTHER FUNCTIONS //////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
-
-void computeVelocities(float vel, float heading, float angular_vel) {
-  // 3 wheel omniwheel kinematics
-  // Transforms from velocity/heading/angular velocity to motor speeds
-  
-//  setspeed_M1 = -((vel * (-0.5 * cos(heading) - sqrt(3) / 2 * sin(heading))) + (2 * angular_vel * DROIDRADIUS));
-//  setspeed_M2 = -((vel * (-0.5 * cos(heading) + sqrt(3) / 2 * sin(heading))) + (2 * angular_vel * DROIDRADIUS));
-//  setspeed_M3 = -(vel * cos(heading) + (2 * angular_vel * DROIDRADIUS));
-  setspeed_M1 = vel;
-  setspeed_M2 = heading;
-  setspeed_M3 = angular_vel;
-}
-
-void loopVelocities(float type, float endspeed, float cycleTime) {
-  Serial.print(setspeed_M1 *100);
+void sendMsg(){
+  Serial.print(setspeed_M1);
   Serial.print("\t");
-  Serial.print(speed_M1 *100);
+  Serial.print(speed_M1);
   Serial.print("\t");
   Serial.println(out_M1);
-  
+}
 
+void readMSG(float *data){
+  if (Serial.available() > 0){
+
+    //Store the data in to the variable data
+    String str = Serial.readStringUntil('\n');
+    str.toCharArray(charData, 60);
+    valPosition = strtok(charData, delimiters);
+    data[0] = 0;
+    data[1] = 0;
+    data[2] = 0;
+    data[3] = 0;
+    data[4] = 0;
+    data[5] = 0;
+    
+
+    for (int i = 0; i < 6; i++) {
+      data[i] = atof(valPosition);
+      //Serial.print(data[i]);
+      valPosition = strtok(NULL, delimiters);
+    }
+    testNumber = 0;
+  }
+return;
+}
+
+void inputWaveform(float testType, float testMag, float testPeriod) {
+ 
   driveTime += 1;
   
   // Test PID using synthetic input
-  if (driveTime < cycleTime){
-    // Step input to endSpeed
-    if (type == 0){
-      setspeed_M1 = endspeed;
+  if (driveTime < testPeriod){
+    // Step input to testMag
+    if (testType == 0){
+      setspeed_M1 = testMag;
     }
-    else if (type == 1){
-      setspeed_M1 += endspeed/cycleTime;
+    else if (testType == 1){
+      setspeed_M1 += testMag/testPeriod;
     }
     else{setspeed_M1 = 0;}     
   }
   
-  else if (driveTime < 2 * cycleTime){
-    // Step input to -endSpeed
-    if (type == 0){
-      setspeed_M1 = -endspeed;
+  else if (driveTime < 2 * testPeriod){
+    // Step input to -testMag
+    if (testType == 0){
+      setspeed_M1 = -testMag;
     }
-    else if (type == 1){
-      setspeed_M1 -= endspeed/cycleTime;
+    else if (testType == 1){
+      setspeed_M1 -= testMag/testPeriod;
     }
     else{setspeed_M1 = 0;}     
   }
 
-  else if (driveTime > 2*cycleTime){
+  else if (driveTime > 2*testPeriod){
     setspeed_M1 = 0;
     driveTime = 0;
-    delay(10);
+    testNumber += 1;
+    delay(5);
   }
 
 }
+
+void setMotorSpeed(double out_M1){
+    
+      if (out_M1 < 0) {
+        digitalWrite(DIR_M1, LOW);
+      } else {
+        digitalWrite(DIR_M1, HIGH);
+      }
+      analogWrite(PWM_M1, int(abs(out_M1)));
+      return;
+    }
 
 double ticks2metres(int ticks) {
   return double(ticks) / TICKS_PER_REV * PI * WHEEL_DIAMETER;
