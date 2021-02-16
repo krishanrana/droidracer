@@ -52,6 +52,7 @@ char charData[60];
 float driveTime = 0;
 int testNumber = 0;
 int testDuration = 2;
+int complete = 0;
 
 // PID Constructor 
 PID PID_M1(&speed_M1, &out_M1, &setspeed_M1, 50, 100, 0, P_ON_M, DIRECT);
@@ -125,9 +126,6 @@ void loop() {
   Kint = data[4];
   Kder = data[5];
   
-
-   
-  
   if (testNumber <= testDuration){
     if (PID_M1.GetMode() == MANUAL){
       PID_M1.SetMode(AUTOMATIC);
@@ -150,7 +148,8 @@ void loop() {
     }
   else{
     // Test is ended, slow motor to zero and turn off while waiting for new input 
-    setspeed_M1 = 0;  
+    setspeed_M1 = 0;
+    complete = 1;  
     if(abs(out_M1) > 3){
       PID_M1.SetTunings(5, 1, 0);
       PID_M1.Compute();
@@ -213,6 +212,9 @@ void sendMsg(){
   Serial.print(speed_M1);
   Serial.print("\t");
   Serial.println(out_M1);
+  Serial.print("\t");
+  Serial.print(complete);
+
 }
 
 void readMSG(float *data){
@@ -236,6 +238,7 @@ void readMSG(float *data){
       valPosition = strtok(NULL, delimiters);
     }
     testNumber = 0;
+    complete = 0;
     Serial.print(testNumber);
   }
 return;
