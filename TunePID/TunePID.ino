@@ -43,7 +43,7 @@ float Kint = 0;
 float Kder = 0;
 
 volatile float val = 0;
-volatile float data[] = {0, 0, 0, 0, 0, 0};
+volatile float data[] = {0,0,0,0,0,0};
 char delimiters[] = ",";
 char* valPosition;
 char charData[60];
@@ -53,6 +53,10 @@ float driveTime = 0;
 int testNumber = 0;
 int testDuration = 2;
 int complete = 0;
+double timeStamp = 0;
+double t0 = 0;
+double t1 = 0;
+
 
 // PID Constructor 
 PID PID_M1(&speed_M1, &out_M1, &setspeed_M1, 50, 100, 0, P_ON_M, DIRECT);
@@ -118,56 +122,53 @@ void loop() {
   // Check serial comms for new message
   readMSG(data);
 
-  // Get test waveform and PID parameters
-  testType = int(data[0]);
-  testMag = data[1];
-  testPeriod = data[2];
-  Kprop = data[3];
-  Kint = data[4];
-  Kder = data[5];
   
-  if (testNumber <= testDuration){
-    if (PID_M1.GetMode() == MANUAL){
-      PID_M1.SetMode(AUTOMATIC);
-    }
-    
-    // Update test input parameters
-    inputWaveform(testType,testMag,testPeriod);
   
-    // Compute PID values
-    PID_M1.SetTunings(Kprop, Kint, Kder); 
-    PID_M1.Compute();
-   
-    // Write to the motor directions and pwm power   
-    // Allow for negative (Reverse) velocity
- 
-    setMotorSpeed(out_M1);
-    Serial.print("Running no.");
-    Serial.println(testNumber);
-    sendMsg();
-    }
-  else{
-    // Test is ended, slow motor to zero and turn off while waiting for new input 
-    setspeed_M1 = 0;
-    complete = 1;  
-    if(abs(out_M1) > 3){
-      PID_M1.SetTunings(5, 1, 0);
-      PID_M1.Compute();
-      setMotorSpeed(out_M1);
-      Serial.print("Slowing no.");
-      Serial.println(testNumber);
-      sendMsg(); 
-    }
-    // When motor is not running, this state may not be enetered into.. FIX
-    else{
-      // Set output to 0 and park
-      PID_M1.SetMode(MANUAL);
-      analogWrite(PWM_M1, 0);
-      Serial.print("Stopped no.");
-      Serial.println(testNumber);
-      sendMsg();
-    }
-  }
+  sendMsg();
+  
+//  if (testNumber <= testDuration){
+//    if (PID_M1.GetMode() == MANUAL){
+//      PID_M1.SetMode(AUTOMATIC);
+//    }
+//    
+//    // Update test input parameters
+//    inputWaveform(testType,testMag,testPeriod);
+//  
+//    // Compute PID values
+//    PID_M1.SetTunings(Kprop, Kint, Kder); 
+//    PID_M1.Compute();
+//   
+//    // Write to the motor directions and pwm power   
+//    // Allow for negative (Reverse) velocity
+// 
+//    setMotorSpeed(out_M1);
+//    timeStamp = millis() - t0;
+////    Serial.print("Running no.");
+////    Serial.println(testNumber);
+//    sendMsg();
+//    }
+//  else{
+//    // Test is ended, slow motor to zero and turn off while waiting for new input 
+//    setspeed_M1 = 0;
+//    complete = 1;  
+//    if(abs(out_M1) > 3){
+//      PID_M1.SetTunings(5, 1, 0);
+//      PID_M1.Compute();
+//      setMotorSpeed(out_M1);
+////      Serial.print("Slowing no.");
+////      Serial.println(testNumber);
+//      sendMsg(); 
+//    }
+//    // When motor is not running, this state may not be entered into.. FIX
+//    else{
+//      // Set output to 0 and park
+//      PID_M1.SetMode(MANUAL);
+//      analogWrite(PWM_M1, 0);
+////      Serial.print("Stopped no.");
+////      Serial.println(testNumber);
+//      sendMsg();
+//    }
+//  }
 }
 
 
@@ -207,13 +208,26 @@ void M1EncoderEvent() {
 // OTHER FUNCTIONS //////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
 void sendMsg(){
-  Serial.print(setspeed_M1);
+//  Serial.print(setspeed_M1);
+//  Serial.print("\t");
+//  Serial.print(speed_M1);
+//  Serial.print("\t");
+//  Serial.print(out_M1);
+//  Serial.print("\t");
+//  Serial.print(timeStamp);
+//  Serial.print("\t");
+//  Serial.println(complete);
+
+ 
+  Serial.print(t0);
   Serial.print("\t");
-  Serial.print(speed_M1);
+  Serial.print(t1);
   Serial.print("\t");
-  Serial.println(out_M1);
+  Serial.print(7);
   Serial.print("\t");
-  Serial.print(complete);
+  Serial.print(" data");
+  Serial.print("\t");
+  Serial.println("in");
 
 }
 
@@ -222,7 +236,7 @@ void readMSG(float *data){
 
     //Store the data in to the variable data
     String str = Serial.readStringUntil('\n');
-    str.toCharArray(charData, 60);
+    str.toCharArray(charData, 50);
     valPosition = strtok(charData, delimiters);
     data[0] = 0;
     data[1] = 0;
@@ -234,22 +248,33 @@ void readMSG(float *data){
 
     for (int i = 0; i < 6; i++) {
       data[i] = atof(valPosition);
-      //Serial.print(data[i]);
+      //Serial.println(data[i]);
       valPosition = strtok(NULL, delimiters);
     }
+
+    // Get test waveform and PID parameters
+    testType = int(data[0]);
+    testMag = data[1];
+    testPeriod = (data[2] * 1000);
+    Kprop = data[3];
+    Kint = data[4];
+    Kder = data[5];
+    
     testNumber = 0;
     complete = 0;
-    Serial.print(testNumber);
+    t0 = millis();
+    t1 = millis();
   }
 return;
 }
 
 void inputWaveform(float testType, float testMag, float testPeriod) {
  
-  driveTime += 1;
+  driveTime = millis()-t1;
+  
   
   // Test PID using synthetic input
-  if (driveTime < testPeriod){
+  if (driveTime < testPeriod/2){
     // Step input to testMag
     if (testType == 0){
       setspeed_M1 = testMag;
@@ -260,7 +285,7 @@ void inputWaveform(float testType, float testMag, float testPeriod) {
     else{setspeed_M1 = 0;}     
   }
   
-  else if (driveTime < 2 * testPeriod){
+  else if (driveTime < testPeriod){
     // Step input to -testMag
     if (testType == 0){
       setspeed_M1 = -testMag;
@@ -271,11 +296,11 @@ void inputWaveform(float testType, float testMag, float testPeriod) {
     else{setspeed_M1 = 0;}     
   }
 
-  else if (driveTime > 2*testPeriod){
+  else if (driveTime >= testPeriod){
     setspeed_M1 = 0;
     driveTime = 0;
+    t1 = millis();
     testNumber += 1;
-    delay(5);
   }
 
 }

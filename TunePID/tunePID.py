@@ -7,10 +7,9 @@ import time
 import numpy as np
 import os
 import serial
-import struct
+
 import matplotlib.pyplot as plt
-import PySimpleGUI as psg
-from fractions import Fraction
+#import PySimpleGUI as psg
 
 
 logging.basicConfig(level=logging.DEBUG,
@@ -52,7 +51,7 @@ class TunePID:
 
         self.buf = bytearray()
         
-        print('Class initialised')
+        logging.debug('Initialisation successful')
 
 
     def readSerial(self):
@@ -62,7 +61,7 @@ class TunePID:
             self.buf = self.buf[i+1:]
             return r
         while True:
-            i = max(1, min(2048, self.ser.in_waiting))
+            i = max(1, min(2048, self.ser.inWaiting())) # in_waiting for python3
             data = self.ser.read(i)
             i = data.find(b"\n")
             if i >= 0:
@@ -85,19 +84,28 @@ class TunePID:
             str(self.Kder) + "\n")
 
         self.ser.write(dataOut.encode("ascii"))
+        print(dataOut.encode("ascii"))
 
     def getOutputMsg(self):
         # Read buffer
-        msgIn = self.readSerial()
+        #msgIn = self.readSerial()
+        #self.ser.flush()
+        msgIn = self.ser.readline()
+        
+        
         # Process message (tab seperated)
-        if msgIn is not None:
+        try:
             msgOut = msgIn.split("\t")
-            self.outSetSpeed = msgOut[1]
-            self.outMotorSpeed = msgOut[2]
-            self.outPWM = msgOut[3]
-            self.outTime = msgOut[4]
-        # Write parameters to output list  
-        self.dataIn.append(msgOut)
+            self.outSetSpeed = msgOut[0]
+            self.outMotorSpeed = msgOut[1]
+            self.outPWM = msgOut[2]
+            self.outTime = msgOut[3]
+            self.testCompleted = msgOut[4]
+            # Write parameters to output list  
+            self.dataIn.append([msgOut[0:4]])
+            print(msgOut)
+        except:
+            logging.warning('Message lost')
 
     def saveOutput(self):
         
@@ -140,25 +148,26 @@ if __name__ == '__main__':
     tp = TunePID()
     t0 = time.time()
             
-    while (True):
-        # Get user input (Waveform parameters, PID gains)
-        tp.testType = 0 # 0 is Step, 1 is Ramp, 2 is Sinusoid
-        tp.testMag = 0 # Magnitude of input
-        tp.testPeriod = 0 # Period of test in seconds
-        tp.Kprop = 0 # Proportional gain
-        tp.Kint = 0 # Integral Gain
-        tp.Kder = 0 # Derivative gain
+    #while (True):
+    # Get user input (Waveform parameters, PID gains)
+    tp.testType = float(1) # 0 is Step, 1 is Ramp, 2 is Sinusoid
+    tp.testMag = float(2) # Magnitude of input
+    tp.testPeriod = float(4) # Period of test in seconds
+    tp.Kprop = float(1) # Proportional gain
+    tp.Kint = float(1) # Integral Gain
+    tp.Kder = float(1) # Derivative gain
 
-        # Send test parameters to arduino
-        tp.writeSerial()
-        while (tp.testCompleted is False):
-            # Get measurements
-            tp.getOutputMsg()
-            # Plot measurements
-            tp.plotOutput()
-            
-        # Save file
-        tp.saveOutput()
+    # Send test parameters to arduino
+    tp.writeSerial()
+    while (time.time() - t0 < 2):
+        # Get measurements
+        tp.getOutputMsg()
+        print(". \n")
+        # Plot measurements
+        #tp.plotOutput()
+        
+    # Save file
+    #tp.saveOutput()
 
         
         
