@@ -96,6 +96,7 @@ class TunePID:
             self.outMotorSpeed = msgOut[2]
             self.outPWM = msgOut[3]
             self.outTime = msgOut[4]
+            self.testCompleted = msgOut[5]
         # Write parameters to output list  
         self.dataIn.append(msgOut)
 
