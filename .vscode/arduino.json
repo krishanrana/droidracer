@@ -1,4 +1,6 @@
 {
     "board": "arduino:avr:uno",
-    "programmer": "Arduino as ISP"
+    "programmer": "AVR ISP",
+    "sketch": "CommsTest/CommsTest.ino",
+    "port": "/dev/ttyUSB0"
 }

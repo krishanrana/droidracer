@@ -7,10 +7,16 @@
                 "/Users/dougpalmer/Documents/Arduino/libraries/**",
                 "/Applications/Arduino.app/Contents/Java/libraries/**",
                 "/Applications/Arduino.app/Contents/Java/hardware/tools/**",
-                "/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/**"
+                "/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/**",
+                "/opt/arduino-1.8.13/hardware/arduino/avr/**",
+                "/opt/arduino-1.8.13/hardware/tools/**",
+                "/opt/arduino-1.8.13/libraries/**",
+                "/home/pi/Arduino/libraries/**",
+                "/opt/arduino-1.8.13/tools/**"
             ],
             "forcedInclude": [
-                "/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/cores/arduino/Arduino.h"
+                "/Applications/Arduino.app/Contents/Java/hardware/arduino/avr/cores/arduino/Arduino.h",
+                "/opt/arduino-1.8.13/hardware/arduino/avr/cores/arduino/Arduino.h"
             ],
             "defines": [
                 "USBCON"
@@ -22,6 +28,22 @@
             "intelliSenseMode": "macos-clang-x64",
             "cStandard": "c17",
             "cppStandard": "c++17"
+        },
+        {
+            "name": "Linux",
+            "includePath": [
+                "/opt/arduino-1.8.13/tools/**",
+                "/home/pi/Arduino/libraries/**",
+                "/opt/arduino-1.8.13/libraries/**",
+                "/opt/arduino-1.8.13/hardware/tools/**",
+                "/opt/arduino-1.8.13/hardware/arduino/avr/**"
+            ],
+            "forcedInclude": [
+                "/opt/arduino-1.8.13/hardware/arduino/avr/cores/arduino/Arduino.h"
+            ],
+            "defines": [
+                "USBCON"
+            ]
         }
     ],
     "version": 4

@@ -2,7 +2,7 @@
 
 unsigned long timer = 0;
 long loopTime = 5000;   // microseconds
-double loops = 0.101;
+double loops = 0;
 
 void setup() {
   Serial.begin(38400);
@@ -15,11 +15,12 @@ void loop() {
   //int val = analogRead(0) - 512;
   //double val = (analogRead(0) -512) / 512.0;
   double val1 = loops;
-  double val2 = loops *1.3;
-  double val3 = loops *1.5;
+  double val2 = random(-10,10);
+  double val3 = random(-5,5);
+  //Serial.println(val2);
   sendToPC(&val1, &val2, &val3);
-  if (loops > 1000);{
-    loops = 0.101; 
+  if (loops > 10){
+    loops = 0; 
   }
 }
 
