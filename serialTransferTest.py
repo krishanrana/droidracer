@@ -1,103 +1,49 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Feb 18 12:10:48 2021
-
-@author: pi
-"""
+from __future__ import print_function, division, absolute_import
 import time
-from pySerialTransfer import pySerialTransfer as txfer
+
+from robust_serial import write_order, Order, write_i8, write_i16, read_i8, read_order,read_i16
+from robust_serial.utils import open_serial_port
 
 
 if __name__ == '__main__':
     try:
-        link = txfer.SerialTransfer('/dev/ttyUSB0')
-        
-        link.open()
-        time.sleep(2) # allow some time for the Arduino to completely reset
-        
-        while True:
-            send_size = 0
-            
-            ###################################################################
-            # Send a list
-            ###################################################################
-            list_ = [1, 3]
-            list_size = link.tx_obj(list_)
-            send_size += list_size
-            
-            ###################################################################
-            # Send a string
-            ###################################################################
-            str_ = 'hello'
-            str_size = link.tx_obj(str_, send_size) - send_size
-            send_size += str_size
-            
-            ###################################################################
-            # Send a float
-            ###################################################################
-            float_ = 5.234
-            float_size = link.tx_obj(float_, send_size) - send_size
-            send_size += float_size
-            
-            ###################################################################
-            # Transmit all the data to send in a single packet
-            ###################################################################
-            link.send(send_size)
-            
-            ###################################################################
-            # Wait for a response and report any errors while receiving packets
-            ###################################################################
-            while not link.available():
-                if link.status < 0:
-                    if link.status == txfer.CRC_ERROR:
-                        print('ERROR: CRC_ERROR')
-                    elif link.status == txfer.PAYLOAD_ERROR:
-                        print('ERROR: PAYLOAD_ERROR')
-                    elif link.status == txfer.STOP_BYTE_ERROR:
-                        print('ERROR: STOP_BYTE_ERROR')
-                    else:
-                        print('ERROR: {}'.format(link.status))
-            
-            ###################################################################
-            # Parse response list
-            ###################################################################
-            rec_list_  = link.rx_obj(obj_type=type(list_),
-                                     obj_byte_size=list_size,
-                                     list_format='i')
-            
-            ###################################################################
-            # Parse response string
-            ###################################################################
-            rec_str_   = link.rx_obj(obj_type=type(str_),
-                                     obj_byte_size=str_size,
-                                     start_pos=list_size)
-            
-            ###################################################################
-            # Parse response float
-            ###################################################################
-            rec_float_ = link.rx_obj(obj_type=type(float_),
-                                     obj_byte_size=float_size,
-                                     start_pos=(list_size + str_size))
-            
-            ###################################################################
-            # Display the received data
-            ###################################################################
-            print('SENT: {} {} {}'.format(list_, str_, float_))
-            print('RCVD: {} {} {}'.format(rec_list_, rec_str_, rec_float_))
-            print(' ')
-    
-    except KeyboardInterrupt:
-        try:
-            link.close()
-        except:
-            pass
-    
-    except:
-        import traceback
-        traceback.print_exc()
-        
-        try:
-            link.close()
-        except:
-            pass
+        serial_file = open_serial_port(serial_port='/dev/ttyUSB0',baudrate=115200, timeout=None)
+    except Exception as e:
+        raise e
 
+    is_connected = False
+    # Initialize communication with Arduino
+    while not is_connected:
+        print("Waiting for arduino...")
+        write_order(serial_file, Order.HELLO)
+        bytes_array = bytearray(serial_file.read(1))
+        if not bytes_array:
+            time.sleep(2)
+            continue
+        byte = bytes_array[0]
+        if byte in [Order.HELLO.value, Order.ALREADY_CONNECTED.value]:
+            is_connected = True
+
+    print("Connected to Arduino")
+
+    motor_speed = 0
+
+    # Equivalent to write_i8(serial_file, Order.MOTOR.value)
+    
+    for _ in range(10):
+        motor_speed = 1
+        write_order(serial_file, Order.MOTOR)
+        order = read_order(serial_file)
+        print("Ordered received: {:?}", order)
+        write_i8(serial_file, motor_speed)
+        value = read_i8(serial_file)
+        print("value received: {:?}", value)
+        time.sleep(0.1)
+        
+    serial_file.close()
+    time.sleep(1)
+    if serial_file.open is False:
+        print('Connection closed')
+    else:
+        print('ERROR, connection still open')
+    
