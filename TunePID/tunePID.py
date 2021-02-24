@@ -95,18 +95,19 @@ class TunePID:
     
     def writeSerial(self):
 
-        # Send over serial to Arduino
-
-        dataOut = (
-            str(self.testType) + "," +
-            str(self.testMag) + "," +
-            str(self.testPeriod) + "," +
-            str(self.Kprop) + "," +
-            str(self.Kint) + "," +
-            str(self.Kder) + "\n")
-
-        self.ser.write(dataOut.encode("ascii"))
-        print(dataOut.encode("ascii"))
+        # Send byte string over serial to Arduino
+        self.ser.reset_output_buffer()
+        dataOut = [
+            self.testType,
+            self.testMag,
+            self.testPeriod, 
+            self.Kprop, 
+            self.Kint,
+            self.Kder]
+        dataByte = struct.pack('f'*len(dataOut),*dataOut)
+        #dataByte = struct.pack(outVarType*len(dataOut),*dataOut)
+        self.ser.write(dataByte)
+        
 
 
     def updateSerialData(self):
@@ -140,7 +141,8 @@ class TunePID:
         while (self.isRun):
             self.ser.readinto(self.inRawData)
             self.isReceiving = True    
-    
+
+
 #     def getOutputMsg(self):
 #         # Read buffer
 #         #msgIn = self.readSerial()
@@ -206,15 +208,16 @@ if __name__ == '__main__':
             
     #while (True):
     # Get user input (Waveform parameters, PID gains)
-#     tp.testType = float(1) # 0 is Step, 1 is Ramp, 2 is Sinusoid
-#     tp.testMag = float(2) # Magnitude of input
-#     tp.testPeriod = float(4) # Period of test in seconds
-#     tp.Kprop = float(1) # Proportional gain
-#     tp.Kint = float(1) # Integral Gain
-#     tp.Kder = float(1) # Derivative gain
+    tp.testType = 0 # 0 is Step, 1 is Ramp, 2 is Sinusoid
+    tp.testMag = 1.0 # Magnitude of input
+    tp.testPeriod = 2.5 # Period of test in seconds
+    tp.Kprop = 20 # Proportional gain
+    tp.Kint = 5 # Integral Gain
+    tp.Kder = 0.3 # Derivative gain
 
     # Send test parameters to arduino
-#     tp.writeSerial()
+    tp.writeSerial()
+    
     for _ in range(10):
         # Get measurements
         tp.updateSerialData()

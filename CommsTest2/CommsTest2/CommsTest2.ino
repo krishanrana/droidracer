@@ -66,3 +66,14 @@ void sendToPC(double* data1, double* data2, double* data3)
                  byteData3[0], byteData3[1], byteData3[2], byteData3[3]};
   Serial.write(buf, 12);
 }
+
+float readSerialInput(){
+// Function polls serial line
+  if (Serial.available() > 0){
+    // Check that message is complete
+
+    // if complete, decode from bytes to floats
+    
+  return messageIn;
+  }
+}
