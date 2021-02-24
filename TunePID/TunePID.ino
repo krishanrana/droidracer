@@ -120,7 +120,7 @@ void setup() {
 void loop() {
   
   // Check serial comms for new message
-  readMSG(data);
+  //readMSG(data);
 
   
   

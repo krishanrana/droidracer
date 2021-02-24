@@ -1,7 +1,7 @@
 // Test code from https://thepoorengineer.com/en/arduino-python-plot/
 
 unsigned long timer = 0;
-long loopTime = 5000;   // microseconds
+long loopTime = 100000;   // microseconds
 double loops = 0;
 
 void setup() {
@@ -15,9 +15,10 @@ void loop() {
   //int val = analogRead(0) - 512;
   //double val = (analogRead(0) -512) / 512.0;
   double val1 = loops;
-  double val2 = random(-10,10);
-  double val3 = random(-5,5);
-  //Serial.println(val2);
+  double val2 = loops + 0.1;
+  double val3 = loops + 0.01;
+  //Serial.println(val1);
+  
   sendToPC(&val1, &val2, &val3);
   if (loops > 10){
     loops = 0; 
