@@ -21,10 +21,24 @@
 // L9958 Enable for all 4 motors
 #define ENABLE_MOTORS 8
 
+// Serial communication definitions
+#define INMSGSIZE 6 // Length of message in values (eg. [1.3 100] = 2)
+#define INVARBYTES 4 // Bytes per value (eg. float = 4)
+
+
+// Serial communication definitions
+int byteLength = INMSGSIZE * INVARBYTES;
+unsigned long timer = 0;
+double msgIn[INMSGSIZE];
+
+union Data{ 
+  double d;
+  byte b[INVARBYTES];
+};
+
 // Motor PWM variables
 int pwm1, pwm2, pwm3;
 int dir1, dir2, dir3;
-char dataString[50] = {0};
 
 volatile double speed_M1;         // Used for input measurement to PID
 double out_M1;                        // Output from PID to power motors
@@ -42,17 +56,12 @@ float Kprop = 0;
 float Kint = 0;
 float Kder = 0;
 
-volatile float val = 0;
-volatile float data[] = {0,0,0,0,0,0};
-char delimiters[] = ",";
-char* valPosition;
-char charData[60];
-
 // Variables for testing
+long loopTime = 100000;   // microseconds
 float driveTime = 0;
 int testNumber = 0;
 int testDuration = 2;
-int complete = 0;
+int completeFlag = 0;
 double timeStamp = 0;
 double t0 = 0;
 double t1 = 0;
@@ -108,9 +117,11 @@ void setup() {
   // L9958 Enable for all 4 motors
   pinMode(ENABLE_MOTORS, OUTPUT);  digitalWrite(ENABLE_MOTORS, LOW);   // HIGH = disabled
 
-  Serial.begin(9600);
+  // Open serial port
+  Serial.begin(38400);
+  timer = micros();
 
-  delay(2000);
+  delay(1000);
  
 }
 
@@ -119,12 +130,22 @@ void setup() {
 /////////////////////////////////////////////////////////////////////////////////////////////
 void loop() {
   
-  // Check serial comms for new message
-  //readMSG(data);
+  timeSync(loopTime);
+  // Read: testType, testMag, TestPeriod, Kp,Ki,Kd
+  readSerialInput();
+  
+  // Process commands and start test
+  // Placeholder echo some input
+  double val1 = msgIn[0];
+  double val2 = msgIn[1];
+  double val3 = msgIn[2];
+  double val4 = msgIn[3];
+  double val5 = msgIn[4];
 
-  
-  
-  sendMsg();
+//  Serial.println(val1);
+  // Write current test values: SetPoint, motorspeed, PWM, time, Complete
+  writeSerial(&val1, &val2, &val3, &val4, &val5);
+
   
 //  if (testNumber <= testDuration){
 //    if (PID_M1.GetMode() == MANUAL){
@@ -178,14 +199,11 @@ void loop() {
 ISR(TIMER2_COMPA_vect) // timer compare interrupt service routine - fires every 0.01632 seconds
 {
   // Ticks per second
-  // Don't know why but M2 and M3 counts are backwards.
-  // Possible swapped wiring of encoders or swapped pin defs?
   speed_M1 = ticks2metres(-M1_Count / 0.01632);
   
   M1_Count = 0;
   
 }
-
 
 // encoder event for the interrupt call
 void M1EncoderEvent() {
@@ -207,71 +225,108 @@ void M1EncoderEvent() {
 /////////////////////////////////////////////////////////////////////////////////////////////
 // OTHER FUNCTIONS //////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
-void sendMsg(){
-//  Serial.print(setspeed_M1);
-//  Serial.print("\t");
-//  Serial.print(speed_M1);
-//  Serial.print("\t");
-//  Serial.print(out_M1);
-//  Serial.print("\t");
-//  Serial.print(timeStamp);
-//  Serial.print("\t");
-//  Serial.println(complete);
-
- 
-  Serial.print(t0);
-  Serial.print("\t");
-  Serial.print(t1);
-  Serial.print("\t");
-  Serial.print(7);
-  Serial.print("\t");
-  Serial.print(" data");
-  Serial.print("\t");
-  Serial.println("in");
-
-}
-
-void readMSG(float *data){
-  if (Serial.available() > 0){
-
-    //Store the data in to the variable data
-    String str = Serial.readStringUntil('\n');
-    str.toCharArray(charData, 50);
-    valPosition = strtok(charData, delimiters);
-    data[0] = 0;
-    data[1] = 0;
-    data[2] = 0;
-    data[3] = 0;
-    data[4] = 0;
-    data[5] = 0;
-    
-
-    for (int i = 0; i < 6; i++) {
-      data[i] = atof(valPosition);
-      //Serial.println(data[i]);
-      valPosition = strtok(NULL, delimiters);
-    }
-
-    // Get test waveform and PID parameters
-    testType = int(data[0]);
-    testMag = data[1];
-    testPeriod = (data[2] * 1000);
-    Kprop = data[3];
-    Kint = data[4];
-    Kder = data[5];
-    
-    testNumber = 0;
-    complete = 0;
-    t0 = millis();
-    t1 = millis();
+void timeSync(unsigned long deltaT)
+{
+  unsigned long currTime = micros();
+  long timeToDelay = deltaT - (currTime - timer);
+  if (timeToDelay > 5000)
+  {
+    delay(timeToDelay / 1000);
+    delayMicroseconds(timeToDelay % 1000);
   }
-return;
+  else if (timeToDelay > 0)
+  {
+    delayMicroseconds(timeToDelay);
+  }
+  else
+  {
+      // timeToDelay is negative so we start immediately
+  }
+  timer = currTime + timeToDelay;
 }
+
+// void writeSerial(int* data1, int* data2, int* data3)
+// {
+//   byte* byteData1 = (byte*)(data1);
+//   byte* byteData2 = (byte*)(data2);
+//   byte* byteData3 = (byte*)(data3);
+//   byte buf[6] = {byteData1[0], byteData1[1],
+//                  byteData2[0], byteData2[1],
+//                  byteData3[0], byteData3[1]};
+//   Serial.write(buf, 6);
+// }
+
+void writeSerial(double* data1, double* data2, double* data3, double* data4, double* data5)
+{ // TODO: Rewrite using loops, Unions etc
+  byte* byteData1 = (byte*)(data1);
+  byte* byteData2 = (byte*)(data2);
+  byte* byteData3 = (byte*)(data3);
+  byte* byteData4 = (byte*)(data4);
+  byte* byteData5 = (byte*)(data5);
+
+  byte buf[20] = {byteData1[0], byteData1[1], byteData1[2], byteData1[3],
+                 byteData2[0], byteData2[1], byteData2[2], byteData2[3],
+                 byteData3[0], byteData3[1], byteData3[2], byteData3[3],
+                 byteData4[0], byteData4[1], byteData4[2], byteData4[3],
+                 byteData5[0], byteData5[1], byteData5[2], byteData5[3]};
+
+  Serial.write(buf, 20);
+}
+
+void readSerialInput(){
+  
+  int bytelength = INMSGSIZE * INVARBYTES;
+  byte bufIn[byteLength];
+  double t0 = millis();
+  // Function polls serial line for complete message
+  if (Serial.available() >= byteLength){
+
+    int byteIn = Serial.readBytes((byte*)&bufIn,byteLength);
+    
+    // Check that message is complete
+    if (byteIn == byteLength){
+      // if complete, decode from bytes to floats
+      
+      for (int var = 0;var<INMSGSIZE;var++){
+        int writebit = 0;
+        union Data dataIn;
+        for (int readbit = (var*INVARBYTES);readbit<(var*INVARBYTES+INVARBYTES);readbit++){       
+          // Read each value bytes into union container 
+          dataIn.b[writebit] = bufIn[readbit];
+          writebit+=1;
+        }
+        msgIn[var] = dataIn.d;       
+      }
+    }
+    else{
+      msgIn[0] = 999;
+    }
+  }
+  else{
+    msgIn[0] = -999;
+  }
+}
+
+
+//     // Get test waveform and PID parameters
+//     testType = int(msgIn[0]);
+//     testMag = msgIn[1];
+//     testPeriod = (msgIn[2] * 1000);
+//     Kprop = msgIn[3];
+//     Kint = msgIn[4];
+//     Kder = msgIn[5];
+    
+//     testNumber = 0;
+//     complete = 0;
+//     t0 = millis();
+//     t1 = millis();
+//   }
+// return;
+// }
 
 void inputWaveform(float testType, float testMag, float testPeriod) {
  
   driveTime = millis()-t1;
-  
   
   // Test PID using synthetic input
   if (driveTime < testPeriod/2){
@@ -302,7 +357,6 @@ void inputWaveform(float testType, float testMag, float testPeriod) {
     t1 = millis();
     testNumber += 1;
   }
-
 }
 
 void setMotorSpeed(double out_M1){

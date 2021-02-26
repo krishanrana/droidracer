@@ -20,7 +20,6 @@ void setup() {
 }
 
 void loop() {
-  //Serial.reset_input_line();
   // Check serial input for message
   timeSync(loopTime);
   readSerialInput();

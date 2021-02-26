@@ -20,7 +20,7 @@ shutdown_flag = False
 
 class TunePID:
 
-    def __init__(self, serial_port='/dev/ttyUSB0',baud=38400,inVarNum=4,inVarType = 'f'):
+    def __init__(self, serial_port='/dev/ttyUSB0',baud=38400,inVarNum=5,outVarNum=6,VarType = 'f'):
 
         # Initialise output filename and directory
         self.path = []
@@ -30,88 +30,86 @@ class TunePID:
         self.isReceiving = False
         self.isRun = True
         self.thread = None
+
+        # Setup variable conversion parameters
+        self.VarType = VarType
+
+        if (self.VarType == 'f'):
+            self.VarBytes = 4
+            logging.debug("Python expecting 4-byte FLOAT type input")
+        elif (self.VarType == 'i'):
+            self.VarBytes = 2 
+            logging.debug("Python expecting 2-byte INT type input")         
+        else:
+            logging.error("Invalid Input data type, must be 'f' or 'i'")
+            sys.exit()
         
-        
-        # Initialise input parameters
-        
+        # Initialise OUTPUT test parameters 
+        self.outVarNum = outVarNum
+        self.dataOut = [0]*self.outVarNum
+
         self.testType = 0
         self.testMag = 0
         self.testPeriod = 0
         self.Kprop = 0
         self.Kint = 0
         self.Kder = 0
-
-        # Initialise data collection variables
-        self.inVarNum = inVarNum
-        self.inVarType = inVarType
-        if (self.inVarType == 'f'):
-            self.inVarBytes = 4
-        elif (self.inVarType == 'i'):
-            self.inVarBytes = 2          
-        else:
-            logging.error("Invalid Input data type, must be 'f' or 'i'")
-            sys.exit()
-          
-        self.inRawData = bytearray(self.inVarNum * self.inVarBytes)
-        self.inData = [0]* self.inVarNum
-        # Here are the variables
-#         self.outSetSpeed = 0
-#         self.outMotorSpeed = 0
-#         self.outPWM = 0
-#         self.outTime = 0
-#         self.testCompleted = False
+ 
+        # Initialise INPUT data collection variables
+        self.inVarNum = inVarNum  
+        self.inRawData = bytearray(self.inVarNum * self.VarBytes)
+        self.inData = [0] * self.inVarNum
         
         # Data container for save
-        self.csvData = [[.0,0,0,0]];
+        self.saveData = [[0] * self.inVarNum]
+        self.initialTimer = 0
 
         # Open serial comms to Arduino
         try:
             self.ser = serial.Serial(serial_port, baud)
+            logging.debug('Serial port connected')
         except:
             logging.error('Serial port not found')
-            
-        self.initialTimer = 0
-        self.bufIn = bytearray()
+            sys.exit()
+        
         
         logging.debug('Initialisation successful')
 
     def writeSerial(self):
-
-        # Send byte string over serial to Arduino
+        # Method compiles and converts message to byte string using defined data format.
+        # Sends message over serial
         self.ser.reset_output_buffer()
         dataOut = [
-            self.testType,
-            self.testMag,
-            self.testPeriod, 
-            self.Kprop, 
-            self.Kint,
-            self.Kder]
-        dataByte = struct.pack('f'*len(dataOut),*dataOut)
-        #dataByte = struct.pack(outVarType*len(dataOut),*dataOut)
+            tp.testType,
+            tp.testMag,
+            tp.testPeriod,
+            tp.Kprop,
+            tp.Kint, 
+            tp.Kder]   
+        dataByte = struct.pack(self.VarType *len(dataOut),*dataOut)
         self.ser.write(dataByte)
-        
 
-
-    def updateSerialData(self):
+    def getSerialData(self):
         # Method reads serial stream given data format expected (floats or ints)
         # Set data time logging
         currentTimer = time.perf_counter()
-        dataTime = ((currentTimer - self.initialTimer))     # the first reading will be erroneous
+        dataTime = ((currentTimer - self.initialTimer))
         self.previousTimer = currentTimer
-        privateData = copy.deepcopy(self.inRawData[:])    # Synchronize all data to the same sample time
+        privateData = copy.deepcopy(self.inRawData[:]) # Synchronize all data to the same sample time
         for i in range(self.inVarNum):
-            # Unpack message, numPlots = number of variables, dataNumBytes = datatype
-            data = privateData[(i*self.inVarBytes):(self.inVarBytes + i*self.inVarBytes)]
-#             value,  = struct.unpack(self.dataType, data)
-            self.inData[i] = struct.unpack(self.inVarType, data)[0] # Unpack always returns tuple
-        # Store values
-        self.csvData.append([self.inData[0], self.inData[1], self.inData[2],dataTime])
-        logging.debug('Data updated')
+            # Unpack message, inVarNum = number of variables, VarBytes = datatype
+            data = privateData[(i*self.VarBytes):(self.VarBytes + i*self.VarBytes)]
+            self.inData[i] = struct.unpack(self.VarType, data)[0] # Unpack always returns tuple
+        # Store values: setPoint, motorSpeed, PWM, timeStamp, completeFlag
+        self.TestCompleted = bool(round(self.inData[-1]))
+        # todo: Change to allow variable data size inVarNum. Try append([*self.inData])
+        self.saveData.append([self.inData[0], self.inData[1], self.inData[2],self.inData[3],self.inData[4]])
+        logging.debug('Data updated:%f', dataTime)
     
     def startReadThread(self):
         if self.thread == None:
             self.thread = Thread(target=self.readSerialThread)
-            #self.thread.daemon = True
+            self.thread.daemon = True
             self.thread.start()
             # Block till we start receiving values
             while self.isReceiving != True:
@@ -124,55 +122,18 @@ class TunePID:
             self.ser.readinto(self.inRawData)
             self.isReceiving = True    
 
-# Function for reading char strings from arduino (similar to serial.readline()
-#     def readSerial(self):
-#         i = self.bufIn.find(b"\n")
-#         if i >= 0:
-#             r = self.buf[:i+1]
-#             self.buf = self.buf[i+1:]
-#             return r
-#         while True:
-#             i = max(1, min(2048, self.ser.inWaiting())) # in_waiting for python3
-#             data = self.ser.read(i)
-#             i = data.find(b"\n")
-#             if i >= 0:
-#                 r = self.buf + data[:i+1]
-#                 self.buf[0:] = data[i+1:]
-#                 return r
-#             else:
-#                 self.buf.extend(data)
-    
-#     def getOutputMsg(self):
-#         # Read buffer
-#         #msgIn = self.readSerial()
-#         #self.ser.flush()
-#         msgIn = self.ser.readline()
-#         
-#         
-#         # Process message (tab seperated)
-#         try:
-#             msgOut = msgIn.split("\t")
-#             self.outSetSpeed = msgOut[0]
-#             self.outMotorSpeed = msgOut[1]
-#             self.outPWM = msgOut[2]
-#             self.outTime = msgOut[3]
-#             self.testCompleted = msgOut[4]
-#             # Write parameters to output list  
-#             self.dataIn.append([msgOut[0:4]])
-#             print(msgOut)
-#         except:
-#             logging.warning('Message lost')
 
-    def saveOutput(self):
-        
-        # Check user to save
-        fileOut = []
-        # Create file name (PIDtest_ss/mm/hr/d/m/y)
 
-    def plotOutput(self):
+    # def saveOutput(self):
         
-        # update graph in loop
-        fileOut = []
+    #     # Check user to save
+    #     fileOut = []
+    #     # Create file name (PIDtest_ss/mm/hr/d/m/y)
+
+    # def plotOutput(self):
+        
+    #     # update graph in loop
+    #     fileOut = []
         
 
     def close(self):
@@ -186,8 +147,6 @@ class TunePID:
 '''
 Captures the ctrl+c keyboard command to close the services and free 
 resources gracefully.
-Allows the sockets and camera to be immediately reopened on next run without
-waiting for the OS to close them on us.
 '''
 def signal_handler(signal, frame):
     global shutdown_flag
@@ -201,11 +160,11 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)
 
     global tp
-    tp = TunePID('/dev/ttyUSB0',38400,3,'f')
+    tp = TunePID('/dev/ttyUSB0',38400,5,6,'f')
     tp.startReadThread()
     t0 = time.time()
             
-    #while (True):
+    #Use GUI loop for online changes
     # Get user input (Waveform parameters, PID gains)
     tp.testType = 0 # 0 is Step, 1 is Ramp, 2 is Sinusoid
     tp.testMag = 1.0 # Magnitude of input
@@ -216,22 +175,21 @@ if __name__ == '__main__':
 
     # Send test parameters to arduino
     tp.writeSerial()
+    tp.initialTimer = 0
     
-    for _ in range(10):
-        # Get measurements
-        tp.updateSerialData()
+    while tp.TestCompleted is False:
+        # Get measurements until test is completed
+        tp.getSerialData()
         for i in range(tp.inVarNum):
             print(tp.inData[i])
         print(time.time() - t0)
-        # Plot measurements
-        #tp.plotOutput()
+
+    # Plot measurements
+    #tp.plotOutput()
         
     # Save file
     #tp.saveOutput()
-
-        
-        
-        
+    
     print('out of loop')
     tp.close()
 
