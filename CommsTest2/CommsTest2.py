@@ -35,6 +35,8 @@ class serialPlot:
         self.plotTimer = 0
         self.previousTimer = 0
         self.csvData = []
+        # Data structure for TX
+        self.dataOut = [0]* numPlots
 
         print('Trying to connect to: ' + str(serialPort) + ' at ' + str(serialBaud) + ' BAUD.')
         try:
@@ -88,6 +90,20 @@ class serialPlot:
             self.isReceiving = True
             #time.sleep(0.001)
             #print(self.rawData)
+            
+    def writeSerial(self):
+
+        # Send byte string over serial to Arduino
+        self.serialConnection.reset_output_buffer()
+        
+        dataByte = struct.pack('f'*len(self.dataOut),*self.dataOut)
+#         dataByte = struct.pack('fff',*self.dataOut)
+        #dataByte = struct.pack(outVarType*len(dataOut),*dataOut)
+#         print(len(dataByte))
+        self.serialConnection.write(dataByte)
+#         print(dataByte)
+    
+
 
     def close(self):
         self.isRun = False
@@ -105,13 +121,20 @@ def main():
     maxPlotLength = 15     # number of points in x-axis of real time plot
     dataNumBytes = 4        # number of bytes of 1 data point
     numPlots = 3            # number of plots in 1 graph
+    
+    
     s = serialPlot(portName, baudRate, maxPlotLength, dataNumBytes, numPlots)   # initializes all required variables
     s.readSerialStart()                                               # starts background thread
-    for _ in range(100):
-        s.getSerialSimple()
-        
+    s.dataOut = [0.10445,2392.5,35.5002]
+    
+    for _ in range(2):
+        s.writeSerial()
+        print(s.dataOut)
+        time.sleep(0.1)
+        s.getSerialSimple()       
         print(s.data)
         print(s.plotTimer)
+        s.dataOut = [10,3,3-9]
 
     # plotting starts below
 #     pltInterval = 50    # Period at which the plot animation updates [ms]

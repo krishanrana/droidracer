@@ -75,24 +75,6 @@ class TunePID:
         
         logging.debug('Initialisation successful')
 
-# Function for reading char strings from arduino (similar to serial.readline()
-#     def readSerial(self):
-#         i = self.bufIn.find(b"\n")
-#         if i >= 0:
-#             r = self.buf[:i+1]
-#             self.buf = self.buf[i+1:]
-#             return r
-#         while True:
-#             i = max(1, min(2048, self.ser.inWaiting())) # in_waiting for python3
-#             data = self.ser.read(i)
-#             i = data.find(b"\n")
-#             if i >= 0:
-#                 r = self.buf + data[:i+1]
-#                 self.buf[0:] = data[i+1:]
-#                 return r
-#             else:
-#                 self.buf.extend(data)
-    
     def writeSerial(self):
 
         # Send byte string over serial to Arduino
@@ -142,7 +124,24 @@ class TunePID:
             self.ser.readinto(self.inRawData)
             self.isReceiving = True    
 
-
+# Function for reading char strings from arduino (similar to serial.readline()
+#     def readSerial(self):
+#         i = self.bufIn.find(b"\n")
+#         if i >= 0:
+#             r = self.buf[:i+1]
+#             self.buf = self.buf[i+1:]
+#             return r
+#         while True:
+#             i = max(1, min(2048, self.ser.inWaiting())) # in_waiting for python3
+#             data = self.ser.read(i)
+#             i = data.find(b"\n")
+#             if i >= 0:
+#                 r = self.buf + data[:i+1]
+#                 self.buf[0:] = data[i+1:]
+#                 return r
+#             else:
+#                 self.buf.extend(data)
+    
 #     def getOutputMsg(self):
 #         # Read buffer
 #         #msgIn = self.readSerial()

@@ -1,8 +1,18 @@
 // Test code from https://thepoorengineer.com/en/arduino-python-plot/
 
+#define INMSGSIZE 3 // Length of message in values (eg. [1.3 100] = 2)
+#define INVARBYTES 4 // Bytes per value (eg. float = 4)
+
+int byteLength = INMSGSIZE * INVARBYTES;
+
 unsigned long timer = 0;
 long loopTime = 100000;   // microseconds
-double loops = 0;
+double msgIn[INMSGSIZE];
+
+union Data{ 
+  double d;
+  byte b[INVARBYTES];
+};
 
 void setup() {
   Serial.begin(38400);
@@ -10,19 +20,19 @@ void setup() {
 }
 
 void loop() {
+  //Serial.reset_input_line();
+  // Check serial input for message
   timeSync(loopTime);
-  loops += 1;
-  //int val = analogRead(0) - 512;
-  //double val = (analogRead(0) -512) / 512.0;
-  double val1 = loops;
-  double val2 = loops + 0.1;
-  double val3 = loops + 0.01;
-  //Serial.println(val1);
+  readSerialInput();
+  
+  // Process and send back
+  double val1 = msgIn[0] + 1;
+  double val2 = msgIn[1] + 1;
+  double val3 = msgIn[2] + 1;
+//  Serial.println(val1);
   
   sendToPC(&val1, &val2, &val3);
-  if (loops > 10){
-    loops = 0; 
-  }
+
 }
 
 void timeSync(unsigned long deltaT)
@@ -67,13 +77,54 @@ void sendToPC(double* data1, double* data2, double* data3)
   Serial.write(buf, 12);
 }
 
-float readSerialInput(){
-// Function polls serial line
-  if (Serial.available() > 0){
-    // Check that message is complete
 
-    // if complete, decode from bytes to floats
+void readSerialInput(){
+  
+  int bytelength = INMSGSIZE * INVARBYTES;
+  byte bufIn[byteLength];
+  double t0 = millis();
+  // Function polls serial line for complete message
+  if (Serial.available() >= byteLength){
+
+    int byteIn = Serial.readBytes((byte*)&bufIn,byteLength);
     
-  return messageIn;
+    // Check that message is complete
+    if (byteIn == byteLength){
+      // if complete, decode from bytes to floats
+      
+      for (int var = 0;var<INMSGSIZE;var++){
+        int writebit = 0;
+        union Data dataIn;
+        for (int readbit = (var*INVARBYTES);readbit<(var*INVARBYTES+INVARBYTES);readbit++){       
+          // Read each value bytes into union container 
+          dataIn.b[writebit] = bufIn[readbit];
+          writebit+=1;
+        }
+        msgIn[var] = dataIn.d;       
+      }
+    }
+    else{
+      msgIn[0] = 999;
+    }
+  }
+  else{
+    msgIn[0] = -999;
   }
 }
+
+//void getSerialData()
+//{
+//  while (Serial.available())
+//  {
+//    char input = Serial.read();
+//    g_recvString += input;
+//    if (input == '%')   // this is the end of message marker
+//    {
+//      int index = g_recvString.indexOf('%');
+//      String tmp = g_recvString.substring(0, index);  // remove the '%' sign
+//      g_scaleFactor = tmp.toFloat();
+//      g_recvString = "";
+//      break;
+//    }
+//  }
+//}
