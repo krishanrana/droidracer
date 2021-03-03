@@ -168,7 +168,7 @@ if __name__ == '__main__':
     # Get user input (Waveform parameters, PID gains)
     tp.testType = 0 # 0 is Step, 1 is Ramp, 2 is Sinusoid
     tp.testMag = 1.0 # Magnitude of input
-    tp.testPeriod = 2.5 # Period of test in seconds
+    tp.testPeriod = 2.5 # Period of waveform in seconds
     tp.Kprop = 20 # Proportional gain
     tp.Kint = 5 # Integral Gain
     tp.Kder = 0.3 # Derivative gain
