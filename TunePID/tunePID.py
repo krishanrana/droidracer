@@ -111,7 +111,7 @@ class TunePID:
     def startReadThread(self):
         if self.thread == None:
             self.thread = Thread(target=self.readSerialThread)
-            #self.thread.daemon = True
+            self.thread.daemon = True
             self.thread.start()
             # Block till we start receiving values
             while self.isReceiving != True:
