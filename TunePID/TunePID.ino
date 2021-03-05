@@ -2,7 +2,7 @@
 #include "PinChangeInt.h"
 
 //Use for PID control of motors
-#include <PID_v1.h>
+#include <PID_v2.h>
 
 // Encoders
 #define M1_ENCODER_A A0
@@ -21,6 +21,10 @@
 // L9958 Enable for all 4 motors
 #define ENABLE_MOTORS 8
 
+// PID
+#define PIDSAMPLERATE 20
+#define LOOPTIME 100000
+
 // Serial communication definitions
 #define INMSGSIZE 6 // Length of message in values (eg. [1.3 100] = 2)
 #define INVARBYTES 4 // Bytes per value (eg. float = 4)
@@ -28,28 +32,32 @@
 
 // Serial communication definitions
 int byteLength = INMSGSIZE * INVARBYTES;
-unsigned long timer = 0;
+unsigned long delayTimer = 0;
 double msgIn[INMSGSIZE];
+// Signals sent in last position of message
+double m0 = 0.0; // Test completed
+double m1 = 1.0; // Test running
+double m5 = 5.0; // Waiting for input
+double m100 = 100.00;// No serial communication received
 
+// Define union for variable datatype conversion
 union Data{ 
   double d;
   byte b[INVARBYTES];
 };
 
 // Motor PWM variables
-int pwm1, pwm2, pwm3;
-int dir1, dir2, dir3;
-
-volatile double speed_M1;         // Used for input measurement to PID
-double out_M1;                        // Output from PID to power motors
-double setspeed_M1;         // Target speed for motors
-float pidSampleRate;
+int pwm1 = 0;
+int dir1 = 0;
+volatile double speed_M1 = 0;         // Used for input measurement to PID
+double out_M1 = 0;                        // Output from PID to power motors
+double setspeed_M1 = 0;         // Target speed for motors
 
 // Variables to store the number of encoder pulses
 volatile signed long M1_Count = 0;
 
 // Input Variables 
-int testType = 0;
+int testType = 100;
 float testMag = 0;
 float testPeriod = 0;
 float Kprop = 0;
@@ -57,11 +65,10 @@ float Kint = 0;
 float Kder = 0;
 
 // Variables for testing
-long loopTime = 100000;   // microseconds
-float driveTime = 0;
+double driveTime = 0;
 int testNumber = 0;
 int testDuration = 2;
-int completeFlag = 0;
+double completeFlag = 1;
 double timeStamp = 0;
 double t0 = 0;
 double t1 = 0;
@@ -94,13 +101,8 @@ void setup() {
   // initialize hardware interrupts
   attachPinChangeInterrupt(M1_ENCODER_A, M1EncoderEvent, CHANGE);
   
-  // PID variable setup
-  speed_M1 = 0;
-  setspeed_M1 = 0; 
-  
   //Set PID compute rate in milliseconds (default = 100)
-  pidSampleRate = 20;
-  PID_M1.SetSampleTime(pidSampleRate);
+  PID_M1.SetSampleTime(PIDSAMPLERATE);
   // Configure for backwards values too
   PID_M1.SetOutputLimits(-255, 255);
   
@@ -119,7 +121,7 @@ void setup() {
 
   // Open serial port
   Serial.begin(38400);
-  timer = micros();
+  delayTimer = micros();
 
   delay(1000);
  
@@ -129,70 +131,80 @@ void setup() {
 // LOOP /////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
 void loop() {
-  
-  timeSync(loopTime);
-  // Read: testType, testMag, TestPeriod, Kp,Ki,Kd
-  readSerialInput();
-  
+  timeSync(LOOPTIME);
+  // Check to see if new message arrives
+  if(completeFlag == 1){ 
+    // Send signal: Ready and waiting for input
+    writeSerial(&m100, &m100, &m100, &m100, &m100);
+    // Read: testType, testMag, TestPeriod, Kprop,Kint,Kder
+    readSerialInput();
+    // Test does not commence until proper data read (100 is no-read flag)
+    if (msgIn[0] != 100){
+      completeFlag = 0;
+      // Send signal: Input received, starting test
+      writeSerial(&m1, &m1, &m1, &m1, &m5);
+      delay(500);   
+    }
+  }
+  else{
   // Process commands and start test
-  // Placeholder echo some input
-  double val1 = msgIn[0];
-  double val2 = msgIn[1];
-  double val3 = msgIn[2];
-  double val4 = msgIn[3];
-  double val5 = msgIn[4];
+    testType = int(msgIn[0]);
+    testMag = msgIn[1];
+    testPeriod = (msgIn[2] * 1000);// convert to milliseconds
+    Kprop = msgIn[3];
+    Kint = msgIn[4];
+    Kder = msgIn[5];
 
-//  Serial.println(val1);
-  // Write current test values: SetPoint, motorspeed, PWM, time, Complete
-  writeSerial(&val1, &val2, &val3, &val4, &val5);
+    PID_M1.SetTunings(Kprop, Kint, Kder);
+    testNumber = 0;
+    completeFlag = 0;
+    t0 = millis();
+    t1 = millis();
+    // Check if test is finished
+    while (testNumber <= testDuration){
+      if (PID_M1.GetMode() == MANUAL){
+        PID_M1.SetMode(AUTOMATIC);
+      }
+      
+      // Update test input parameters
+      inputWaveform(testType,testMag,testPeriod);
+    
+      // Compute PID values      
+      PID_M1.Compute();  
+      setMotorSpeed(out_M1);
+      timeStamp = millis() - t0;
 
+      //Send signal:  Test running
+      writeSerial(&setspeed_M1, &speed_M1, &out_M1, &timeStamp, &m1);
+      }
+
+    // Test is ended, slow motor to zero and turn off before getting new input 
+    setspeed_M1 = 0;
+    
   
-//  if (testNumber <= testDuration){
-//    if (PID_M1.GetMode() == MANUAL){
-//      PID_M1.SetMode(AUTOMATIC);
-//    }
-//    
-//    // Update test input parameters
-//    inputWaveform(testType,testMag,testPeriod);
-//  
-//    // Compute PID values
-//    PID_M1.SetTunings(Kprop, Kint, Kder); 
-//    PID_M1.Compute();
-//   
-//    // Write to the motor directions and pwm power   
-//    // Allow for negative (Reverse) velocity
-// 
-//    setMotorSpeed(out_M1);
-//    timeStamp = millis() - t0;
-////    Serial.print("Running no.");
-////    Serial.println(testNumber);
-//    sendMsg();
-//    }
-//  else{
-//    // Test is ended, slow motor to zero and turn off while waiting for new input 
-//    setspeed_M1 = 0;
-//    complete = 1;  
-//    if(abs(out_M1) > 3){
-//      PID_M1.SetTunings(5, 1, 0);
-//      PID_M1.Compute();
-//      setMotorSpeed(out_M1);
-////      Serial.print("Slowing no.");
-////      Serial.println(testNumber);
-//      sendMsg(); 
-//    }
-//    // When motor is not running, this state may not be entered into.. FIX
-//    else{
-//      // Set output to 0 and park
-//      PID_M1.SetMode(MANUAL);
-//      analogWrite(PWM_M1, 0);
-////      Serial.print("Stopped no.");
-////      Serial.println(testNumber);
-//      sendMsg();
-//    }
-//  }
+  if(abs(out_M1) > 3){
+    //Set aggressive PID
+    PID_M1.SetTunings(50, 10, 0);
+    PID_M1.Compute();
+    setMotorSpeed(out_M1);
+    timeStamp = millis() - t0;
+    // Send signal: Test running
+    writeSerial(&setspeed_M1, &speed_M1, &out_M1, &timeStamp, &m1); 
+    }
+    
+  // When motor is not running, this state may not be entered into.. FIX
+  else{
+    // Set output to 0 and park
+    completeFlag = 1.0;  
+    PID_M1.SetMode(MANUAL);
+    analogWrite(PWM_M1, 0);
+    timeStamp = millis() - t0;
+    // Send signal: All stopped, test over
+    writeSerial(&setspeed_M1, &speed_M1, &out_M1, &timeStamp, &m0);
+    delay(500);
+    }
+  }
 }
-
-
 /////////////////////////////////////////////////////////////////////////////////////////////
 // INTERRUPTS ///////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -228,7 +240,7 @@ void M1EncoderEvent() {
 void timeSync(unsigned long deltaT)
 {
   unsigned long currTime = micros();
-  long timeToDelay = deltaT - (currTime - timer);
+  long timeToDelay = deltaT - (currTime - delayTimer);
   if (timeToDelay > 5000)
   {
     delay(timeToDelay / 1000);
@@ -242,7 +254,7 @@ void timeSync(unsigned long deltaT)
   {
       // timeToDelay is negative so we start immediately
   }
-  timer = currTime + timeToDelay;
+  delayTimer = currTime + timeToDelay;
 }
 
 // void writeSerial(int* data1, int* data2, int* data3)
@@ -299,30 +311,14 @@ void readSerialInput(){
       }
     }
     else{
-      msgIn[0] = 999;
+      msgIn[0] = 100;
     }
   }
   else{
-    msgIn[0] = -999;
+    msgIn[0] = 100;
   }
 }
 
-
-//     // Get test waveform and PID parameters
-//     testType = int(msgIn[0]);
-//     testMag = msgIn[1];
-//     testPeriod = (msgIn[2] * 1000);
-//     Kprop = msgIn[3];
-//     Kint = msgIn[4];
-//     Kder = msgIn[5];
-    
-//     testNumber = 0;
-//     complete = 0;
-//     t0 = millis();
-//     t1 = millis();
-//   }
-// return;
-// }
 
 void inputWaveform(float testType, float testMag, float testPeriod) {
  
