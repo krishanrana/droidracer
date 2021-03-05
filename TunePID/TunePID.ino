@@ -149,11 +149,11 @@ void loop() {
   else{
   // Process commands and start test
     testType = int(msgIn[0]);
-    testMag = msgIn[1];
+    testMag = msgIn[1];// Target velocity in ms^-1
     testPeriod = (msgIn[2] * 1000);// convert to milliseconds
-    Kprop = msgIn[3];
-    Kint = msgIn[4];
-    Kder = msgIn[5];
+    Kprop = msgIn[3]*255;
+    Kint = msgIn[4]*255;
+    Kder = msgIn[5]*255;
 
     PID_M1.SetTunings(Kprop, Kint, Kder);
     testNumber = 0;
@@ -184,7 +184,7 @@ void loop() {
   
   if(abs(out_M1) > 3){
     //Set aggressive PID
-    PID_M1.SetTunings(50, 10, 0);
+    PID_M1.SetTunings(50, 10, 1.5);
     PID_M1.Compute();
     setMotorSpeed(out_M1);
     timeStamp = millis() - t0;

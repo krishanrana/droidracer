@@ -9,7 +9,7 @@ import copy
 import serial
 import struct
 
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 #import PySimpleGUI as psg
 
 
@@ -104,7 +104,7 @@ class TunePID:
             # Unpack message, inVarNum = number of variables, VarBytes = datatype
             data = privateData[(i*self.VarBytes):(self.VarBytes + i*self.VarBytes)]
             self.inData[i] = struct.unpack(self.VarType, data)[0] # Unpack always returns tuple
-        # Store values: setPoint, motorSpeed, PWM, timeStamp, signal
+        
         # Decode signal
         remoteSignal = round(self.inData[-1])
         if remoteSignal == 0:    
@@ -123,7 +123,6 @@ class TunePID:
             self.TestRunning = False
             self.remoteWaiting = True
             logging.debug("Signal = 100: Remote waiting for instructions")
-        
             
         # todo: Change to allow variable data size inVarNum. Try append([*self.inData])
         self.saveData.append([self.inData[0], self.inData[1], self.inData[2],self.inData[3],self.inData[4]])
@@ -148,17 +147,24 @@ class TunePID:
             time.sleep(0.000001)
 
 
+    def saveOutput(self):
+        self.saveDataNP = np.array(self.saveData)
+        np.savetxt('PIDTest.csv',self.saveDataNP,delimiter=',')
+        logging.debug('Results saved to file')          
 
-    # def saveOutput(self):
+    def plotOutput(self):
         
-    #     # Check user to save
-    #     fileOut = []
-    #     # Create file name (PIDtest_ss/mm/hr/d/m/y)
-
-    # def plotOutput(self):
-        
-    #     # update graph in loop
-    #     fileOut = []
+         # update graph in loop
+         #fileOut = []
+        # Plot values: setPoint, motorSpeed, PWM, timeStamp, signal
+        fig, ax = plt.subplots()                    
+        ax.plot(self.saveDataNP[:,3],self.saveDataNP[:,0], label='Setpoint')
+        ax.plot(self.saveDataNP[:,3],self.saveDataNP[:,1], label='Motor speed')
+        ax.plot(self.saveDataNP[:,3],self.saveDataNP[:,2], label='PWM')
+        ax.set_ylabel('Velocity - m/s')
+        ax.set_title('PID Test')
+        ax.legend()
+        plt.show()
         
 
     def close(self):
@@ -195,10 +201,10 @@ if __name__ == '__main__':
     # Get user input (Waveform parameters, PID gains)
     tp.testType = 0.0 # 0 is Step, 1 is Ramp, 2 is Sinusoid
     tp.testMag = 1.0 # Magnitude of input
-    tp.testPeriod = 1 # Period of waveform in seconds
-    tp.Kprop = 20.0 # Proportional gain
-    tp.Kint = 1.0 # Integral Gain
-    tp.Kder = 0.0 # Derivative gain
+    tp.testPeriod = 3 # Period of waveform in seconds
+    tp.Kprop = 0.8 # Proportional gain
+    tp.Kint = 0.3 # Integral Gain
+    tp.Kder = 0.05 # Derivative gain
     
     # Check if remote needs instructions
     while tp.remoteWaiting == True:
@@ -216,14 +222,14 @@ if __name__ == '__main__':
         for i in range(tp.inVarNum):
             print("%.3f" % tp.inData[i])
         print(time.time() - t0)
-        time.sleep(0.1)
+        time.sleep(0.02)
 
-    # Plot measurements
-    #tp.plotOutput()
-        
     # Save file
-    #tp.saveOutput()
+    tp.saveOutput()
     
+    # Plot measurements
+    tp.plotOutput()
+
     print('out of loop')
     tp.close()
 
