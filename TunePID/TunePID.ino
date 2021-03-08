@@ -287,8 +287,7 @@ void readSerialInput(){
     
     // Check that message is complete
     if (byteIn == byteLength){
-      // if complete, decode from bytes to floats
-      
+      // if complete, decode from bytes to floats     
       for (int var = 0;var<INMSGSIZE;var++){
         int writebit = 0;
         union Data dataIn;
@@ -312,8 +311,7 @@ void readSerialInput(){
 
 double getTargetVelocity(int Type, float testMag, float testPeriod) {
  
-  driveTime = millis()-t1;
-  
+  driveTime = millis()-t1; 
   double setVelocity = 0;
   
   switch (Type){
@@ -322,13 +320,12 @@ double getTargetVelocity(int Type, float testMag, float testPeriod) {
     
     case 1:
       return rampInput(driveTime,testMag,testPeriod);
-    break;
 
-//    case 2:
-//      setVelocity = sinInput(driveTime,testMag,testPeriod);
-//    break;
+    case 2:
+      return  sineInput(driveTime,testMag,testPeriod);
 
     default:
+      testNumber += 1;
       return 0;
   }
 }
@@ -360,8 +357,7 @@ double rampInput(double t, float mag, float T){
     }
   else if (t < T){
     setVelocity = -mag + (t-3*T/4)*accel;
-    }
-    
+    }   
   else if (t >= T){
     setVelocity = 0;
     driveTime = 0;
@@ -371,41 +367,18 @@ double rampInput(double t, float mag, float T){
   return setVelocity;
 }
 
-
-
-void inputWaveform(float testType, float testMag, float testPeriod) {
- 
-  driveTime = millis()-t1;
-  // NOTE: Change to acceleration / jerk model
-  // Test PID using synthetic input
-  if (driveTime < testPeriod/2){
-    // Step input to testMag
-    if (testType == 0){
-      setspeed_M1 = testMag;
+double sineInput(double t, float mag, float T){
+  double setVelocity = 0;
+  if (t < T){
+    setVelocity = mag * sin(t);
     }
-    else if (testType == 1){
-      setspeed_M1 += testMag/testPeriod;
-    }
-    else{setspeed_M1 = 0;}     
-  }
-  
-  else if (driveTime < testPeriod){
-    // Step input to -testMag
-    if (testType == 0){
-      setspeed_M1 = -testMag;
-    }
-    else if (testType == 1){
-      setspeed_M1 -= testMag/testPeriod;
-    }
-    else{setspeed_M1 = 0;}     
-  }
-
-  else if (driveTime >= testPeriod){
-    setspeed_M1 = 0;
+  else if (t >= T){
+    setVelocity = 0;
     driveTime = 0;
     t1 = millis();
     testNumber += 1;
-  }
+    }
+  return setVelocity;
 }
 
 void setMotorSpeed(double out_M1){
