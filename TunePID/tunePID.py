@@ -225,11 +225,11 @@ if __name__ == '__main__':
             
     #Use GUI loop for online changes
     # Get user input (Waveform parameters, PID gains)
-    tp.testType = 0.0 # 0 is Step, 1 is Ramp, 2 is Sinusoid
-    tp.testMag = 0.1 # Magnitude of input
+    tp.testType = 1.0 # 0 is Step, 1 is Ramp, 2 is Sinusoid
+    tp.testMag = 0.3 # Magnitude of input
     tp.testPeriod = 3.0 # Period of waveform in seconds
-    tp.Kprop = 1.2 # Proportional gain
-    tp.Kint = 30 # Integral Gain
+    tp.Kprop = 1.5 # Proportional gain
+    tp.Kint = 40 # Integral Gain
     tp.Kder = 0.001 # Derivative gain
     
     # Check if remote needs instructions

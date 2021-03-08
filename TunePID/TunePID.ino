@@ -320,10 +320,10 @@ double getTargetVelocity(int Type, float testMag, float testPeriod) {
     case 0:
       return stepInput(driveTime,testMag,testPeriod);
     
-//    case 1:
-//      setVelocity = rampInput(driveTime,testMag,testPeriod);
-//    break;
-//
+    case 1:
+      return rampInput(driveTime,testMag,testPeriod);
+    break;
+
 //    case 2:
 //      setVelocity = sinInput(driveTime,testMag,testPeriod);
 //    break;
@@ -354,10 +354,14 @@ double rampInput(double t, float mag, float T){
   double accel = 4*mag/T;
   if (t < T/4){
     setVelocity = accel * t;
-  }
+    }
   else if (t < 3*T/4){
     setVelocity = mag - (t-T/4)*accel;
     }
+  else if (t < T){
+    setVelocity = -mag + (t-3*T/4)*accel;
+    }
+    
   else if (t >= T){
     setVelocity = 0;
     driveTime = 0;
