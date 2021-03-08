@@ -4,6 +4,7 @@
 //Use for PID control of motors
 #include <PID_v2.h>
 
+
 // Encoders
 #define M1_ENCODER_A A0
 #define M1_ENCODER_B A1
@@ -171,8 +172,8 @@ void loop() {
       }
       
       // Update test input parameters
-      inputWaveform(testType,testMag,testPeriod);
-    
+      //inputWaveform(testType,testMag,testPeriod);
+      setspeed_M1 = getTargetVelocity(testType, testMag, testPeriod);
       // Compute PID values      
       PID_M1.Compute();
       
@@ -186,7 +187,7 @@ void loop() {
 
     // Test is ended, slow motor to zero and turn off before getting new input 
     setspeed_M1 = 0.0;
-    PID_M1.SetTunings(10, 1, 0.5);
+    PID_M1.SetTunings(380, 7800, 0.255);
     
   // Park system slowly to avoid integral windup on restart
   for(int t = 0; t<50;t+=1){
@@ -325,6 +326,45 @@ void readSerialInput(){
   }
 }
 
+
+double getTargetVelocity(int Type, float testMag, float testPeriod) {
+ 
+  driveTime = millis()-t1;
+  
+  double setVelocity = 0;
+  
+  switch (Type){
+    case 0:
+      return stepInput(driveTime,testMag,testPeriod);
+    
+//    case 1:
+//      setVelocity = rampInput(driveTime,testMag,testPeriod);
+//    break;
+//
+//    case 2:
+//      setVelocity = sinInput(driveTime,testMag,testPeriod);
+//    break;
+
+    default:
+      return 0;
+  }
+}
+
+double stepInput(double t, float mag, float T){
+  double setVelocity = 0;
+  if (t < T/2){
+    setVelocity = mag;
+  }
+  else if (t < T){
+    setVelocity = -mag;
+    }
+  else if (t >= T){
+    driveTime = 0;
+    t1 = millis();
+    testNumber += 1;
+    }
+  return setVelocity;
+}
 
 void inputWaveform(float testType, float testMag, float testPeriod) {
  
