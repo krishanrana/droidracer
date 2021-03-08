@@ -69,7 +69,7 @@ float Kder = 0;
 double driveTime = 0;
 int testNumber = 0;
 int testDuration = 2;
-double completeFlag = 1;
+int completeFlag = 1;
 double timeStamp = 0;
 double t0 = 0;
 double t1 = 0;
@@ -169,18 +169,12 @@ void loop() {
     while (testNumber <= testDuration){
       if (PID_M1.GetMode() == MANUAL){
         PID_M1.SetMode(AUTOMATIC);
-      }
-      
+      }      
       // Update test input parameters
-      //inputWaveform(testType,testMag,testPeriod);
       setspeed_M1 = getTargetVelocity(testType, testMag, testPeriod);
-      // Compute PID values      
       PID_M1.Compute();
-      
-  
       setMotorSpeed(out_M1);
       timeStamp = millis() - t0;
-
       //Send data + signal:  Test running
       writeSerial(&setspeed_M1, &speed_M1, &out_M1, &timeStamp, &m1);
       }
@@ -200,7 +194,7 @@ void loop() {
     }
   
   // Set output to 0 and park
-  completeFlag = 1.0;  
+  completeFlag = 1;  
   PID_M1.SetOutputLimits(0, 0);
   PID_M1.SetMode(MANUAL);
   PID_M1.SetOutputLimits(-255, 255);
@@ -263,17 +257,6 @@ void timeSync(unsigned long deltaT)
   }
   delayTimer = currTime + timeToDelay;
 }
-
-// void writeSerial(int* data1, int* data2, int* data3)
-// {
-//   byte* byteData1 = (byte*)(data1);
-//   byte* byteData2 = (byte*)(data2);
-//   byte* byteData3 = (byte*)(data3);
-//   byte buf[6] = {byteData1[0], byteData1[1],
-//                  byteData2[0], byteData2[1],
-//                  byteData3[0], byteData3[1]};
-//   Serial.write(buf, 6);
-// }
 
 void writeSerial(double* data1, double* data2, double* data3, double* data4, double* data5)
 { // TODO: Rewrite using loops, Unions etc
@@ -365,6 +348,26 @@ double stepInput(double t, float mag, float T){
     }
   return setVelocity;
 }
+
+double rampInput(double t, float mag, float T){
+  double setVelocity = 0;
+  double accel = 4*mag/T;
+  if (t < T/4){
+    setVelocity = accel * t;
+  }
+  else if (t < 3*T/4){
+    setVelocity = mag - (t-T/4)*accel;
+    }
+  else if (t >= T){
+    setVelocity = 0;
+    driveTime = 0;
+    t1 = millis();
+    testNumber += 1;
+    }
+  return setVelocity;
+}
+
+
 
 void inputWaveform(float testType, float testMag, float testPeriod) {
  
