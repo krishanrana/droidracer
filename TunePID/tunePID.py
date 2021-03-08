@@ -225,7 +225,7 @@ if __name__ == '__main__':
             
     #Use GUI loop for online changes
     # Get user input (Waveform parameters, PID gains)
-    tp.testType = 1.0 # 0 is Step, 1 is Ramp, 2 is Sinusoid
+    tp.testType = 2.0 # 0 is Step, 1 is Ramp, 2 is Sinusoid
     tp.testMag = 0.3 # Magnitude of input
     tp.testPeriod = 3.0 # Period of waveform in seconds
     tp.Kprop = 1.5 # Proportional gain

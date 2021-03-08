@@ -370,7 +370,7 @@ double rampInput(double t, float mag, float T){
 double sineInput(double t, float mag, float T){
   double setVelocity = 0;
   if (t < T){
-    setVelocity = mag * sin(t);
+    setVelocity = mag * sin(6.2832*t/T);
     }
   else if (t >= T){
     setVelocity = 0;
