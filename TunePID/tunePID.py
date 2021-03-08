@@ -11,10 +11,33 @@ import struct
 
 import matplotlib.pyplot as plt
 #import PySimpleGUI as psg
+# Log file location
+logfile = 'debug.log'
 
+# Define your own logger name
+logger = logging.getLogger("tunePIDlog")
+# Set default logging level to DEBUG
+logger.setLevel(logging.DEBUG)
 
-logging.basicConfig(level=logging.DEBUG,
-                      format='[%(levelname)s] (%(threadName)-9s) %(message)s',)
+# create console handler
+print_format = logging.Formatter('[%(levelname)s] (%(threadName)-9s) %(message)s')
+console_handler = logging.StreamHandler(sys.stdout)
+console_handler.setLevel(logging.DEBUG)
+console_handler.setFormatter(print_format)
+
+# create log file handler
+# and define a custom log format, set its log level to DEBUG
+log_format = logging.Formatter('[%(asctime)s] %(levelname)-8s %(name)-12s %(message)s')
+file_handler = logging.FileHandler(logfile)
+file_handler.setLevel(logging.DEBUG)
+file_handler.setFormatter(log_format)
+
+#Add handlers to the logger
+logger.addHandler(file_handler)
+logger.addHandler(console_handler)
+
+# logging.basicConfig(level=logging.DEBUG,
+#                       format='[%(levelname)s] (%(threadName)-9s) %(message)s',)
 shutdown_flag = False
 
 
@@ -40,12 +63,12 @@ class TunePID:
 
         if (self.VarType == 'f'):
             self.VarBytes = 4
-            logging.debug("Python expecting 4-byte FLOAT type input")
+            logger.debug("Python expecting 4-byte FLOAT type input")
         elif (self.VarType == 'i'):
             self.VarBytes = 2 
-            logging.debug("Python expecting 2-byte INT type input")         
+            logger.debug("Python expecting 2-byte INT type input")         
         else:
-            logging.error("Invalid Input data type, must be 'f' or 'i'")
+            logger.error("Invalid Input data type, must be 'f' or 'i'")
             sys.exit()
         
         # Initialise OUTPUT test parameters 
@@ -71,13 +94,13 @@ class TunePID:
         # Open serial comms to Arduino
         try:
             self.ser = serial.Serial(serial_port, baud)
-            logging.debug('Serial port connected')
+            logger.debug('Serial port connected')
         except:
-            logging.error('Serial port not found')
+            logger.error('Serial port not found')
             sys.exit()
         
         
-        logging.debug('Initialisation successful')
+        logger.debug('Initialisation successful')
 
     def writeSerial(self):
         # Method compiles and converts message to byte string using defined data format.
@@ -110,23 +133,23 @@ class TunePID:
         if remoteSignal == 0:    
             self.TestRunning = False
             self.remoteWaiting = False
-            logging.debug("Signal = 0: Remote completed test")
+            logger.debug("Signal = 0: Remote completed test")
         elif remoteSignal == 1:    
             self.TestRunning = True
             self.remoteWaiting = False
-            logging.debug("Signal = 1: Remote running test")
+            logger.debug("Signal = 1: Remote running test")
         elif remoteSignal == 5:    
             self.TestRunning = True
             self.remoteWaiting = False
-            logging.debug("Signal = 5: Remote has received instructions, starting test")
+            logger.debug("Signal = 5: Remote has received instructions, starting test")
         elif remoteSignal == 100:    
             self.TestRunning = False
             self.remoteWaiting = True
-            logging.debug("Signal = 100: Remote waiting for instructions")
+            logger.debug("Signal = 100: Remote waiting for instructions")
             
         # todo: Change to allow variable data size inVarNum. Try append([*self.inData])
         self.saveData.append([self.inData[0], self.inData[1], self.inData[2],self.inData[3],self.inData[4]])
-        logging.debug('Data updated:%f', dataTime)
+        logger.debug('Data updated:%f', dataTime)
     
     def startReadThread(self):
         if self.thread == None:
@@ -148,22 +171,25 @@ class TunePID:
 
 
     def saveOutput(self):
-        self.saveDataNP = np.array(self.saveData)
+        saveDataNP = np.array(self.saveData)
+        self.saveDataNP = saveDataNP[saveDataNP[:,3]>0]
         np.savetxt('PIDTest.csv',self.saveDataNP,delimiter=',')
-        logging.debug('Results saved to file')          
+        logger.debug('Results saved to file')          
 
     def plotOutput(self):
-        
-         # update graph in loop
-         #fileOut = []
         # Plot values: setPoint, motorSpeed, PWM, timeStamp, signal
-        fig, ax = plt.subplots()                    
-        ax.plot(self.saveDataNP[:,3],self.saveDataNP[:,0], label='Setpoint')
-        ax.plot(self.saveDataNP[:,3],self.saveDataNP[:,1], label='Motor speed')
-        ax.plot(self.saveDataNP[:,3],self.saveDataNP[:,2], label='PWM')
+        fig, ax = plt.subplots(figsize=(10,6))                    
+        ax.plot(self.saveDataNP[:,3],self.saveDataNP[:,0], 'r',label='Setpoint')
+        ax.plot(self.saveDataNP[:,3],self.saveDataNP[:,1], 'b',label='Motor speed')
         ax.set_ylabel('Velocity - m/s')
+        ax.set_ylim(-(2*self.testMag),(2*self.testMag))
+        ax2 = ax.twinx()
+        ax2.plot(self.saveDataNP[:,3],self.saveDataNP[:,2], 'g',label='PWM')
+        ax2.set_ylabel('Control u - PWM')
+        ax2.set_ylim(-255,255)
         ax.set_title('PID Test')
-        ax.legend()
+        #ax.legend()
+        fig.legend(loc="upper right", bbox_to_anchor=(1,1), bbox_transform=ax.transAxes)
         plt.show()
         
 
@@ -200,19 +226,19 @@ if __name__ == '__main__':
     #Use GUI loop for online changes
     # Get user input (Waveform parameters, PID gains)
     tp.testType = 0.0 # 0 is Step, 1 is Ramp, 2 is Sinusoid
-    tp.testMag = 1.0 # Magnitude of input
-    tp.testPeriod = 3 # Period of waveform in seconds
-    tp.Kprop = 0.8 # Proportional gain
-    tp.Kint = 0.3 # Integral Gain
-    tp.Kder = 0.05 # Derivative gain
+    tp.testMag = 0.1 # Magnitude of input
+    tp.testPeriod = 3.0 # Period of waveform in seconds
+    tp.Kprop = 1.2 # Proportional gain
+    tp.Kint = 30 # Integral Gain
+    tp.Kder = 0.001 # Derivative gain
     
     # Check if remote needs instructions
     while tp.remoteWaiting == True:
         # Send test parameters to arduino
         tp.getSerialData()
         tp.writeSerial()
-        logging.debug("Data sent to remote")
-        time.sleep(0.1)
+        logger.debug("Data sent to remote")
+        time.sleep(0.2)
         
     tp.initialTimer = 0
     
@@ -221,8 +247,7 @@ if __name__ == '__main__':
         tp.getSerialData()
         for i in range(tp.inVarNum):
             print("%.3f" % tp.inData[i])
-        print(time.time() - t0)
-        time.sleep(0.02)
+        time.sleep(0.015)
 
     # Save file
     tp.saveOutput()

@@ -76,6 +76,8 @@ double t1 = 0;
 
 // PID Constructor 
 PID PID_M1(&speed_M1, &out_M1, &setspeed_M1, 50, 100, 0, P_ON_M, DIRECT);
+
+
 /////////////////////////////////////////////////////////////////////////////////////////////
 // SETUP ////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -131,19 +133,19 @@ void setup() {
 // LOOP /////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
 void loop() {
-  timeSync(LOOPTIME);
+  //timeSync(LOOPTIME);
   // Check to see if new message arrives
   if(completeFlag == 1){ 
     // Send signal: Ready and waiting for input
-    writeSerial(&m100, &m100, &m100, &m100, &m100);
+    writeSerial(&m0, &m0, &m0, &m0, &m100);
+    timeSync(LOOPTIME);
     // Read: testType, testMag, TestPeriod, Kprop,Kint,Kder
     readSerialInput();
     // Test does not commence until proper data read (100 is no-read flag)
     if (msgIn[0] != 100){
       completeFlag = 0;
       // Send signal: Input received, starting test
-      writeSerial(&m1, &m1, &m1, &m1, &m5);
-      delay(500);   
+      writeSerial(&m0, &m0, &m0, &m0, &m5);   
     }
   }
   else{
@@ -154,10 +156,12 @@ void loop() {
     Kprop = msgIn[3]*255;
     Kint = msgIn[4]*255;
     Kder = msgIn[5]*255;
-
+    
+    msgIn[0] = 100;
+    
+    timeSync(30000);
     PID_M1.SetTunings(Kprop, Kint, Kder);
-    testNumber = 0;
-    completeFlag = 0;
+    testNumber = 1;
     t0 = millis();
     t1 = millis();
     // Check if test is finished
@@ -170,39 +174,41 @@ void loop() {
       inputWaveform(testType,testMag,testPeriod);
     
       // Compute PID values      
-      PID_M1.Compute();  
+      PID_M1.Compute();
+      
+  
       setMotorSpeed(out_M1);
       timeStamp = millis() - t0;
 
-      //Send signal:  Test running
+      //Send data + signal:  Test running
       writeSerial(&setspeed_M1, &speed_M1, &out_M1, &timeStamp, &m1);
       }
 
     // Test is ended, slow motor to zero and turn off before getting new input 
-    setspeed_M1 = 0;
+    setspeed_M1 = 0.0;
+    PID_M1.SetTunings(10, 1, 0.5);
     
-  
-  if(abs(out_M1) > 3){
-    //Set aggressive PID
-    PID_M1.SetTunings(50, 10, 1.5);
+  // Park system slowly to avoid integral windup on restart
+  for(int t = 0; t<50;t+=1){
     PID_M1.Compute();
     setMotorSpeed(out_M1);
     timeStamp = millis() - t0;
     // Send signal: Test running
     writeSerial(&setspeed_M1, &speed_M1, &out_M1, &timeStamp, &m1); 
+    timeSync(20000);
     }
+  
+  // Set output to 0 and park
+  completeFlag = 1.0;  
+  PID_M1.SetOutputLimits(0, 0);
+  PID_M1.SetMode(MANUAL);
+  PID_M1.SetOutputLimits(-255, 255);
+  analogWrite(PWM_M1, 0);
+  timeStamp = millis() - t0;
+  // Send signal: All stopped, test over
+  writeSerial(&setspeed_M1, &speed_M1, &out_M1, &timeStamp, &m0);
+  delay(500);
     
-  // When motor is not running, this state may not be entered into.. FIX
-  else{
-    // Set output to 0 and park
-    completeFlag = 1.0;  
-    PID_M1.SetMode(MANUAL);
-    analogWrite(PWM_M1, 0);
-    timeStamp = millis() - t0;
-    // Send signal: All stopped, test over
-    writeSerial(&setspeed_M1, &speed_M1, &out_M1, &timeStamp, &m0);
-    delay(500);
-    }
   }
 }
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -323,7 +329,7 @@ void readSerialInput(){
 void inputWaveform(float testType, float testMag, float testPeriod) {
  
   driveTime = millis()-t1;
-  
+  // NOTE: Change to acceleration / jerk model
   // Test PID using synthetic input
   if (driveTime < testPeriod/2){
     // Step input to testMag
