@@ -8,6 +8,7 @@ NOTE: Some code from MPU6050.py and iC2 library by Jeff Rowland via Geir Istad
 """
 # Import packages
 import numpy as np
+import sys
 from MPUClass.MPU6050 import MPU6050 # Rewrite class using native numpy
 import logging
 import time
@@ -19,16 +20,16 @@ from DroidControl import droidControl
 # Setup logging (Use droidlogging.conf as alternative)
 
 # Log file location
-logfile = 'debug.log'
+logfile = 'debugIMU.txt'
 # Define your own logger name
-logger = logging.getLogger("IMUlogger")
+logger = logging.getLogger("Imulog")
 # Set default logging level to DEBUG
 logger.setLevel(logging.DEBUG)
 
 # create console handler
-print_format = logging.Formatter('%(levelname)-8s %(name)-12s %(message)s')
+print_format = logging.Formatter('[%(levelname)s] (%(threadName)-9s) %(message)s')
 console_handler = logging.StreamHandler(sys.stdout)
-console_handler.setLevel(logging.WARNING)
+console_handler.setLevel(logging.DEBUG)
 console_handler.setFormatter(print_format)
 
 # create log file handler
@@ -52,6 +53,7 @@ class droidInertial(MPU6050):
         
         self.TimeKminus1 = time.time()        
         self.TimeK = time.time()
+        #self.gravity = np.array([0,0,9.80665])
         self.gravity = 9.80665
         self.FIFO_buffer = [0]*42
         self.dmpAccel = np.array([0,0,0])
@@ -64,7 +66,7 @@ class droidInertial(MPU6050):
         self.theta = np.array([0,0,0])
         self.omegaBias = np.array([0,0,0])
         
-        self.imuOut = []
+        #self.imuOut = []
         
         
         debug_output = False
@@ -75,15 +77,19 @@ class droidInertial(MPU6050):
         try:
             [x_accel_offset, y_accel_offset,
               z_accel_offset, x_gyro_offset, y_gyro_offset, z_gyro_offset] = np.loadtxt('/home/pi/droidracer/MPUClass/imuBiases.csv', delimiter=',', dtype = "int")
-            logger.info('Initialising IMU biases to file.') 
-            # Use existing IMU bias estimates
+            logger.info('Initialising IMU biases to file.')
+#             [x_accel_offset, y_accel_offset,
+#               z_accel_offset, x_gyro_offset, y_gyro_offset, z_gyro_offset] = np.array([0,0,0,0,0,0])
+            # Use existing IMU bias            
             self.accelBias = np.array([[x_accel_offset, y_accel_offset,z_accel_offset]])
+            print(self.accelBias)
             self.omegaBias = np.array([[x_gyro_offset, y_gyro_offset, z_gyro_offset]])
+            print(self.omegaBias)
         
         except:
             [x_accel_offset, y_accel_offset,
               z_accel_offset, x_gyro_offset, y_gyro_offset, z_gyro_offset] = np.array([0,0,0,0,0,0]) # Placeholder, run cal routine
-            logger.info('No Bias file found. Static Calibration required')
+            logger.warning('No Bias file found. Static Calibration required')
 
         # Check for IMU Offset file (Not yet implemented)
         try:
@@ -99,27 +105,24 @@ class droidInertial(MPU6050):
         MPU6050.__init__(self, i2c_bus, device_address, x_accel_offset, y_accel_offset,
               z_accel_offset, x_gyro_offset, y_gyro_offset, z_gyro_offset,
               debug_output)
-              
         
+        self.XGyoff = self.get_x_gyro_offset_TC()
+        self.YGyoff = self.get_y_gyro_offset_TC()
+        self.ZGyoff = self.get_z_gyro_offset_TC()
         
         # Initialise DMP
         self.dmp_initialize()
-#        # Acelerometer sensitivity set to 2g full scale
-#        self.set_full_scale_accel_range(0x00) 
-#        # Gyro set to 250 deg/sec full scale
-#        self.set_full_scale_gyro_range(0x00)
-#        # Set sample rate to 1000/(1 + rate)
-#        self.set_rate(9)
-#        #98Hz low pass filter
-#        self.set_DLF_mode(0x02)
         # Start DMP
         self.set_DMP_enabled(True)
         self.FIFO_packet_size = self.DMP_get_FIFO_packet_size()
-        
+                
         logger.debug(('Interrupt status: %s ' % hex(self.get_int_status())))
         logger.debug('FIFO Packet size: %s ' % self.FIFO_packet_size)
         logger.debug(('FIFO count: %s ' % hex(self.get_FIFO_count())))
         
+        self.set_x_accel_offset(x_accel_offset)
+        self.set_y_accel_offset(y_accel_offset)
+        self.set_z_accel_offset(z_accel_offset)
         
         
     def readIMUraw(self):
@@ -129,8 +132,8 @@ class droidInertial(MPU6050):
         self.TimeK = time.time()
         # Remove constant bias;
         # : Store as numpy arrays as we will be using matrix operations for Kalman filter
-        self.rawAccel = (np.array([self.get_acceleration()]) * (self.gravity / 16384.0)) - self.accelBias
-        self.rawOmega = (np.array([self.get_rotation()]) / 131.0) - self.omegaBias
+        self.rawAccel = (np.array([self.get_acceleration()]))/ 16384.0  * self.gravity
+        self.rawOmega = (np.array([self.get_rotation()])- self.omegaBias) / 131.0
         
         
     def readDMP(self):
@@ -139,7 +142,7 @@ class droidInertial(MPU6050):
         mpu_int_status = self.get_int_status()
         
         while FIFO_count < self.FIFO_packet_size:
-                FIFO_count = self.get_FIFO_count()
+            FIFO_count = self.get_FIFO_count()
         # If overflow is detected by status or fifo count we want to reset
         if (FIFO_count == 1024) or (mpu_int_status & 0x10):
             self.reset_FIFO()
@@ -183,10 +186,10 @@ class droidInertial(MPU6050):
             # Set motor control as (speed,direction,omega)
             # Note: Change droidControl to implement new PID control
             dc = droidControl()
-            t0 = time.time()
+            t00 = time.time()
             idx = int(0)
             dc.setSpeed(0,0,calOmega)
-            while time.time() - t0 < calTime:
+            while time.time() - t00 < calTime:
                 # Get raw IMU data
                 self.readIMUraw()
                 self.storeIMUdata()
@@ -207,7 +210,7 @@ if __name__ == "__main__":
     di = droidInertial()
 
     print("Class Initialised")
-    print("Test read time - RAW")
+    #print("Test read time - RAW")
     
 #    counter = 0
 #    t0 = time.time()
@@ -237,23 +240,39 @@ if __name__ == "__main__":
     print("Test linear propagation")
     
     t0 = time.time()
+    accelRaw = np.array([[0,0,0]])
     dispRaw = np.array([[0,0,0]])
     counter = 0
-    while counter < 5000:
+    while counter < 10000:
         di.readIMUraw()
         di.propagateLinear()
         dispRaw = np.concatenate((dispRaw, di.displacement),axis=0)
+        accelRaw = np.concatenate((accelRaw, di.rawAccel),axis=0)
         counter +=1
         
     tend = time.time() 
     print('Time: %f' % (tend-t0))
-    fig = plt.figure()
-    ax = fig.add_subplot(311)
+    print('xAc bias: %0.4f' % np.median(accelRaw[:,0]))
+    print('yAc bias: %0.4f' % np.median(accelRaw[:,1]))
+    print('zAc bias: %0.4f' % np.median(accelRaw[:,2]))
+    
+    fig, ax = plt.subplots(figsize=(10,6))   
     ax.plot(dispRaw[:,0])
     ax = fig.add_subplot(312)
     ax.plot(dispRaw[:,1])
     ax = fig.add_subplot(313)
     ax.plot(dispRaw[:,2])
+    plt.show()
+    
+#     fig2, ax2 = plt.subplots(figsize=(10,6))   
+#     ax2 = fig2.add_subplot(311)
+#     ax2.plot(accelRaw[:,0])
+#     ax2 = fig2.add_subplot(312)
+#     ax2.plot(accelRaw[:,1])
+#     ax2 = fig2.add_subplot(313)
+#     ax2.plot(accelRaw[:,2])
+#     plt.show()
+    
     
     
     

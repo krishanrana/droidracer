@@ -51,9 +51,15 @@ import ctypes
 import time
 import smbus
 import csv
-from MPUConstants import MPUConstants as C
-from Quaternion import Quaternion as Q
-from Quaternion import XYZVector as V
+try:
+    
+    from MPUClass.MPUConstants import MPUConstants as C
+    from MPUClass.Quaternion import Quaternion as Q
+    from MPUClass.Quaternion import XYZVector as V
+except:
+    from MPUConstants import MPUConstants as C
+    from Quaternion import Quaternion as Q
+    from Quaternion import XYZVector as V
 
 
 class MPU6050:
@@ -138,7 +144,7 @@ class MPU6050:
         # Attempt to bypass adafruit lib
         #a_data_list = self.__mpu.bus.read_i2c_block_data(0x68, a_address, a_length)
         #print('data' + str(a_data_list))
-        for x in xrange(0, a_length):
+        for x in range(0, a_length):
             a_data_list[x] = self.__bus.read_byte_data(self.__dev_id,
                                                        a_address + x)
         return a_data_list

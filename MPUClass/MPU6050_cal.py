@@ -4,6 +4,16 @@ import time
 import numpy as np
 import matplotlib.pyplot as plt
 
+try:
+    
+    from MPUClass.MPUConstants import MPUConstants as C
+    
+except:
+    from MPUConstants import MPUConstants as C
+    
+
+
+
 def avg_from_array(a_array):
     sum = 0.0
     for index in range(0, len(a_array)):
@@ -27,9 +37,10 @@ enable_debug_output = True
 mpu = MPU6050(i2c_bus, device_address, x_accel_offset, y_accel_offset,
               z_accel_offset, x_gyro_offset, y_gyro_offset, z_gyro_offset,
               enable_debug_output)
-# Set IMU sensitivity from MPUConstants.py           
-mpu.set_full_scale_accel_range(0x00) 
-mpu.set_full_scale_gyro_range(0x00)
+# Set IMU sensitivity from MPUConstants.py
+
+mpu.set_full_scale_accel_range(C.MPU6050_ACCEL_FS_2) 
+mpu.set_full_scale_gyro_range(C.MPU6050_GYRO_FS_250)
 mpu.set_rate(9)
              
 
@@ -97,14 +108,14 @@ xGyHist = []
 yGyHist = []
 zGyHist = []
 
-accelError = 2
+accelError = 3
 gyroError = 8
 Error = np.abs(np.array(accel_reading + gyro_reading))
 allowableError = np.array([accelError,accelError,accelError,gyroError,gyroError,gyroError])
 
 runIDX = 0
 t0 = time.time()
-print'Initializing'
+print('Initializing')
 try:
     while np.any(Error > allowableError): 
         
@@ -232,7 +243,7 @@ try:
             runIDX += 1
             
         if runIDX %1000 == 0:
-            print".",               
+            print(".",)               
                 
 
 except KeyboardInterrupt:

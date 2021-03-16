@@ -1,0 +1,185 @@
+[2021-03-16 16:23:49,690] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 16:23:49,693] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 16:23:53,404] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 16:23:53,405] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 16:23:53,406] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-16 18:33:11,962] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 18:33:11,964] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 18:33:15,809] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 18:33:15,810] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 18:33:15,812] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-16 18:38:36,566] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 18:38:36,569] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 18:38:40,413] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 18:38:40,414] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 18:38:40,416] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-16 18:39:32,572] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 18:39:32,575] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 18:39:36,343] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 18:39:36,344] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 18:39:36,346] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-16 18:39:58,323] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 18:39:58,326] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 18:40:02,131] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 18:40:02,132] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 18:40:02,134] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-16 18:40:25,005] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 18:40:25,009] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 18:40:28,910] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 18:40:28,916] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 18:40:28,919] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-03-16 19:55:54,836] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 19:55:54,838] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 19:55:58,681] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 19:55:58,682] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 19:55:58,684] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-16 19:57:26,008] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 19:57:26,012] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 19:57:29,839] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 19:57:29,840] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 19:57:29,842] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-16 19:58:08,995] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 19:58:09,001] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 19:58:12,762] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 19:58:12,763] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 19:58:12,765] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-16 20:00:00,193] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 20:00:00,197] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 20:00:04,055] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 20:00:04,056] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 20:00:04,058] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-16 20:01:01,352] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 20:01:01,360] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 20:01:05,148] DEBUG    Imulog       Interrupt status: 0x1 
+[2021-03-16 20:01:05,150] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 20:01:05,153] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-03-16 20:05:50,947] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 20:05:50,952] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 20:05:54,795] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 20:05:54,796] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 20:05:54,798] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-16 20:07:04,983] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 20:07:04,987] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 20:07:08,797] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 20:07:08,799] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 20:07:08,801] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-16 20:07:42,098] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 20:07:42,107] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 20:07:45,910] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 20:07:45,912] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 20:07:45,914] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-16 20:08:31,174] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 20:08:31,179] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 20:08:34,896] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 20:08:34,897] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 20:08:34,899] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-16 20:09:51,906] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 20:09:51,911] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 20:09:55,746] DEBUG    Imulog       Interrupt status: 0x1 
+[2021-03-16 20:09:55,746] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 20:09:55,748] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-16 20:10:43,104] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 20:10:43,109] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 20:10:46,960] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 20:10:46,961] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 20:10:46,963] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-16 20:11:35,471] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 20:11:35,478] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 20:11:39,196] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 20:11:39,197] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 20:11:39,200] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-16 20:12:02,431] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 20:12:02,436] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 20:12:06,265] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 20:12:06,265] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 20:12:06,267] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-16 20:13:14,414] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 20:13:14,418] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 20:13:18,274] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 20:13:18,275] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 20:13:18,277] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-16 20:13:40,525] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 20:13:40,530] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 20:13:44,365] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 20:13:44,366] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 20:13:44,368] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-16 20:20:50,509] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 20:20:50,514] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 20:20:54,374] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 20:20:54,375] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 20:20:54,377] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-16 20:23:47,471] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 20:23:47,477] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 20:23:51,330] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 20:23:51,331] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 20:23:51,333] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-16 20:24:31,539] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 20:24:31,544] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 20:24:35,398] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 20:24:35,399] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 20:24:35,401] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-16 20:25:29,347] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 20:25:29,351] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 20:25:33,208] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 20:25:33,209] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 20:25:33,211] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-16 20:31:07,332] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 20:31:07,336] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 20:31:11,199] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 20:31:11,200] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 20:31:11,202] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-16 20:32:20,309] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 20:32:20,314] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 20:32:24,028] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 20:32:24,029] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 20:32:24,031] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-16 20:34:53,421] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 20:34:53,426] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 20:34:57,255] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 20:34:57,256] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 20:34:57,263] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-03-16 20:46:23,441] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 20:46:23,446] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 20:46:27,281] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 20:46:27,282] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 20:46:27,293] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-03-16 20:48:14,704] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 20:48:14,709] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 20:48:18,566] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 20:48:18,567] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 20:48:18,569] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-16 20:49:04,878] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 20:49:04,883] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 20:49:08,604] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 20:49:08,605] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 20:49:08,606] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-16 20:49:48,412] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 20:49:48,417] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 20:49:52,213] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 20:49:52,214] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 20:49:52,215] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-16 20:50:19,615] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 20:50:19,620] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 20:50:23,436] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 20:50:23,437] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 20:50:23,439] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-16 20:51:23,430] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 20:51:23,435] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 20:51:27,152] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 20:51:27,153] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 20:51:27,154] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-16 20:53:11,342] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 20:53:11,350] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 20:53:15,203] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 20:53:15,204] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 20:53:15,206] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-16 20:54:29,787] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 20:54:29,791] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 20:54:33,500] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 20:54:33,500] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 20:54:33,502] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-16 20:58:15,861] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-16 20:58:15,866] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-16 20:58:19,696] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-16 20:58:19,697] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-16 20:58:19,699] DEBUG    Imulog       FIFO count: 0x0 
