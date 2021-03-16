@@ -1,4 +1,3 @@
-from __future__ import division
 
 import logging
 import signal
@@ -10,7 +9,8 @@ import serial
 import struct
 from fractions import Fraction
 
-
+""" This class contains various methods for high level control of omni droid robot
+"""
 
 logging.basicConfig(level=logging.DEBUG,
                       format='[%(levelname)s] (%(threadName)-9s) %(message)s',)

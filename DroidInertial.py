@@ -7,13 +7,8 @@ Created on Mon Jan 18 11:29:54 2021
 NOTE: Some code from MPU6050.py and iC2 library by Jeff Rowland via Geir Istad
 """
 # Import packages
-import sys
-
-# Add path for modules, to be reorganised
-sys.path.append('/home/pi/droidracer/MPUClass')
-
 import numpy as np
-from MPU6050 import MPU6050 # Rewrite class using native numpy
+from MPUClass.MPU6050 import MPU6050 # Rewrite class using native numpy
 import logging
 import time
 import matplotlib.pyplot as plt
@@ -186,6 +181,7 @@ class droidInertial(MPU6050):
         
         else:
             # Set motor control as (speed,direction,omega)
+            # Note: Change droidControl to implement new PID control
             dc = droidControl()
             t0 = time.time()
             idx = int(0)
