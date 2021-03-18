@@ -66,9 +66,7 @@ class droidInertial(MPU6050):
         self.theta = np.array([0,0,0])
         self.omegaBias = np.array([0,0,0])
         
-        #self.imuOut = []
-        
-        
+        #self.imuOut = []        
         debug_output = False
         i2c_bus = 1
         device_address = 0x68
@@ -132,7 +130,7 @@ class droidInertial(MPU6050):
         self.TimeK = time.time()
         # Remove constant bias;
         # : Store as numpy arrays as we will be using matrix operations for Kalman filter
-        self.rawAccel = (np.array([self.get_acceleration()]))/ 16384.0  * self.gravity
+        self.rawAccel = np.array([self.get_acceleration()])/ 16384.0  * self.gravity
         self.rawOmega = (np.array([self.get_rotation()])- self.omegaBias) / 131.0
         
         
@@ -167,10 +165,13 @@ class droidInertial(MPU6050):
     def propagateLinear(self):
         # Replace as part of Kalman filter
         dt = self.TimeK - self.TimeKminus1
+        self.dt = dt
         self.velocityMinus1 = self.velocity
         self.displacementMinus1 = self.displacement
-        self.velocity = (self.rawAccel + self.rawAccelMinus1)/2 * dt + self.velocityMinus1
-        self.displacement = (self.rawAccel + self.rawAccelMinus1)/4 * (dt**2) + (self.velocity + self.velocityMinus1)/2 * dt + self.displacementMinus1
+        self.velocity = self.rawAccel * dt + self.velocityMinus1
+        self.displacement =  self.velocity * dt + self.displacementMinus1
+#         self.velocity = (self.rawAccel + self.rawAccelMinus1)/2 * dt + self.velocityMinus1
+#         self.displacement = (self.rawAccel + self.rawAccelMinus1)/4 * (dt**2) + (self.velocity + self.velocityMinus1)/2 * dt + self.displacementMinus1
 
     def storeIMUdata(self):
         temp = self.rawAccel.tolist() + self.rawOmega.tolist() +  [self.TimeK]
@@ -238,15 +239,24 @@ if __name__ == "__main__":
 #    print('Average read time: %f' % ((di.TimeK - t0) / 100))
     
     print("Test linear propagation")
+
+    for idx in range(10):
+        di.readIMUraw()
+        print(idx)
+        time.sleep(0.010)
+        
+    di.propagateLinear()
+    accelRaw = di.rawAccel
+    dispRaw = di.displacement
+    velRaw = di.velocity
     
     t0 = time.time()
-    accelRaw = np.array([[0,0,0]])
-    dispRaw = np.array([[0,0,0]])
     counter = 0
-    while counter < 10000:
+    while counter < 2000:
         di.readIMUraw()
         di.propagateLinear()
         dispRaw = np.concatenate((dispRaw, di.displacement),axis=0)
+        velRaw = np.concatenate((velRaw, di.velocity),axis=0)
         accelRaw = np.concatenate((accelRaw, di.rawAccel),axis=0)
         counter +=1
         
@@ -256,22 +266,31 @@ if __name__ == "__main__":
     print('yAc bias: %0.4f' % np.median(accelRaw[:,1]))
     print('zAc bias: %0.4f' % np.median(accelRaw[:,2]))
     
-    fig, ax = plt.subplots(figsize=(10,6))   
-    ax.plot(dispRaw[:,0])
-    ax = fig.add_subplot(312)
-    ax.plot(dispRaw[:,1])
-    ax = fig.add_subplot(313)
-    ax.plot(dispRaw[:,2])
-    plt.show()
+    fig, ax = plt.subplots(3,3,figsize=(12,9))
     
-#     fig2, ax2 = plt.subplots(figsize=(10,6))   
-#     ax2 = fig2.add_subplot(311)
-#     ax2.plot(accelRaw[:,0])
-#     ax2 = fig2.add_subplot(312)
-#     ax2.plot(accelRaw[:,1])
-#     ax2 = fig2.add_subplot(313)
-#     ax2.plot(accelRaw[:,2])
-#     plt.show()
+    ax[0,0].plot(dispRaw[:,0], 'r',label='Displacement - x (m)')
+    ax[0,0].set_ylabel('Displacement - m')
+    ax[0,1].plot(dispRaw[:,1], 'r',label='Displacement - y (m)')
+    ax[0,2].plot(dispRaw[:,2], 'r',label='Displacement - z (m)')
+    
+    
+    #ax = fig.add_subplot(334)
+    ax[1,0].plot(velRaw[:,0],'g',label='Velocity - x (m/s)')
+    ax[1,0].set_ylabel('Velocity - (m/s)')
+    #ax = fig.add_subplot(335)
+    ax[1,1].plot(velRaw[:,1],'g',label='Velocity - y (m/s)')
+#     ax = fig.add_subplot(336)
+    ax[1,2].plot(velRaw[:,2],'g',label='Velocity - z (m/s)')
+    
+#     ax = fig.add_subplot(337)
+    ax[2,0].plot(accelRaw[:,0],'b',label='Accel - x (m/s^2)')
+    ax[2,0].set_ylabel('Accel - (m/s^2)')
+#     ax = fig.add_subplot(338)
+    ax[2,1].plot(accelRaw[:,1],'b',label='Accel - y (m/s^2)')
+#     ax = fig.add_subplot(339)
+    ax[2,2].plot(accelRaw[:,2],'b',label='Accel - z (m/s^2)')
+    
+    plt.show()
     
     
     
