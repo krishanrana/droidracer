@@ -13,6 +13,9 @@ from MPUClass.MPU6050 import MPU6050 # Rewrite class using native numpy
 import logging
 import time
 import matplotlib.pyplot as plt
+import PySimpleGUI as psg
+from scipy.optimize import least_squares
+
 
 
 from DroidControl import droidControl
@@ -66,7 +69,7 @@ class droidInertial(MPU6050):
         self.theta = np.array([0,0,0])
         self.omegaBias = np.array([0,0,0])
         
-        #self.imuOut = []        
+        self.imuOut = []        
         debug_output = False
         i2c_bus = 1
         device_address = 0x68
@@ -76,12 +79,10 @@ class droidInertial(MPU6050):
             [x_accel_offset, y_accel_offset,
               z_accel_offset, x_gyro_offset, y_gyro_offset, z_gyro_offset] = np.loadtxt('/home/pi/droidracer/MPUClass/imuBiases.csv', delimiter=',', dtype = "int")
             logger.info('Initialising IMU biases to file.')
-#             [x_accel_offset, y_accel_offset,
-#               z_accel_offset, x_gyro_offset, y_gyro_offset, z_gyro_offset] = np.array([0,0,0,0,0,0])
             # Use existing IMU bias            
-            self.accelBias = np.array([[x_accel_offset, y_accel_offset,z_accel_offset]])
+            self.accelBias = np.array([x_accel_offset, y_accel_offset,z_accel_offset])
             print(self.accelBias)
-            self.omegaBias = np.array([[x_gyro_offset, y_gyro_offset, z_gyro_offset]])
+            self.omegaBias = np.array([x_gyro_offset, y_gyro_offset, z_gyro_offset])
             print(self.omegaBias)
         
         except:
@@ -104,10 +105,6 @@ class droidInertial(MPU6050):
               z_accel_offset, x_gyro_offset, y_gyro_offset, z_gyro_offset,
               debug_output)
         
-        self.XGyoff = self.get_x_gyro_offset_TC()
-        self.YGyoff = self.get_y_gyro_offset_TC()
-        self.ZGyoff = self.get_z_gyro_offset_TC()
-        
         # Initialise DMP
         self.dmp_initialize()
         # Start DMP
@@ -121,19 +118,16 @@ class droidInertial(MPU6050):
         self.set_x_accel_offset(x_accel_offset)
         self.set_y_accel_offset(y_accel_offset)
         self.set_z_accel_offset(z_accel_offset)
-        
-        
+               
     def readIMUraw(self):
         self.TimeKminus1 = self.TimeK
         self.rawAccelMinus1 = self.rawAccel
         self.rawOmegaMinus1 = self.rawOmega
         self.TimeK = time.time()
-        # Remove constant bias;
         # : Store as numpy arrays as we will be using matrix operations for Kalman filter
         self.rawAccel = np.array([self.get_acceleration()])/ 16384.0  * self.gravity
-        self.rawOmega = (np.array([self.get_rotation()])- self.omegaBias) / 131.0
-        
-        
+        self.rawOmega = np.array([self.get_rotation()]) / 131.0
+               
     def readDMP(self):
         self.TimeKminus1 = self.TimeK
         FIFO_count = self.get_FIFO_count()
@@ -156,11 +150,11 @@ class droidInertial(MPU6050):
             self.FIFO_buffer = self.get_FIFO_bytes(self.FIFO_packet_size)
             self.reset_FIFO()
             Accel = self.DMP_get_acceleration(self.FIFO_buffer)
-            self.dmpAccel = np.array([[Accel.x,Accel.y,Accel.z]])
+            self.dmpAccel = np.array([Accel.x,Accel.y,Accel.z])
             self.dmpQuaternion = self.DMP_get_quaternion(self.FIFO_buffer)
             self.dmpGrav = self.DMP_get_gravity(self.dmpQuaternion)
             Omega = self.DMP_get_euler_roll_pitch_yaw(self.dmpQuaternion, self.dmpGrav)
-            self.dmpEulerOmega = np.array([[Omega.x, Omega.y, Omega.z]])
+            self.dmpEulerOmega = np.array([Omega.x, Omega.y, Omega.z])
     
     def propagateLinear(self):
         # Replace as part of Kalman filter
@@ -168,16 +162,72 @@ class droidInertial(MPU6050):
         self.dt = dt
         self.velocityMinus1 = self.velocity
         self.displacementMinus1 = self.displacement
-        self.velocity = self.rawAccel * dt + self.velocityMinus1
-        self.displacement =  self.velocity * dt + self.displacementMinus1
-#         self.velocity = (self.rawAccel + self.rawAccelMinus1)/2 * dt + self.velocityMinus1
-#         self.displacement = (self.rawAccel + self.rawAccelMinus1)/4 * (dt**2) + (self.velocity + self.velocityMinus1)/2 * dt + self.displacementMinus1
+        self.velocity = (self.rawAccel + self.rawAccelMinus1)/2 * dt + self.velocityMinus1
+        self.displacement =  (self.velocity + self.velocityMinus1)/2 * dt + self.displacementMinus1
 
     def storeIMUdata(self):
         temp = self.rawAccel.tolist() + self.rawOmega.tolist() +  [self.TimeK]
         self.imuOut.append(temp)
+    # TODO: Wrap calibration functions in seperate calibration class
+    def recordStaticIMU(self, calTime = 5, saveData = True):
+        # GUI asks user to prepare droid for test n
+        poses = {'pose 1':(0,'all'),
+                 'pose 2':(1,'1'),
+                 'pose 3':(2,'1'),
+                 'pose 4':(1,'2'),
+                 'pose 5':(2,'2'),
+                 'pose 6':(1,'3'),
+                 'pose 7':(2,'3'),
+                 'pose 8':(1,'1 & 2'),
+                 'pose 9':(2,'1 & 2'),}
+        
+        self.meanAccel=[]
+        self.varAccel=[]
+        self.accelData = []
+        # Get data at various poses
+        for pose, blocks in poses.items():
+            print('\n','Set up robot in ',pose, 'with ',blocks[0], 'blocks under wheel ',blocks[1],'\n')
+            input('Press any key to continue, ctrl C to quit')
+            poseAccel = []
+            t00 = time.time()
+            while time.time() - t00 < calTime:
+                # Get raw IMU data
+                self.readIMUraw()
+                poseAccel.append(self.rawAccel.tolist())
+                
+            
+            meanPoseAccel = np.mean(poseAccel,axis=0)
+            varPoseAccel = np.var(poseAccel,axis=0)
+            self.accelData.append(poseAccel)
+            self.meanAccel.append(meanPoseAccel)
+            self.varAccel.append(varPoseAccel)
+            
+            print(len(poseAccel[0]),' samples collected in %0.2f seconds'%  calTime)
+            print('\n')
+            print('Mean accel (x,y,z) = ', meanPoseAccel)
+            print('Variance accel (x,y,z) = ', varPoseAccel,'\n'*3)
+            # Optimse for biases
+        if saveData:
+                np.savetxt('staticData.csv',np.array(self.accelData),delimiter=',')
+                logger.info('Saving static data to file: %s entries' % len(self.accelData[0]))
     
+    def calStatic(self, getStaticData = False):
+        if getStaticData is True:
+            logger.info('Get ready to acquire static calibration data from robot!')
+            self.recordStaticIMU()
+        else:
+            try:
+               self.accelData = np.loadtxt('/home/pi/droidracer/MPUClass/staticData.csv', delimiter=',', dtype = "int")
+            except:
+                logger.info('Get ready to acquire static calibration data from robot!')
+                self.recordStaticIMU()
+        b0 = self.accelBias
+        self.biasEstimate = least_squares(costFunction, b0, args=(self.gravity, self.accelData))
     
+
+
+        
+             
     def calFindOffsets (self,calTime = 5, calOmega = 0.5,saveData = False):
         # Dynamic calibration
         if self.accelBias == [0,0,0]:
@@ -206,91 +256,101 @@ class droidInertial(MPU6050):
             logger.info('Dynamic data gathering complete.')
 
             self.imuOffset = np.array([0,0,0])
+            
+            
+#-------Methods to test functionality--------------------
+            
+            
+    def testReadSpeed(self):
+       print("Test read time - RAW")
+       counter = 0
+       t0 = time.time()
+       self.readIMUraw()
+       accelRaw = self.rawAccel
+       while counter < 100:
+           self.readIMUraw()
+           accelRaw = np.concatenate((accelRaw, self.rawAccel),axis=0)
+           time.sleep(0.008)
+           counter += 1
+       print('100 Raw values in: %f' % (self.TimeK - t0))
+       print('Average read time: %f' % ((self.TimeK - t0) / 100))
+       
+       print("Test read time - DMP")
+       counter = 0
+       self.reset_FIFO()
+       t0 = time.time()
+       self.readDMP()
+       accelDmp = self.dmpAccel
+       while counter < 100:
+           self.readDMP()
+           accelDmp = np.concatenate((accelDmp, self.dmpAccel),axis=0)
+           counter += 1
+       print('100 DMP values read in: %f' % (self.TimeK - t0))
+       print('Average read time: %f' % ((self.TimeK - t0) / 100))
+       
+    def testLinProp(self):
+        print("Test linear propagation")
+        # Warm up IMU
+        for idx in range(10):
+            self.readIMUraw()
+            print(idx)
+            time.sleep(0.1)
+            
+        # Initialise storage containers   
+        self.propagateLinear()
+        accelRaw = self.rawAccel
+        dispRaw = self.displacement
+        velRaw = self.velocity
+        
+        t0 = time.time()
+        counter = 0
+        while counter < 2000:
+            self.readIMUraw()
+            self.propagateLinear()
+            dispRaw = np.concatenate((dispRaw, self.displacement),axis=0)
+            velRaw = np.concatenate((velRaw, self.velocity),axis=0)
+            accelRaw = np.concatenate((accelRaw, self.rawAccel),axis=0)
+            counter +=1
+            
+        tend = time.time()
+        
+        print('Time: %f' % (tend-t0))
+        print('xAc bias: %0.4f' % np.median(accelRaw[:,0]))
+        print('yAc bias: %0.4f' % np.median(accelRaw[:,1]))
+        print('zAc bias: %0.4f' % np.median(accelRaw[:,2]))
+        
+        fig, ax = plt.subplots(3,3,figsize=(12,9))
+        
+        ax[0,0].plot(dispRaw[:,0], 'r',label='Displacement - x (m)')
+        ax[0,0].set_ylabel('Displacement - m')
+        ax[0,1].plot(dispRaw[:,1], 'r',label='Displacement - y (m)')
+        ax[0,2].plot(dispRaw[:,2], 'r',label='Displacement - z (m)')
+        
+        ax[1,0].plot(velRaw[:,0],'g',label='Velocity - x (m/s)')
+        ax[1,0].set_ylabel('Velocity - (m/s)')
+        ax[1,1].plot(velRaw[:,1],'g',label='Velocity - y (m/s)')
+        ax[1,2].plot(velRaw[:,2],'g',label='Velocity - z (m/s)')
+        
+        ax[2,0].plot(accelRaw[:,0],'b',label='Accel - x (m/s^2)')
+        ax[2,0].set_ylabel('Accel - (m/s^2)')
+        ax[2,1].plot(accelRaw[:,1],'b',label='Accel - y (m/s^2)')
+        ax[2,2].plot(accelRaw[:,2],'b',label='Accel - z (m/s^2)')
+        
+        plt.show()
+        
+def costFunction(grav, obs, bias):
+    return grav**2 - ((obs[0] - bias[0])**2 + (obs[1] - bias[1])**2 + (obs[2] - bias[2])**2)
+                
+                
 
 if __name__ == "__main__":
     di = droidInertial()
-
-    print("Class Initialised")
-    #print("Test read time - RAW")
+#     di.testReadSpeed()
+#     di.testLinProp()
+#     di.recordStaticIMU()
+    di.calStatic()
     
-#    counter = 0
-#    t0 = time.time()
-#    di.readIMUraw()
-#    accelRaw = di.rawAccel
-#    while counter < 100:
-#        di.readIMUraw()
-#        accelRaw = np.concatenate((accelRaw, di.rawAccel),axis=0)
-#        time.sleep(0.008)
-#        counter += 1
-#    print('100 Raw values in: %f' % (di.TimeK - t0))
-#    print('Average read time: %f' % ((di.TimeK - t0) / 100))
-#    
-#    print("Test read time - DMP")
-#    counter = 0
-#    di.reset_FIFO()
-#    t0 = time.time()
-#    di.readDMP()
-#    accelDmp = di.dmpAccel
-#    while counter < 100:
-#        di.readDMP()
-#        accelDmp = np.concatenate((accelDmp, di.dmpAccel),axis=0)
-#        counter += 1
-#    print('100 DMP values in: %f' % (di.TimeK - t0))
-#    print('Average read time: %f' % ((di.TimeK - t0) / 100))
-    
-    print("Test linear propagation")
-
-    for idx in range(10):
-        di.readIMUraw()
-        print(idx)
-        time.sleep(0.010)
-        
-    di.propagateLinear()
-    accelRaw = di.rawAccel
-    dispRaw = di.displacement
-    velRaw = di.velocity
-    
-    t0 = time.time()
-    counter = 0
-    while counter < 2000:
-        di.readIMUraw()
-        di.propagateLinear()
-        dispRaw = np.concatenate((dispRaw, di.displacement),axis=0)
-        velRaw = np.concatenate((velRaw, di.velocity),axis=0)
-        accelRaw = np.concatenate((accelRaw, di.rawAccel),axis=0)
-        counter +=1
-        
-    tend = time.time() 
-    print('Time: %f' % (tend-t0))
-    print('xAc bias: %0.4f' % np.median(accelRaw[:,0]))
-    print('yAc bias: %0.4f' % np.median(accelRaw[:,1]))
-    print('zAc bias: %0.4f' % np.median(accelRaw[:,2]))
-    
-    fig, ax = plt.subplots(3,3,figsize=(12,9))
-    
-    ax[0,0].plot(dispRaw[:,0], 'r',label='Displacement - x (m)')
-    ax[0,0].set_ylabel('Displacement - m')
-    ax[0,1].plot(dispRaw[:,1], 'r',label='Displacement - y (m)')
-    ax[0,2].plot(dispRaw[:,2], 'r',label='Displacement - z (m)')
-    
-    
-    #ax = fig.add_subplot(334)
-    ax[1,0].plot(velRaw[:,0],'g',label='Velocity - x (m/s)')
-    ax[1,0].set_ylabel('Velocity - (m/s)')
-    #ax = fig.add_subplot(335)
-    ax[1,1].plot(velRaw[:,1],'g',label='Velocity - y (m/s)')
-#     ax = fig.add_subplot(336)
-    ax[1,2].plot(velRaw[:,2],'g',label='Velocity - z (m/s)')
-    
-#     ax = fig.add_subplot(337)
-    ax[2,0].plot(accelRaw[:,0],'b',label='Accel - x (m/s^2)')
-    ax[2,0].set_ylabel('Accel - (m/s^2)')
-#     ax = fig.add_subplot(338)
-    ax[2,1].plot(accelRaw[:,1],'b',label='Accel - y (m/s^2)')
-#     ax = fig.add_subplot(339)
-    ax[2,2].plot(accelRaw[:,2],'b',label='Accel - z (m/s^2)')
-    
-    plt.show()
+   
     
     
     
