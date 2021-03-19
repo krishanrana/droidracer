@@ -169,7 +169,7 @@ class droidInertial(MPU6050):
         temp = self.rawAccel.tolist() + self.rawOmega.tolist() +  [self.TimeK]
         self.imuOut.append(temp)
     # TODO: Wrap calibration functions in seperate calibration class
-    def recordStaticIMU(self, calTime = 5, saveData = True):
+    def recordStaticIMU(self, sampleLength = 1000, saveData = True):
         # GUI asks user to prepare droid for test n
         poses = {'pose 1':(0,'all'),
                  'pose 2':(1,'1'),
@@ -183,51 +183,60 @@ class droidInertial(MPU6050):
         
         self.meanAccel=[]
         self.varAccel=[]
-        self.accelData = []
+        self.accelData = np.array([[0,0,0]])
+        
         # Get data at various poses
         for pose, blocks in poses.items():
             print('\n','Set up robot in ',pose, 'with ',blocks[0], 'blocks under wheel ',blocks[1],'\n')
             input('Press any key to continue, ctrl C to quit')
-            poseAccel = []
+            # Get initial reading
+            self.readIMUraw()
+            self.poseAccel = self.rawAccel
             t00 = time.time()
-            while time.time() - t00 < calTime:
+            while len(self.poseAccel) < sampleLength:
                 # Get raw IMU data
                 self.readIMUraw()
-                poseAccel.append(self.rawAccel.tolist())
+                self.poseAccel = np.concatenate((self.poseAccel, self.rawAccel),axis=0)
+                print('.',)
                 
             
-            meanPoseAccel = np.mean(poseAccel,axis=0)
-            varPoseAccel = np.var(poseAccel,axis=0)
-            self.accelData.append(poseAccel)
+            calTime = time.time()-t00
+            meanPoseAccel = np.mean(self.poseAccel,axis=0)
+            varPoseAccel = np.var(self.poseAccel,axis=0)
+            self.accelData = np.concatenate((self.accelData, self.poseAccel),axis=0)
             self.meanAccel.append(meanPoseAccel)
             self.varAccel.append(varPoseAccel)
             
-            print(len(poseAccel[0]),' samples collected in %0.2f seconds'%  calTime)
+            print(len(self.poseAccel),' samples collected in %0.2f seconds'%  calTime)
             print('\n')
             print('Mean accel (x,y,z) = ', meanPoseAccel)
             print('Variance accel (x,y,z) = ', varPoseAccel,'\n'*3)
             # Optimse for biases
         if saveData:
-                np.savetxt('staticData.csv',np.array(self.accelData),delimiter=',')
-                logger.info('Saving static data to file: %s entries' % len(self.accelData[0]))
+            np.savetxt('staticData.csv',self.accelData[1:],delimiter=',')
+            logger.info('Saving static data to file: %s entries' % len(self.accelData))
     
     def calStatic(self, getStaticData = False):
+
+        try:
+            self.accelData = np.loadtxt('/home/pi/droidracer/staticData.csv', delimiter=',', dtype = "float")
+            logger.info('staticData.csv loaded')
+        except:
+            logger.info('staticData.csv file not found, launching calibration routine')
+            self.recordStaticIMU()
         if getStaticData is True:
             logger.info('Get ready to acquire static calibration data from robot!')
             self.recordStaticIMU()
-        else:
-            try:
-               self.accelData = np.loadtxt('/home/pi/droidracer/MPUClass/staticData.csv', delimiter=',', dtype = "int")
-            except:
-                logger.info('Get ready to acquire static calibration data from robot!')
-                self.recordStaticIMU()
-        b0 = self.accelBias
-        self.biasEstimate = least_squares(costFunction, b0, args=(self.gravity, self.accelData))
+            
+            
+        b0 = self.accelBias / 16384.0  * self.gravity
+        b0 = b0.tolist()
+        Ax = self.accelData[:,0].tolist()
+        self.biasEstimate = least_squares(costFunction, b0, args=(self.gravity, Ax))
+        logger.info('Bias estimation complete: ',self.biasEstimate.x)
+        logger.debug(self.biasEstimate.x * 16384.0  / self.gravity)
     
-
-
         
-             
     def calFindOffsets (self,calTime = 5, calOmega = 0.5,saveData = False):
         # Dynamic calibration
         if self.accelBias == [0,0,0]:
@@ -338,8 +347,8 @@ class droidInertial(MPU6050):
         
         plt.show()
         
-def costFunction(grav, obs, bias):
-    return grav**2 - ((obs[0] - bias[0])**2 + (obs[1] - bias[1])**2 + (obs[2] - bias[2])**2)
+def costFunction(bias, grav, obs):
+    return grav - np.sqrt((obs[0] - bias[0])**2 + (obs[1] - bias[1])**2 + (obs[2] - bias[2])**2)
                 
                 
 
@@ -348,7 +357,7 @@ if __name__ == "__main__":
 #     di.testReadSpeed()
 #     di.testLinProp()
 #     di.recordStaticIMU()
-    di.calStatic()
+    di.calStatic(getStaticData = False)
     
    
     

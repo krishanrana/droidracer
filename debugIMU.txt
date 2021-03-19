@@ -400,3 +400,181 @@
 [2021-03-19 17:26:56,894] DEBUG    Imulog       FIFO Packet size: 42 
 [2021-03-19 17:26:56,896] DEBUG    Imulog       FIFO count: 0x0 
 [2021-03-19 17:26:56,905] INFO     Imulog       Get ready to acquire static calibration data from robot!
+[2021-03-19 17:34:28,605] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-19 17:34:28,616] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-19 17:34:32,641] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-19 17:34:32,644] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-19 17:34:32,647] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-19 17:34:32,676] INFO     Imulog       Get ready to acquire static calibration data from robot!
+[2021-03-19 17:38:15,597] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-19 17:38:15,602] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-19 17:38:19,459] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-19 17:38:19,460] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-19 17:38:19,462] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-19 17:38:19,471] INFO     Imulog       Get ready to acquire static calibration data from robot!
+[2021-03-19 17:38:49,845] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-19 17:38:49,859] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-19 17:38:53,857] DEBUG    Imulog       Interrupt status: 0x2 
+[2021-03-19 17:38:53,861] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-19 17:38:53,865] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-03-19 17:38:53,890] INFO     Imulog       Get ready to acquire static calibration data from robot!
+[2021-03-19 17:43:13,252] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-19 17:43:13,256] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-19 17:43:17,088] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-19 17:43:17,089] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-19 17:43:17,091] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-19 17:43:17,100] INFO     Imulog       Get ready to acquire static calibration data from robot!
+[2021-03-19 19:55:52,648] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-19 19:55:52,652] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-19 19:55:56,489] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-19 19:55:56,490] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-19 19:55:56,492] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-19 19:55:56,501] INFO     Imulog       Get ready to acquire static calibration data from robot!
+[2021-03-19 19:57:42,675] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-19 19:57:42,686] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-19 19:57:46,698] DEBUG    Imulog       Interrupt status: 0x2 
+[2021-03-19 19:57:46,702] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-19 19:57:46,706] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-03-19 19:57:46,732] INFO     Imulog       Get ready to acquire static calibration data from robot!
+[2021-03-19 20:00:43,555] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-19 20:00:43,561] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-19 20:00:47,402] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-19 20:00:47,404] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-19 20:00:47,406] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-19 20:00:47,415] INFO     Imulog       Get ready to acquire static calibration data from robot!
+[2021-03-19 20:07:28,055] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-19 20:07:28,069] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-19 20:07:32,085] DEBUG    Imulog       Interrupt status: 0x2 
+[2021-03-19 20:07:32,088] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-19 20:07:32,091] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-03-19 20:07:32,117] INFO     Imulog       Get ready to acquire static calibration data from robot!
+[2021-03-19 20:10:34,388] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-19 20:10:34,399] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-19 20:10:38,406] DEBUG    Imulog       Interrupt status: 0x2 
+[2021-03-19 20:10:38,409] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-19 20:10:38,413] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-03-19 20:10:38,439] INFO     Imulog       Get ready to acquire static calibration data from robot!
+[2021-03-19 20:14:40,916] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-19 20:14:40,920] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-19 20:14:44,758] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-19 20:14:44,759] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-19 20:14:44,761] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-19 20:14:44,770] INFO     Imulog       Get ready to acquire static calibration data from robot!
+[2021-03-19 20:15:42,984] INFO     Imulog       Saving static data to file: 3 entries
+[2021-03-19 20:42:07,608] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-19 20:42:07,612] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-19 20:42:11,450] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-19 20:42:11,451] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-19 20:42:11,453] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-19 20:42:11,462] INFO     Imulog       Get ready to acquire static calibration data from robot!
+[2021-03-19 22:03:38,581] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-19 22:03:38,585] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-19 22:03:42,416] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-19 22:03:42,417] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-19 22:03:42,419] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-19 22:03:43,020] INFO     Imulog       staticData.csv loaded
+[2021-03-19 22:05:03,408] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-19 22:05:03,412] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-19 22:05:07,236] DEBUG    Imulog       Interrupt status: 0x1 
+[2021-03-19 22:05:07,237] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-19 22:05:07,239] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-19 22:05:07,869] INFO     Imulog       staticData.csv loaded
+[2021-03-19 22:07:10,539] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-19 22:07:10,551] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-19 22:07:14,570] DEBUG    Imulog       Interrupt status: 0x2 
+[2021-03-19 22:07:14,573] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-19 22:07:14,576] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-03-19 22:07:16,470] INFO     Imulog       staticData.csv loaded
+[2021-03-19 22:13:08,135] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-19 22:13:08,147] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-19 22:13:12,134] DEBUG    Imulog       Interrupt status: 0x2 
+[2021-03-19 22:13:12,136] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-19 22:13:12,140] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-03-19 22:13:14,036] INFO     Imulog       staticData.csv loaded
+[2021-03-19 22:20:45,583] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-19 22:20:45,595] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-19 22:20:49,569] DEBUG    Imulog       Interrupt status: 0x2 
+[2021-03-19 22:20:49,571] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-19 22:20:49,575] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-03-19 22:20:51,480] INFO     Imulog       staticData.csv loaded
+[2021-03-19 22:33:06,354] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-19 22:33:06,366] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-19 22:33:10,364] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-19 22:33:10,367] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-19 22:33:10,371] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-03-19 22:33:12,297] INFO     Imulog       staticData.csv loaded
+[2021-03-19 22:36:55,895] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-19 22:36:55,904] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-19 22:36:59,744] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-19 22:36:59,746] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-19 22:36:59,748] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-19 22:37:00,387] INFO     Imulog       staticData.csv loaded
+[2021-03-19 22:45:54,593] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-19 22:45:54,598] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-19 22:45:58,425] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-19 22:45:58,426] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-19 22:45:58,428] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-19 22:45:59,072] INFO     Imulog       staticData.csv loaded
+[2021-03-19 22:45:59,073] INFO     Imulog       Get ready to acquire static calibration data from robot!
+[2021-03-19 22:48:16,044] INFO     Imulog       Saving static data to file: 9001 entries
+[2021-03-19 22:48:16,210] DEBUG    Imulog        active_mask: array([0., 0., 0.])
+        cost: 8.16880939760022e-14
+         fun: array([-4.04198204e-07])
+        grad: array([-1.02506682e-06,  4.68001118e-06,  6.31621230e-06])
+         jac: array([[  2.53604992, -11.57850563, -15.62652243]])
+     message: '`xtol` termination condition is satisfied.'
+        nfev: 44
+        njev: 18
+  optimality: 6.316212296064179e-06
+      status: 3
+     success: True
+           x: array([-1.26802494,  5.76650787,  7.79051622])
+[2021-03-19 22:51:33,620] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-19 22:51:33,627] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-19 22:51:37,462] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-19 22:51:37,463] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-19 22:51:37,466] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-03-19 22:51:38,109] INFO     Imulog       staticData.csv loaded
+[2021-03-19 22:52:48,321] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-19 22:52:48,328] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-19 22:52:52,161] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-19 22:52:52,162] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-19 22:52:52,164] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-19 22:52:52,802] INFO     Imulog       staticData.csv loaded
+[2021-03-19 22:52:52,947] DEBUG    Imulog        active_mask: array([0., 0., 0.])
+        cost: 4.473354451971678e-16
+         fun: array([-2.99110496e-08])
+        grad: array([-6.86423585e-08,  3.48206930e-07,  4.67122617e-07])
+         jac: array([[  2.29488297, -11.64141461, -15.61705865]])
+     message: '`xtol` termination condition is satisfied.'
+        nfev: 40
+        njev: 19
+  optimality: 4.6712261659650927e-07
+      status: 3
+     success: True
+           x: array([-1.17018648,  5.79796236,  7.78578433])
+[2021-03-19 22:53:13,511] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-19 22:53:13,524] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-19 22:53:17,756] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-19 22:53:17,758] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-19 22:53:17,761] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-19 22:53:19,782] INFO     Imulog       staticData.csv loaded
+[2021-03-19 22:55:33,373] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-19 22:55:33,378] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-19 22:55:37,217] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-19 22:55:37,218] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-19 22:55:37,220] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-19 22:55:37,859] INFO     Imulog       staticData.csv loaded
+[2021-03-19 22:58:31,878] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-19 22:58:31,883] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-19 22:58:35,733] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-19 22:58:35,735] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-19 22:58:35,737] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-19 22:58:36,353] INFO     Imulog       staticData.csv loaded
+[2021-03-19 22:58:56,622] INFO     Imulog       Initialising IMU biases to file.
+[2021-03-19 22:58:56,628] INFO     Imulog       Initialising IMU offsets to file.
+[2021-03-19 22:59:00,480] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-03-19 22:59:00,481] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-03-19 22:59:00,483] DEBUG    Imulog       FIFO count: 0x0 
+[2021-03-19 22:59:01,112] INFO     Imulog       staticData.csv loaded
+[2021-03-19 22:59:01,284] DEBUG    Imulog       [-1955.03346733  9686.67370484 13007.7334061 ]
