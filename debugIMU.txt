@@ -1281,3 +1281,117 @@
 [2021-03-23 16:24:37,080] DEBUG    Imulog       FIFO Packet size: 42 
 [2021-03-23 16:24:37,082] DEBUG    Imulog       FIFO count: 0x0 
 [2021-03-23 16:25:05,426] INFO     Imulog       staticData.csv loaded
+[2021-04-17 19:36:25,684] INFO     Imulog       Initialising IMU biases to file.
+[2021-04-17 19:36:29,549] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-04-17 19:36:29,551] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-04-17 19:36:29,553] DEBUG    Imulog       FIFO count: 0x0 
+[2021-04-17 19:36:30,185] INFO     Imulog       staticData.csv loaded
+[2021-04-17 19:41:22,451] INFO     Imulog       Initialising IMU biases to file.
+[2021-04-17 19:41:58,072] INFO     Imulog       Initialising IMU biases to file.
+[2021-04-17 19:42:51,900] INFO     Imulog       Initialising IMU biases to file.
+[2021-04-17 19:42:55,719] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-04-17 19:42:55,720] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-04-17 19:42:55,722] DEBUG    Imulog       FIFO count: 0x0 
+[2021-04-17 19:42:56,346] INFO     Imulog       staticData.csv loaded
+[2021-04-17 19:52:01,306] INFO     Imulog       Initialising IMU biases to file.
+[2021-04-17 19:52:17,533] INFO     Imulog       Initialising IMU biases to file.
+[2021-04-17 19:52:25,752] INFO     Imulog       Initialising IMU biases to file.
+[2021-04-17 19:52:32,185] INFO     Imulog       Initialising IMU biases to file.
+[2021-04-17 19:52:53,606] INFO     Imulog       Initialising IMU biases to file.
+[2021-04-17 19:54:32,249] INFO     Imulog       Initialising IMU biases to file.
+[2021-04-17 19:54:36,117] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-04-17 19:54:36,118] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-04-17 19:54:36,120] DEBUG    Imulog       FIFO count: 0x0 
+[2021-04-17 19:54:36,765] INFO     Imulog       staticData.csv loaded
+[2021-04-17 19:55:02,784] INFO     Imulog       Initialising IMU biases to file.
+[2021-04-17 19:55:06,748] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-04-17 19:55:06,749] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-04-17 19:55:06,751] DEBUG    Imulog       FIFO count: 0x0 
+[2021-04-17 19:55:07,398] INFO     Imulog       staticData.csv loaded
+[2021-04-17 19:55:21,009] INFO     Imulog       Initialising IMU biases to file.
+[2021-04-17 19:55:25,222] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-04-17 19:55:25,225] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-04-17 19:55:25,228] DEBUG    Imulog       FIFO count: 0x0 
+[2021-04-17 19:55:27,174] INFO     Imulog       staticData.csv loaded
+[2021-04-17 20:00:22,665] INFO     Imulog       Initialising IMU biases to file.
+[2021-04-17 20:00:26,491] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-04-17 20:00:26,492] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-04-17 20:00:26,494] DEBUG    Imulog       FIFO count: 0x0 
+[2021-04-17 20:00:27,123] INFO     Imulog       staticData.csv loaded
+[2021-04-17 20:02:53,855] INFO     Imulog       Initialising IMU biases to file.
+[2021-04-17 20:02:57,663] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-04-17 20:02:57,665] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-04-17 20:02:57,667] DEBUG    Imulog       FIFO count: 0x0 
+[2021-04-17 20:02:58,298] INFO     Imulog       staticData.csv loaded
+[2021-04-17 20:13:58,275] INFO     Imulog       Initialising IMU biases to file.
+[2021-04-17 20:14:02,116] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-04-17 20:14:02,118] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-04-17 20:14:02,119] DEBUG    Imulog       FIFO count: 0x0 
+[2021-04-17 20:14:02,739] INFO     Imulog       staticData.csv loaded
+[2021-04-17 20:15:32,637] INFO     Imulog       Initialising IMU biases to file.
+[2021-04-17 20:15:36,423] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-04-17 20:15:36,424] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-04-17 20:15:36,426] DEBUG    Imulog       FIFO count: 0x0 
+[2021-04-17 20:15:37,066] INFO     Imulog       staticData.csv loaded
+[2021-04-17 20:18:13,187] INFO     Imulog       Initialising IMU biases to file.
+[2021-04-17 20:18:17,010] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-04-17 20:18:17,012] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-04-17 20:18:17,013] DEBUG    Imulog       FIFO count: 0x0 
+[2021-04-17 20:18:17,014] INFO     Imulog       Get ready to acquire static calibration data from robot!
+[2021-04-17 20:18:57,754] INFO     Imulog       Initialising IMU biases to file.
+[2021-04-17 20:19:01,583] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-04-17 20:19:01,584] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-04-17 20:19:01,587] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-04-17 20:19:01,588] INFO     Imulog       Get ready to acquire static calibration data from robot!
+[2021-04-17 20:26:17,072] INFO     Imulog       Saving static data to file: 15001 entries
+[2021-04-17 20:26:17,424] INFO     Imulog       Bias estimation complete: 
+[2021-04-17 20:26:17,425] DEBUG    Imulog       [  4424.89791267 -18248.46511301  -9021.18461572]
+[2021-04-17 20:26:17,430] INFO     Imulog       Saving static accelerometer biases to file
+[2021-04-17 20:32:26,244] INFO     Imulog       Initialising IMU biases to file.
+[2021-04-17 20:32:30,237] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-04-17 20:32:30,241] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-04-17 20:32:30,245] DEBUG    Imulog       FIFO count: 0x0 
+[2021-04-17 20:32:33,385] INFO     Imulog       staticData.csv loaded
+[2021-04-17 20:32:33,772] INFO     Imulog       Bias estimation complete: 
+[2021-04-17 20:32:33,775] DEBUG    Imulog       [  4427.01683438 -18256.23606729  -9022.09496119]
+[2021-04-17 20:32:33,787] INFO     Imulog       Saving static accelerometer biases to file
+[2021-04-17 20:38:30,623] INFO     Imulog       Initialising IMU biases to file.
+[2021-04-17 20:38:34,664] DEBUG    Imulog       Interrupt status: 0x2 
+[2021-04-17 20:38:34,667] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-04-17 20:38:34,671] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-04-17 20:40:02,853] INFO     Imulog       staticData.csv loaded
+[2021-04-17 20:41:14,605] INFO     Imulog       Bias estimation complete: 
+[2021-04-17 20:41:14,608] DEBUG    Imulog       [  4427.01683438 -18256.23606729  -9022.09496119]
+[2021-04-17 20:41:14,619] INFO     Imulog       Saving static accelerometer biases to file
+[2021-04-17 20:43:56,777] INFO     Imulog       Initialising IMU biases to file.
+[2021-04-17 20:44:00,817] DEBUG    Imulog       Interrupt status: 0x2 
+[2021-04-17 20:44:00,820] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-04-17 20:44:00,823] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-04-17 20:44:08,299] INFO     Imulog       staticData.csv loaded
+[2021-04-17 20:44:08,680] INFO     Imulog       Bias estimation complete: 
+[2021-04-17 20:44:08,683] DEBUG    Imulog       [  4427.01683438 -18256.23606729  -9022.09496119]
+[2021-04-17 20:44:08,694] INFO     Imulog       Saving static accelerometer biases to file
+[2021-04-17 20:50:36,145] INFO     Imulog       Initialising IMU biases to file.
+[2021-04-17 20:50:39,984] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-04-17 20:50:39,986] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-04-17 20:50:39,988] DEBUG    Imulog       FIFO count: 0x0 
+[2021-04-17 20:50:41,012] INFO     Imulog       staticData.csv loaded
+[2021-04-17 20:50:41,334] INFO     Imulog       Bias estimation complete: 
+[2021-04-17 20:50:41,336] DEBUG    Imulog       [  4427.01683438 -18256.23606729  -9022.09496119]
+[2021-04-17 20:50:41,344] INFO     Imulog       Saving static accelerometer biases to file
+[2021-04-17 21:05:15,570] INFO     Imulog       Initialising IMU biases to file.
+[2021-04-17 21:05:19,421] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-04-17 21:05:19,422] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-04-17 21:05:19,425] DEBUG    Imulog       FIFO count: 0x0 
+[2021-04-17 21:05:20,437] INFO     Imulog       staticData.csv loaded
+[2021-04-17 21:05:20,742] INFO     Imulog       Bias estimation complete: 
+[2021-04-17 21:05:20,744] DEBUG    Imulog       [  4427.01683438 -18256.23606729  -9022.09496119]
+[2021-04-17 21:05:20,751] INFO     Imulog       Saving static accelerometer biases to file
+[2021-04-17 21:10:22,385] INFO     Imulog       Initialising IMU biases to file.
+[2021-04-17 21:10:26,222] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-04-17 21:10:26,223] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-04-17 21:10:26,226] DEBUG    Imulog       FIFO count: 0x0 
+[2021-04-17 21:36:49,260] INFO     Imulog       Initialising IMU biases to file.
+[2021-04-17 21:36:53,091] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-04-17 21:36:53,092] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-04-17 21:36:53,094] DEBUG    Imulog       FIFO count: 0x0 

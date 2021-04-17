@@ -131,7 +131,8 @@ class droidInertial(MPU6050):
             self.dmpEulerOmega = np.array([Omega.x, Omega.y, Omega.z])
     
     def propagateLinear(self):
-        # Replace as part of Kalman filter
+        # NOTES: Replace as part of Kalman filter
+        # Estimate current pose and remove gravity vector
         dt = self.TimeK - self.TimeKminus1
         self.dt = dt
         self.velocityMinus1 = self.velocity
@@ -378,13 +379,13 @@ class droidInertial(MPU6050):
         
     def plotDataSet(self,data):
         
-        fig, ax = plt.subplots(1,3,figsize=(12,9))
+        fig, ax = plt.subplots(3,1,figsize=(12,9))
 
-        ax[0,0].plot(data[:,0],'r',label='Accel - x (m/s^2)')
-        ax[0,0].set_ylabel('Accel - (m/s^2)')
-        ax[0,1].plot(data[:,1],'g',label='Accel - y (m/s^2)')
-        ax[0,2].plot(data[:,2],'b',label='Accel - z (m/s^2)')
-        fig.legend(loc="upper right", bbox_to_anchor=(1,1), bbox_transform=ax.transAxes)
+        ax[0].plot(data[:,0],'r',label='Accel - x (m/s^2)')
+        ax[0].set_ylabel('Accel - (m/s^2)')
+        ax[1].plot(data[:,1],'g',label='Accel - y (m/s^2)')
+        ax[2].plot(data[:,2],'b',label='Accel - z (m/s^2)')
+#         fig.legend(loc="upper right", bbox_to_anchor=(1,1), bbox_transform=ax.transAxes)
 
         plt.show()
        
@@ -494,22 +495,22 @@ class droidInertial(MPU6050):
         ax.text(0,0,-10,'Gravity',color ='r')
         
         # Create rotated coordinate system
-        uR, vR, wR = pose.apply([u0,v0,w0])
-        ax.quiver(x0,y0,z0,uR,vR,wR,color=colours,length = 8,arrow_length_ratio=0.1)
-        ax.text(8,0,0.1,r'$X_r$',color ='r')
-        ax.text(0,8,0,r'$Y_r$',color ='g')
-        ax.text(0,0,8,r'$Z_r$',color ='b')
+        uR, vR, wR = pose.apply([u0,v0,w0]) * 8
+        ax.quiver(x0,y0,z0,uR,vR,wR,color=colours,length = 1,arrow_length_ratio=0.1)
+        ax.text(uR[0],uR[1],uR[2],r'$X_r$',color ='r')
+        ax.text(vR[0],vR[1],vR[2],r'$Y_r$',color ='g')
+        ax.text(wR[0],wR[1],wR[2],r'$Z_r$',color ='b')
         
         ax.set_xlim3d(-10,10)
         ax.set_ylim3d(-10,10)
         ax.set_zlim3d(-10,10)
         
-        ax.set_xlabel(r'$A_x - ms^(-1)$')
-        ax.set_ylabel(r'$A_y - ms^(-1)$')
-        ax.set_zlabel(r'$A_z - ms^(-1)$')
+        ax.set_xlabel(r'$A_x - ms^{-2}$')
+        ax.set_ylabel(r'$A_y - ms^{-2}$')
+        ax.set_zlabel(r'$A_z - ms^{-2}$')
         
         Euler = pose.as_euler('zyx',degrees=True)        
-        ax.set_title(r'Pose: {0} $R_x$: {1:.2f} $R_y$: {2:.2f} $R_y$: {3:.2f}'.format(poseNo, Euler[0], Euler[1], Euler[2]))
+        ax.set_title(r'Pose: {0} $R_x$: {1:.2f} $R_y$: {2:.2f} $R_z$: {3:.2f}'.format(poseNo, Euler[0], Euler[1], Euler[2]))
 
     def checkRotation(self,R):
         R = pose.as_matrix()
@@ -527,14 +528,14 @@ if __name__ == "__main__":
 #     di.testReadSpeed()
 #     di.calStatic(getStaticData = False)
 #     di.plotDataSet(di.accelData)
-#     di.testLinProp()
-    di.loadCalData(loadStaticData = True)
-    rotations = di.estPose(di.accelData, di.accelBias)
-    for poseNo,pose in enumerate(rotations,start=1):
-        #di.plotPose(pose,poseNo)
-        isRot, deter = di.checkRotation(pose)
-        print('Pose {0} is a {1}, determinant ={2:.2f}'.format(poseNo,isRot, deter))
-        
+    di.testLinProp()
+#     di.loadCalData(loadStaticData = True)
+#     rotations = di.estPose(di.accelData, di.accelBias)
+#     for poseNo,pose in enumerate(rotations,start=1):
+#         di.plotPose(pose,poseNo)
+# #         isRot, deter = di.checkRotation(pose)
+# #         print('Pose {0} is a {1}, determinant ={2:.2f}'.format(poseNo,isRot, deter))
+#         
         
     plt.show()
         
