@@ -18,12 +18,8 @@ shutdown_flag = False
 
 
 class droidControl:
-    '''
-    #####################################################################################
-        CONSTRUCTOR
-    #####################################################################################
-    '''
-    def __init__(self, serial_port='/dev/ttyUSB0',baud=9600):
+
+    def __init__(self, serial_port='/dev/ttyUSB0',baud=38400):
 
         # Velocity controller
         self.speed = 0

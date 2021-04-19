@@ -1395,3 +1395,7 @@
 [2021-04-17 21:36:53,091] DEBUG    Imulog       Interrupt status: 0x0 
 [2021-04-17 21:36:53,092] DEBUG    Imulog       FIFO Packet size: 42 
 [2021-04-17 21:36:53,094] DEBUG    Imulog       FIFO count: 0x0 
+[2021-04-18 14:02:23,620] INFO     Imulog       Initialising IMU biases to file.
+[2021-04-18 14:02:27,453] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-04-18 14:02:27,454] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-04-18 14:02:27,456] DEBUG    Imulog       FIFO count: 0x0 

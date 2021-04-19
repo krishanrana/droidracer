@@ -169,7 +169,6 @@ class TunePID:
             self.isReceiving = True
             time.sleep(0.000001)
 
-
     def saveOutput(self):
         saveDataNP = np.array(self.saveData)
         self.saveDataNP = saveDataNP[saveDataNP[:,3]>0]
