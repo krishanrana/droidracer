@@ -7,13 +7,13 @@ import numpy as np
 import os
 import serial
 import struct
-from fractions import Fraction
+#from fractions import Fraction
 
 """ This class contains various methods for high level control of omni droid robot
 """
 
-logging.basicConfig(level=logging.DEBUG,
-                      format='[%(levelname)s] (%(threadName)-9s) %(message)s',)
+# logging.basicConfig(level=logging.DEBUG,
+#                       format='[%(levelname)s] (%(threadName)-9s) %(message)s',)
 shutdown_flag = False
 
 
