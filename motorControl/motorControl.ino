@@ -2,7 +2,7 @@
 #include "PinChangeInt.h"
 
 //Use for PID control of motors
-#include <PID_v1.h>
+#include <PID_v2.h>
 
 
 // Encoders
@@ -16,66 +16,89 @@
 //Motors
 #define TICKS_PER_REV 980 // Using Pololu 20.4:1 25D gearmotor 48 tick/rev
 #define WHEEL_DIAMETER 0.058
-#define DROIDRADIUS 0.15
-// L9958 DIRection pins
+
+// L9958 Direction pins
 #define DIR_M1 2
 #define DIR_M2 3
 #define DIR_M3 4
+
 // L9958 PWM pins
 #define PWM_M1 9
 #define PWM_M2 10    // Timer1
 #define PWM_M3 5
+
 // L9958 Enable for all 4 motors
 #define ENABLE_MOTORS 8
 
-int pwm1, pwm2, pwm3;
-int dir1, dir2, dir3;
+// PID
+#define PIDSAMPLERATE 20
+#define LOOPTIME 30000
 
-char dataString[50] = {0};
+// Serial communication definitions
+#define INMSGSIZE 7 // Length of message in values (eg. [1.3 100] = 2)
+#define INVARBYTES 4 // Bytes per value (eg. float = 4)
+
+// States and signals
+#define PARKED 0
+#define RUNNING 1
+#define STANDBY 3
+#define TIMEOUT 5
+#define NO_COMMS 100
 
 
-// PID variables
-//#define KP_AGG 15
-//#define KI_AGG 250
-//#define KD_AGG 0
-//
-//#define KP_CON 10
-//#define KI_CON 0
-//#define KD_CON 0.01
-#define KP_AGG 15
-#define KI_AGG 50
-#define KD_AGG 0
+// Serial communication variables
+int byteLength = INMSGSIZE * INVARBYTES;
+double msgIn[INMSGSIZE];
 
-#define KP_CON 10
-#define KI_CON 0
-#define KD_CON 0.1
-// Set threshold for change in controller parameters. Defined as absolute error from setpoint (motor speed in m/s)
-#define CON_THRESH 0.1
+// Signals and state machine
+int state = NO_COMMS;
 
-volatile double speed_M1, speed_M2, speed_M3;         // Used for input measurement to PID
-double out_M1, out_M2, out_M3;                        // Output from PID to power motors
-double setspeed_M1, setspeed_M2, setspeed_M3;         // Target speed for motors
-double pidSampleRate;
+// Timers
+unsigned long delayTimer = 0;
+unsigned long safetyClock = 0;
+unsigned long parkClock = 0;
+unsigned long safetyTimeOut = LOOPTIME * 50;
+unsigned long parkTimeOut = LOOPTIME * 20;
 
-// PID Constructor 
-PID PID_M1(&speed_M1, &out_M1, &setspeed_M1, KP_AGG, KI_AGG, KD_AGG,P_ON_M, DIRECT);
-PID PID_M2(&speed_M2, &out_M2, &setspeed_M2, KP_AGG, KI_AGG, KD_AGG,P_ON_M, DIRECT);
-PID PID_M3(&speed_M3, &out_M3, &setspeed_M3, KP_AGG, KI_AGG, KD_AGG,P_ON_M, DIRECT);
+// Define union for variable datatype conversion
+union Data{ 
+  double d;
+  byte b[INVARBYTES];
+};
+
+// Motor PWM variables
+int pwm1 = 0;
+int dir1 = 0;
+int pwm2 = 0;
+int dir2 = 0;
+int pwm3 = 0;
+int dir3 = 0;
+
+// PID variable setup
+volatile double speed_M1 = 0;
+volatile double speed_M2 = 0;
+volatile double speed_M3 = 0;
+
+// Output from PID to power motors
+double out_M1, out_M2, out_M3;                        
 
 // Variables to store the number of encoder pulses
-// for each motor
 volatile signed long M1_Count = 0;
 volatile signed long M2_Count = 0;
 volatile signed long M3_Count = 0;
 
-volatile float heading_angle = 0;
+// Input Variables 
+double setspeed_M1 = 0;
+double setspeed_M2 = 0;
+double setspeed_M3 = 0;
+float Kprop = 0;
+float Kint = 0;
+float Kder = 0;
 
-volatile float val = 0;
-volatile float data[] = {0, 0, 0};
-char delimiters[] = ",";
-char* valPosition;
-char charData[50];
-
+// PID Constructor 
+PID PID_M1(&speed_M1, &out_M1, &setspeed_M1, Kprop, Kint, Kder,P_ON_M, DIRECT);
+PID PID_M2(&speed_M2, &out_M2, &setspeed_M2, Kprop, Kint, Kder,P_ON_M, DIRECT);
+PID PID_M3(&speed_M3, &out_M3, &setspeed_M3, Kprop, Kint, Kder,P_ON_M, DIRECT);
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 // SETUP ////////////////////////////////////////////////////////////////////////////////////
@@ -108,19 +131,12 @@ void setup() {
   attachPinChangeInterrupt(M2_ENCODER_A, M2EncoderEvent, CHANGE);
   attachPinChangeInterrupt(M3_ENCODER_A, M3EncoderEvent, CHANGE);
 
-  //Motor stuff
-
-  // PID variable setup
-  speed_M1 = 0;
-  speed_M2 = 0;
-  speed_M3 = 0;
-  setspeed_M1 = 0;
-  setspeed_M2 = 0;
-  setspeed_M3 = 0;
-
   //Set PID compute rate in milliseconds (default = 100)
-  pidSampleRate = 20;
-  PID_M1.SetSampleTime(pidSampleRate);
+  
+  PID_M1.SetSampleTime(PIDSAMPLERATE);
+  PID_M2.SetSampleTime(PIDSAMPLERATE);
+  PID_M3.SetSampleTime(PIDSAMPLERATE);
+
   // Configure for backwards values too
   PID_M1.SetOutputLimits(-255, 255);
   PID_M2.SetOutputLimits(-255, 255);
@@ -130,7 +146,7 @@ void setup() {
   PID_M2.SetMode(AUTOMATIC);
   PID_M3.SetMode(AUTOMATIC);
 
-  // L9958 DIRection pins
+  // L9958 Direction pins
   pinMode(DIR_M1, OUTPUT);
   pinMode(DIR_M2, OUTPUT);
   pinMode(DIR_M3, OUTPUT);
@@ -143,154 +159,129 @@ void setup() {
   // L9958 Enable for all 4 motors
   pinMode(ENABLE_MOTORS, OUTPUT);  digitalWrite(ENABLE_MOTORS, LOW);   // HIGH = disabled
 
-  Serial.begin(9600);
+  // Open serial port
+  Serial.begin(38400);
+  delayTimer = micros();
 
-  delay(2000);
- 
-     
+  delay(1000);
 }
-
-
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 // LOOP /////////////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
 void loop() {
+  // State transitions
+  // Ensure constant loop speed
+  timeSync(LOOPTIME);
   
-  // Check serial comms for new vel/heading/angular_vel
-  if (Serial.available() > 0)
-  {
-
-    //Store the data in to the varaible data
-    String str = Serial.readStringUntil('\n');
-    str.toCharArray(charData, 50);
-    valPosition = strtok(charData, delimiters);
-    data[0] = 0;
-    data[1] = 0;
-    data[2] = 0;
-
-    for (int i = 0; i < 3; i++) {
-      data[i] = atof(valPosition);
-      //Serial.print(data[i]);
-      valPosition = strtok(NULL, delimiters);
-    }
-
-    // Update the measured motor speeds
-    computeVelocities(data[0], data[1], data[2]);
-    
-  }  
+  // Read: setspeed_M1, setspeed_M2, setspeed_M3, Kprop,Kint,Kder
+  readSerialInput();
+  int command  = int(msgIn[0]);
   
-  // Print some diagnostics
-  Serial.print(setspeed_M1 *100);
-  Serial.print("\t");
-  Serial.print(speed_M1 *100);
-  Serial.print("\t");
-  Serial.println(out_M1);
+  // Check that a valid message is received, set operation state and reset safety timer
+  if (command != NO_COMMS){
+    safetyClock = 0;
+   
+    switch (command){
+      case PARKED:
+        state = PARKED;
+        break;       
+      case RUNNING:
+        state = RUNNING;
+        break;
+      case STANDBY:
+        state = STANDBY;
+      default:
+        state = NO_COMMS;
+        break; 
+    }         
+  }
+  else{
+    state = NO_COMMS;
+    Serial.print("line 200");
+  }
   
-//  Serial.print("M2 set: ");
-//  Serial.print(setspeed_M2);
-//  Serial.print(" PWM: ");
-//  Serial.print(out_M2);
-//  Serial.print(" spd: ");
-//  Serial.println(speed_M2);
-//  
-//  Serial.print("M3 set: ");
-//  Serial.print(setspeed_M3);
-//  Serial.print(" PWM: ");
-//  Serial.print(out_M3);
-//  Serial.print(" spd: ");
-//  Serial.println(speed_M3);
- 
-  // This seems really hacky, look at better way of achieving this
-  
-  // Check if need to switch between aggressive/conservative PID tuning values
-//  if (abs(speed_M1 - setspeed_M1) < CON_THRESH){
-//    PID_M1.SetTunings(KP_CON, KI_CON, KD_CON);
-//    // Clear the integral buildup (CHECK THIS!!)
-//    PID_M1.SetMode(MANUAL);
-//    PID_M1.SetMode(AUTOMATIC);  
-//  } else {
-//    PID_M1.SetTunings(KP_AGG, KI_AGG, KD_AGG);
-//  }
-//  
-//  if (abs(speed_M2 - setspeed_M2) < CON_THRESH){
-//    PID_M2.SetTunings(KP_CON, KI_CON, KD_CON);
-//    // Clear the integral buildup
-//    PID_M2.SetMode(MANUAL);
-//    PID_M2.SetMode(AUTOMATIC);  
-//    } else {
-//    PID_M2.SetTunings(KP_AGG, KI_AGG, KD_AGG);
-//  }
-//  
-//  if (abs(speed_M3 - setspeed_M3) < CON_THRESH){
-//    // Clear the integral buildup
-//    PID_M3.SetTunings(KP_CON, KI_CON, KD_CON);
-//    PID_M3.SetMode(MANUAL);
-//    PID_M3.SetMode(AUTOMATIC);  
-//  } else {
-//    PID_M3.SetTunings(KP_AGG, KI_AGG, KD_AGG);
-//  }
+  if (safetyClock > safetyTimeOut){
+    state = TIMEOUT;
+  }
+  // State actions
+  switch (state){
+      case PARKED:
+        parkClock = 0;
+        
+        PID_M1.SetOutputLimits(0, 0);
+        PID_M1.SetMode(MANUAL);
+        PID_M1.SetOutputLimits(-255, 255);
+        analogWrite(PWM_M1, 0);
+        PID_M2.SetOutputLimits(0, 0);
+        PID_M2.SetMode(MANUAL);
+        PID_M2.SetOutputLimits(-255, 255);
+        analogWrite(PWM_M1, 0);
+        PID_M3.SetOutputLimits(0, 0);
+        PID_M3.SetMode(MANUAL);
+        PID_M3.SetOutputLimits(-255, 255);
+        analogWrite(PWM_M1, 0);
+        
+      case RUNNING:
+        parkClock = 0;
+        if (PID_M1.GetMode() == MANUAL){
+          PID_M1.SetMode(AUTOMATIC);
+        }     
+        setspeed_M1 = msgIn[1];// Target velocity in ms^-1
+        setspeed_M2 = msgIn[2];// Target velocity in ms^-1
+        setspeed_M3 = msgIn[3];// Target velocity in ms^-1
+        Kprop = msgIn[4]*255;// Match PWM scale
+        Kint = msgIn[5]*255;
+        Kder = msgIn[6]*255;
+        
+      case STANDBY:
+        parkClock = 0;
+        setspeed_M1 = 0;// Target velocity in ms^-1
+        setspeed_M2 = 0;// Target velocity in ms^-1
+        setspeed_M3 = 0;// Target velocity in ms^-1
+        
+      case TIMEOUT:
+        setspeed_M1 = 0;// Target velocity in ms^-1
+        setspeed_M2 = 0;// Target velocity in ms^-1
+        setspeed_M3 = 0;// Target velocity in ms^-1
+        Kprop = 380;
+        Kint = 7800;
+        Kder = 0.255;
+        parkClock += LOOPTIME;
+        if (parkClock > parkTimeOut){
+          state = PARKED;
+        }
+              
+      case NO_COMMS:
+        break; 
+    }    
 
-    
+  // Set Kp, Ki, Kd
+  PID_M1.SetTunings(Kprop, Kint, Kder);
+  PID_M2.SetTunings(Kprop, Kint, Kder);
+  PID_M3.SetTunings(Kprop, Kint, Kder);
+  
+  // Update PID controller, Calculate output  
   PID_M1.Compute();
   PID_M2.Compute();
   PID_M3.Compute();
-
-  // Write to the motor directions and pwm power
-  // Set to 0,0,0 for dead stop
-  if (setspeed_M1==0 && setspeed_M2==0 && setspeed_M3==0){
-
-    // Aggressively drive PID to 0,0,0 and park
-    PID_M1.SetTunings(KP_AGG, KI_AGG, KD_AGG);
-      
-    if (abs(out_M1) <= 1){
-
-      PID_M1.SetMode(MANUAL);
-      PID_M2.SetMode(MANUAL);
-      PID_M3.SetMode(MANUAL);
-      analogWrite(PWM_M1, 0);
-      analogWrite(PWM_M2, 0);
-      analogWrite(PWM_M3, 0);
-      PID_M1.SetMode(AUTOMATIC);
-      PID_M2.SetMode(AUTOMATIC);
-      PID_M3.SetMode(AUTOMATIC);}
     
-    
-    
-// Allow for negative (Reverse) velocity
-  } else {
-    if (out_M1 < 0) {
-      digitalWrite(DIR_M1, LOW);
-    } else {
-      digitalWrite(DIR_M1, HIGH);
-    }
-    analogWrite(PWM_M1, int(abs(out_M1)));
-  
-    if (out_M2 < 0) {
-      digitalWrite(DIR_M2, LOW);
-    } else {
-      digitalWrite(DIR_M2, HIGH);
-    }
-    analogWrite(PWM_M2, int(abs(out_M2)));
-  
-    if (out_M3 < 0) {
-      digitalWrite(DIR_M3, LOW);
-    } else {
-      digitalWrite(DIR_M3, HIGH);
-    }
-    analogWrite(PWM_M3, int(abs(out_M3)));
-  }
+  // Set output (u)
+  setMotorSpeeds(out_M1,out_M2,out_M3);
+  safetyClock += LOOPTIME;
+ 
+  //Send data + state:  
+  double mess = double(state);
+  writeSerial(&mess,&speed_M1,&out_M1,&speed_M2,&out_M2,&speed_M3,&out_M3);
 }
-
-
+    
 /////////////////////////////////////////////////////////////////////////////////////////////
 // INTERRUPTS ///////////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
 ISR(TIMER2_COMPA_vect) // timer compare interrupt service routine - fires every 0.01632 seconds
 {
   // Ticks per second
-  // Don't know why but M2 and M3 counts are backwards.
-  // Possible swapped wiring of encoders or swapped pin defs?
+  
   speed_M1 = ticks2metres(-M1_Count / 0.01632);
   speed_M2 = ticks2metres(M2_Count / 0.01632);
   speed_M3 = ticks2metres(M3_Count / 0.01632);
@@ -357,20 +348,107 @@ void M3EncoderEvent() {
 /////////////////////////////////////////////////////////////////////////////////////////////
 // OTHER FUNCTIONS //////////////////////////////////////////////////////////////////////////
 /////////////////////////////////////////////////////////////////////////////////////////////
-
-void computeVelocities(float vel, float heading, float angular_vel) {
-  // 3 wheel omniwheel kinematics
-  // Transforms from velocity/heading/angular velocity to motor speeds
-  
-//  setspeed_M1 = -((vel * (-0.5 * cos(heading) - sqrt(3) / 2 * sin(heading))) + (2 * angular_vel * DROIDRADIUS));
-//  setspeed_M2 = -((vel * (-0.5 * cos(heading) + sqrt(3) / 2 * sin(heading))) + (2 * angular_vel * DROIDRADIUS));
-//  setspeed_M3 = -(vel * cos(heading) + (2 * angular_vel * DROIDRADIUS));
-  setspeed_M1 = vel;
-  setspeed_M2 = heading;
-  setspeed_M3 = angular_vel;
-
+void timeSync(unsigned long deltaT)
+{
+  unsigned long currTime = micros();
+  long timeToDelay = deltaT - (currTime - delayTimer);
+  if (timeToDelay > 5000)
+  {
+    delay(timeToDelay / 1000);
+    delayMicroseconds(timeToDelay % 1000);
+  }
+  else if (timeToDelay > 0)
+  {
+    delayMicroseconds(timeToDelay);
+  }
+  else
+  {
+      // timeToDelay is negative so we start immediately
+  }
+  delayTimer = currTime + timeToDelay;
 }
 
+void writeSerial(double* data1, double* data2, double* data3, double* data4, double* data5, double* data6, double* data7)
+{ // TODO: Rewrite using loops, Unions etc
+  byte* byteData1 = (byte*)(data1);
+  byte* byteData2 = (byte*)(data2);
+  byte* byteData3 = (byte*)(data3);
+  byte* byteData4 = (byte*)(data4);
+  byte* byteData5 = (byte*)(data5);
+  byte* byteData6 = (byte*)(data6);
+  byte* byteData7 = (byte*)(data7);
+  
+  byte buf[28] = {byteData1[0], byteData1[1], byteData1[2], byteData1[3],
+                 byteData2[0], byteData2[1], byteData2[2], byteData2[3],
+                 byteData3[0], byteData3[1], byteData3[2], byteData3[3],
+                 byteData4[0], byteData4[1], byteData4[2], byteData4[3],
+                 byteData5[0], byteData5[1], byteData5[2], byteData5[3],
+                 byteData6[0], byteData6[1], byteData6[2], byteData6[3],
+                 byteData7[0], byteData7[1], byteData7[2], byteData7[3]};
+
+  Serial.write(buf, 28);
+}
+
+void readSerialInput(){
+  
+  int bytelength = INMSGSIZE * INVARBYTES;
+  byte bufIn[byteLength];
+  double t0 = millis();
+  // Function polls serial line for complete message
+  if (Serial.available() >= byteLength){
+
+    int byteIn = Serial.readBytes((byte*)&bufIn,byteLength);
+    
+    // Check that message is complete
+    if (byteIn == byteLength){
+      // if complete, decode from bytes to floats     
+      for (int var = 0;var<INMSGSIZE;var++){
+        int writebit = 0;
+        union Data dataIn;
+        for (int readbit = (var*INVARBYTES);readbit<(var*INVARBYTES+INVARBYTES);readbit++){       
+          // Read each value bytes into union container 
+          dataIn.b[writebit] = bufIn[readbit];
+          writebit+=1;
+        }
+        msgIn[var] = dataIn.d;       
+      }
+    }
+    else{
+      msgIn[0] = NO_COMMS;
+    }
+  }
+  else{
+    msgIn[0] = NO_COMMS;
+  }
+}
+
+void setMotorSpeeds(double out_M1,double out_M2,double out_M3){
+    
+      if (out_M1 < 0) {
+        digitalWrite(DIR_M1, LOW);
+      } else {
+        digitalWrite(DIR_M1, HIGH);
+      }
+      analogWrite(PWM_M1, int(abs(out_M1)));
+      return;
+      
+      if (out_M2 < 0) {
+        digitalWrite(DIR_M2, LOW);
+      } else {
+        digitalWrite(DIR_M2, HIGH);
+      }
+      analogWrite(PWM_M2, int(abs(out_M2)));
+      return;
+      
+      if (out_M3 < 0) {
+        digitalWrite(DIR_M3, LOW);
+      } else {
+        digitalWrite(DIR_M3, HIGH);
+      }
+      analogWrite(PWM_M3, int(abs(out_M3)));
+      return;
+    }
+    
 double ticks2metres(int ticks) {
   return double(ticks) / TICKS_PER_REV * PI * WHEEL_DIAMETER;
 }

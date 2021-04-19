@@ -1,53 +1,264 @@
+""" This class contains various methods for high level control of omni droid robot
+"""
 
+from threading import Thread
 import logging
 import signal
 import sys
 import time
 import numpy as np
 import os
+import copy
 import serial
 import struct
-#from fractions import Fraction
 
-""" This class contains various methods for high level control of omni droid robot
-"""
+import matplotlib.pyplot as plt
+#import PySimpleGUI as psg
+# Log file location
+logfile = 'debug.log'
 
-# logging.basicConfig(level=logging.DEBUG,
-#                       format='[%(levelname)s] (%(threadName)-9s) %(message)s',)
+# Define your own logger name
+logger = logging.getLogger("droidControlLog")
+# Set default logging level to DEBUG
+logger.setLevel(logging.DEBUG)
+
+# create console handler
+print_format = logging.Formatter('[%(levelname)s] (%(threadName)-9s) %(message)s')
+console_handler = logging.StreamHandler(sys.stdout)
+console_handler.setLevel(logging.DEBUG)
+console_handler.setFormatter(print_format)
+
+# create log file handler
+# and define a custom log format, set its log level to DEBUG
+log_format = logging.Formatter('[%(asctime)s] %(levelname)-8s %(name)-12s %(message)s')
+file_handler = logging.FileHandler(logfile)
+file_handler.setLevel(logging.DEBUG)
+file_handler.setFormatter(log_format)
+
+#Add handlers to the logger
+logger.addHandler(file_handler)
+logger.addHandler(console_handler)
+
+
 shutdown_flag = False
 
 
 class droidControl:
 
-    def __init__(self, serial_port='/dev/ttyUSB0',baud=38400):
+    def __init__(self, serial_port='/dev/ttyUSB0',baud=38400,inVarNum=7,outVarNum=7,VarType = 'f'):
 
-        # Velocity controller
-        self.speed = 0
-        self.vector = 0
-        self.omega = 0
+        # Initialise output filename and directory
+        self.path = []
+        self.fileName = []
+        
+        # Flags for thread operation
+        self.isReceiving = False
+        self.isRun = True
+        self.thread = None
+        
+        # Loop control states
+        self.droidMoving = False
+        self.remoteWaiting = True
+
+        # Setup variable conversion parameters
+        self.VarType = VarType
+
+        if (self.VarType == 'f'):
+            self.VarBytes = 4
+            logger.debug("Python expecting 4-byte FLOAT type input")
+        elif (self.VarType == 'i'):
+            self.VarBytes = 2 
+            logger.debug("Python expecting 2-byte INT type input")         
+        else:
+            logger.error("Invalid Input data type, must be 'f' or 'i'")
+            sys.exit()
+        
+        # Initialise OUTPUT test parameters 
+        self.outVarNum = outVarNum
+        self.dataOut = [0]*self.outVarNum
+        
+        # Motor velociries and control parameters
+        self.droidradius = 0.15
+        
+        # Control inputs
+        self.MaxLinearVelocity = 0 # Maximum speed of droid velocituy vector
+        self.MaxAngularVelocity = 0 # Maximum speed of droid velocituy vector
+        
+        self.droidHeading = 90 # direction of travel (degrees relative to droid frame
+        self.worldRotation = 0 # # rotation of droid relative to initial pose
+        
+        self.velM1 = 0.0
+        self.velM2 = 0.0
+        self.velM3 = 0.0
+        self.Kprop = 0.0
+        self.Kint = 0.0
+        self.Kder = 0.0
+        
+        self.runCommand = 0.0
+ 
+        # Initialise INPUT data collection variables
+        self.inVarNum = inVarNum  
+        self.inRawData = bytearray(self.inVarNum * self.VarBytes)
+        self.inData = [0] * self.inVarNum
+        
+        # Data container for save
+        # TODO: make this automatic, currently adding timestamp and setpoint
+        self.saveData = [[0] * (self.inVarNum + 4)]
+        self.initialTimer = 0.0
 
         # Open serial comms to Arduino
-        self.ser = serial.Serial(serial_port, baud)
-        print('Class initialised')
+        try:
+            self.ser = serial.Serial(serial_port, baud)
+            logger.debug('Serial port connected')
+        except:
+            logger.error('Serial port not found')
+            sys.exit()
+        
+        
+        logger.debug('Initialisation successful')
+        
+#------Bi-directional communication methods-----------
 
+    def writeSerial(self):
+        # Method compiles and converts message to byte string using defined data format.
+        # Sends message over serial
+        self.ser.reset_output_buffer()
+        dataOut = [
+            self.runCommand,
+            self.velM1,
+            self.velM2,
+            self.velM3,
+            self.Kprop,
+            self.Kint, 
+            self.Kder]   
+        dataByte = struct.pack(self.VarType *len(dataOut),*dataOut)
+        self.ser.write(dataByte)
+        logger.debug('Data written to serial')
 
-    def setSpeed(self, speed, vector, omega):
-        # Store the speeds just in case
-        self.speed = speed
-        self.vector = vector
-        self.omega = omega
+    def getSerialData(self):
+        # Method reads serial stream given data format expected (floats or ints)
+        # Set data time logging
+        currentTimer = time.time()
+        dataTime = ((currentTimer - self.initialTimer))
+        privateData = copy.deepcopy(self.inRawData[:]) # Synchronize all data to the same sample time
+        for i in range(self.inVarNum):
+            # Unpack message, inVarNum = number of variables, VarBytes = datatype
+            data = privateData[(i*self.VarBytes):(self.VarBytes + i*self.VarBytes)]
+            self.inData[i] = struct.unpack(self.VarType, data)[0] # Unpack always returns tuple
+        
+        # Decode signal from remote, update states
+        remoteSignal = round(self.inData[0])
+        print('signal:%0.1f'% remoteSignal)
+        if remoteSignal == 0:
+            self.droidMoving = False
+            self.remoteWaiting = False
+            logger.debug("PARKED")
+        elif remoteSignal == 1:
+            self.droidMoving = True
+            self.remoteWaiting = False
+            logger.debug("RUNNING")
+        elif remoteSignal == 3:
+            self.droidMoving = False
+            self.remoteWaiting = False
+            logger.debug("STANDBY: Remote waiting for instructions")
+        elif remoteSignal == 5:
+            self.droidRunning = True
+            self.remoteWaiting = False
+            logger.debug("TIMEOUT: Remote will auto-park")
+        elif remoteSignal == 100:
+            self.droidMoving = False
+            self.remoteWaiting = True
+            logger.debug("NO_COMMS: Remote not recieived data")
+            
+        # todo: Change to allow variable data size inVarNum. Try append([*self.inData])
+        self.saveData.append([self.velM1,self.inData[0], self.inData[1], self.velM2, self.inData[2],self.inData[3],self.velM3,self.inData[4],self.inData[5],self.inData[6], dataTime])
+        logger.debug('Data updated:%f', dataTime)
+    
+    def startReadThread(self):
+        if self.thread == None:
+            self.thread = Thread(target=self.readSerialThread,daemon = True)
+            #self.thread.daemon = True
+            self.thread.start()
+            # Block till we start receiving values
+            while self.isReceiving != True:
+                time.sleep(0.1)
+            
+    
+    def readSerialThread(self):    # retrieve data
+        time.sleep(1)  # give some buffer time for retrieving data
+        self.ser.reset_input_buffer()
+        while (self.isRun):
+            self.ser.readinto(self.inRawData)
+            self.isReceiving = True
+            time.sleep(0.000001)
+            
+#------High level control methods-----------
+            
+            
+    def calcMotorVels(self, linearVel, theta, angularVel):
+        # 3 wheel omniwheel kinematics
+        # Transforms from velocity/heading/angular velocity to motor speeds
+        self.velM1 = -((linearVel * (-0.5 * np.cos(theta) - np.sqrt(3) / 2 * np.sin(theta))) + (2 * angularVel * self.droidradius));
+        self.velM2 = -((linearVel * (-0.5 * np.cos(theta) + np.sqrt(3) / 2 * np.sin(theta))) + (2 * angularVel * self.droidradius));
+        self.velM3 = -(linearVel * np.cos(theta) + (2 * angularVel * self.droidradius));
+    
+    def estimateDroidMotion(self):
+        # Inverse kinematic model: INPUT - wheel velocities, OUTPUT velocity, ang vel
+        pass
 
-        # Send over serial to Arduino
-        speed = str(speed)
-        vector = str(vector)
-        omega = str(omega)
-        data_out = speed + "," + vector + "," + omega + "\n"
-        self.ser.write(data_out.encode("ascii"))
+#------Data visualisation methods-----------
+    
+    def saveOutput(self):
+        saveDataNP = np.array(self.saveData)
+        self.saveDataNP = saveDataNP[saveDataNP[:,9]>0]
+        np.savetxt('drive.csv',self.saveDataNP,delimiter=',')
+        logger.debug('Results saved to file')          
+
+    def plotOutput(self):
+        # Plot values: setPoint, motorSpeed, PWM, timeStamp, signal
+        fig, ax = plt.subplots(1,3, figsize=(12,9))                    
+        ax[0,0].plot(self.saveDataNP[:,9],self.saveDataNP[:,0], 'r',label='M1 Setpoint')
+        ax[0,0].plot(self.saveDataNP[:,9],self.saveDataNP[:,1], 'b',label='M1 Motor speed')
+        ax[0,0].set_ylabel('Velocity - m/s')
+        ax[0,0].set_ylim(-2,2)
+        ax2 = ax.twinx()
+        ax2[0,0].plot(self.saveDataNP[:,9],self.saveDataNP[:,2], 'g',label='M1 PWM')
+        ax2[0,0].set_ylabel('Control u - PWM')
+        ax2[0,0].set_ylim(-255,255)
+        ax[0,0].set_title('M1')
+        
+        ax[0,1].plot(self.saveDataNP[:,9],self.saveDataNP[:,3], 'r',label='M2 Setpoint')
+        ax[0,1].plot(self.saveDataNP[:,9],self.saveDataNP[:,4], 'b',label='M2 Motor speed')
+        ax[0,1].set_ylabel('Velocity - m/s')
+        ax[0,1].set_ylim(-2,2)
+#         ax2 = ax.twinx()
+        ax2[0,1].plot(self.saveDataNP[:,9],self.saveDataNP[:,5], 'g',label='M2 PWM')
+        ax2[0,1].set_ylabel('Control u - PWM')
+        ax2[0,1].set_ylim(-255,255)
+        ax[0,1].set_title('M2')
+    
+        ax[0,2].plot(self.saveDataNP[:,9],self.saveDataNP[:,7], 'r',label='M1 Setpoint')
+        ax[0,2].plot(self.saveDataNP[:,9],self.saveDataNP[:,8], 'b',label='M2 Motor speed')
+        ax[0,2].set_ylabel('Velocity - m/s')
+        ax[0,2].set_ylim(-2,2)
+#         ax2 = ax.twinx()
+        ax2[0,2].plot(self.saveDataNP[:,9],self.saveDataNP[:,9], 'g',label='M3 PWM')
+        ax2[0,2].set_ylabel('Control u - PWM')
+        ax2[0,2].set_ylim(-255,255)
+        ax[0,2].set_title('M3')
+
+        fig.legend(loc="upper right", bbox_to_anchor=(1,1), bbox_transform=ax.transAxes)
+        plt.show()
+        
+
+    
+#------Shutdown methods-----------
 
     def close(self):
         global shutdown_flag
         shutdown_flag = True
-
+        # Shutdown thread
+        self.isrun = False
         # Close serial port
         self.ser.close()
         print('Releasing resources')
@@ -55,14 +266,13 @@ class droidControl:
 '''
 Captures the ctrl+c keyboard command to close the services and free 
 resources gracefully.
-Allows the sockets and camera to be immediately reopened on next run without
-waiting for the OS to close them on us.
 '''
 def signal_handler(signal, frame):
     global shutdown_flag
     shutdown_flag = True
     dc.close()
     print('Closing gracefully. Bye Bye!')
+    sys.exit()
 
 
 if __name__ == '__main__':
@@ -70,18 +280,62 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)
 
     global dc
-    runTime = 10
-    dc = droidControl()
-    t0 = time.time()        
-    while time.time()-t0 < runTime:
-        dc.setSpeed(0, 0, 1)
-        byteString = dc.ser.read(78)
-        print(byteString)
-        #time.sleep(0.017)
-        
+    dc = droidControl('/dev/ttyUSB0',38400,7,7,'f')
+    dc.startReadThread()
+    t0 = time.time()
+            
+    #Use GUI loop for online changes
+    # Get user input (Waveform parameters, PID gains)
+    dc.LinearVelocity = 0.2 # m.s^-1
+    dc.AngularVelocity = 0.0 # degrees.s^-1
+    dc.Heading = np.pi /2 # radians in robot frame
+    dc.Distance = 1 # metres
+    dc.worldRotation = 0 # degrees in world frame
+    dc.Kprop = 1.5 # Proportional gain
+    dc.Kint = 40 # Integral gain
+    dc.Kder = 0.001 # Derivative gain
+    dc.runCommand = 1.0
+    
+    # Calculate 3 motor velocities from input
+    dc.calcMotorVels(dc.LinearVelocity, dc.Heading, dc.AngularVelocity)
+    logger.debug("M1: %f" % dc.velM1)
+    logger.debug("M2: %f" % dc.velM2)
+    logger.debug("M3: %f" % dc.velM3)
+    # Check if remote needs instructions
+    while dc.remoteWaiting == True:
+        # Send test parameters to arduino
+        dc.getSerialData()
+        dc.writeSerial()
+        time.sleep(0.02)
+    
+    dc.runCommand = 1.0 
+    # Calculate time to drive  
+    runTime = dc.Distance / dc.LinearVelocity
+    logger.debug("Estimated runtime = %0.2f " % runTime)
+    
+    # Initialise timer
+    dc.initialTimer = time.time()
+    driveTime = 0.0
+    while driveTime <= runTime:
+        dc.getSerialData()
+        dc.writeSerial()
+        # Naive open-loop odometry 
+        driveTime = time.time() - dc.initialTimer
+        displacement = dc.LinearVelocity * driveTime
+        for i in range(dc.inVarNum):
+            print("%.3f" % dc.inData[i])
+        print('Current displacement: %0.3f' % displacement)
+        time.sleep(0.015)
+
+#     # Save file
+#     dc.saveOutput()
+#     
+#     # Plot measurements
+#     dc.plotOutput()
+
     print('out of loop')
-    dc.setSpeed(0, 0, 0)
     dc.close()
 
     print('All done')
         
+
