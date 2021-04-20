@@ -125,15 +125,16 @@ class droidControl:
         self.ser.reset_output_buffer()
         dataOut = [
             self.runCommand,
-            self.velM1,
-            self.velM2,
-            self.velM3,
+            np.round(self.velM1,2),
+            np.round(self.velM2,2),
+            np.round(self.velM3,2),
             self.Kprop,
             self.Kint, 
             self.Kder]   
         dataByte = struct.pack(self.VarType *len(dataOut),*dataOut)
         self.ser.write(dataByte)
         logger.debug('Data written to serial')
+        print(self.runCommand)
 
     def getSerialData(self):
         # Method reads serial stream given data format expected (floats or ints)
@@ -141,34 +142,37 @@ class droidControl:
         currentTimer = time.time()
         dataTime = ((currentTimer - self.initialTimer))
         privateData = copy.deepcopy(self.inRawData[:]) # Synchronize all data to the same sample time
-        for i in range(self.inVarNum):
+        
+        byteSignal = privateData[0:4]       
+        intSignal = struct.unpack('i', byteSignal)[0]
+        self.inData[0] = intSignal
+        for i in range(1,self.inVarNum):
             # Unpack message, inVarNum = number of variables, VarBytes = datatype
             data = privateData[(i*self.VarBytes):(self.VarBytes + i*self.VarBytes)]
             self.inData[i] = struct.unpack(self.VarType, data)[0] # Unpack always returns tuple
         
         # Decode signal from remote, update states
-        remoteSignal = round(self.inData[0])
-        print('signal:%0.1f'% remoteSignal)
-        if remoteSignal == 0:
-            self.droidMoving = False
-            self.remoteWaiting = False
-            logger.debug("PARKED")
-        elif remoteSignal == 1:
-            self.droidMoving = True
-            self.remoteWaiting = False
-            logger.debug("RUNNING")
-        elif remoteSignal == 3:
-            self.droidMoving = False
-            self.remoteWaiting = False
-            logger.debug("STANDBY: Remote waiting for instructions")
-        elif remoteSignal == 5:
-            self.droidRunning = True
-            self.remoteWaiting = False
-            logger.debug("TIMEOUT: Remote will auto-park")
-        elif remoteSignal == 100:
-            self.droidMoving = False
+        # Unpack 4 Byte packet and read bits
+        encoded32 = np.uint32(self.inData[0])
+        self.remoteSignal = [1 if c=='1' else 0 for c in bin(intSignal)[2:].zfill(4)]
+        
+        print(self.remoteSignal)
+        if self.remoteSignal[-1] == 0:
             self.remoteWaiting = True
-            logger.debug("NO_COMMS: Remote not recieived data")
+            logger.debug("NO_COMMS")
+        if self.remoteSignal[-1] == 1:
+            self.remoteWaiting = False
+        if self.remoteSignal[-2] == 0:
+            self.droidMoving = False
+            logger.debug("PARKED")
+        if self.remoteSignal[-2] == 1:
+            self.droidRunning = True
+            logger.debug("RUNNING")
+        if self.remoteSignal[-3] == 0:
+            self.droidMoving = False
+        if self.remoteSignal[-3] == 1:
+            self.droidRunning = True
+            logger.debug("TIMEOUT")
             
         # todo: Change to allow variable data size inVarNum. Try append([*self.inData])
         self.saveData.append([self.velM1,self.inData[0], self.inData[1], self.velM2, self.inData[2],self.inData[3],self.velM3,self.inData[4],self.inData[5],self.inData[6], dataTime])
@@ -286,7 +290,7 @@ if __name__ == '__main__':
             
     #Use GUI loop for online changes
     # Get user input (Waveform parameters, PID gains)
-    dc.LinearVelocity = 0.2 # m.s^-1
+    dc.LinearVelocity = 0.5 # m.s^-1
     dc.AngularVelocity = 0.0 # degrees.s^-1
     dc.Heading = np.pi /2 # radians in robot frame
     dc.Distance = 1 # metres
@@ -294,28 +298,22 @@ if __name__ == '__main__':
     dc.Kprop = 1.5 # Proportional gain
     dc.Kint = 40 # Integral gain
     dc.Kder = 0.001 # Derivative gain
-    dc.runCommand = 1.0
+    dc.runCommand = 0.0
     
     # Calculate 3 motor velocities from input
     dc.calcMotorVels(dc.LinearVelocity, dc.Heading, dc.AngularVelocity)
     logger.debug("M1: %f" % dc.velM1)
     logger.debug("M2: %f" % dc.velM2)
     logger.debug("M3: %f" % dc.velM3)
-    # Check if remote needs instructions
-    while dc.remoteWaiting == True:
-        # Send test parameters to arduino
-        dc.getSerialData()
-        dc.writeSerial()
-        time.sleep(0.02)
     
-    dc.runCommand = 1.0 
     # Calculate time to drive  
-    runTime = dc.Distance / dc.LinearVelocity
+    runTime = dc.Distance / (dc.LinearVelocity + 0.000000001)
     logger.debug("Estimated runtime = %0.2f " % runTime)
-    
     # Initialise timer
     dc.initialTimer = time.time()
     driveTime = 0.0
+    dc.runCommand = 1.0
+
     while driveTime <= runTime:
         dc.getSerialData()
         dc.writeSerial()
@@ -325,7 +323,18 @@ if __name__ == '__main__':
         for i in range(dc.inVarNum):
             print("%.3f" % dc.inData[i])
         print('Current displacement: %0.3f' % displacement)
-        time.sleep(0.015)
+        time.sleep(0.025)
+    dc.runCommand = 0.0
+    dc.writeSerial()
+
+    # Test timeout
+#     dc.writeSerial()
+#     for x in range(50):
+#         dc.getSerialData()
+#         for i in range(dc.inVarNum):
+#             print("%.3f" % dc.inData[i])
+#         time.sleep(0.025)
+#     dc.runCommand = 0.0
 
 #     # Save file
 #     dc.saveOutput()

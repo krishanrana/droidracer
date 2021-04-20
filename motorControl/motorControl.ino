@@ -31,8 +31,8 @@
 #define ENABLE_MOTORS 8
 
 // PID
-#define PIDSAMPLERATE 20
-#define LOOPTIME 30000
+#define PIDSAMPLERATE 20 // milliseconds
+#define LOOPTIME 30 // milliseconds
 
 // Serial communication definitions
 #define INMSGSIZE 7 // Length of message in values (eg. [1.3 100] = 2)
@@ -41,9 +41,7 @@
 // States and signals
 #define PARKED 0
 #define RUNNING 1
-#define STANDBY 3
-#define TIMEOUT 5
-#define NO_COMMS 100
+#define NO_COMMS 0
 
 
 // Serial communication variables
@@ -51,14 +49,16 @@ int byteLength = INMSGSIZE * INVARBYTES;
 double msgIn[INMSGSIZE];
 
 // Signals and state machine
-int state = NO_COMMS;
+int motorState = 0;
+int comState = 0;
+int timeOut = 0;
 
 // Timers
 unsigned long delayTimer = 0;
 unsigned long safetyClock = 0;
 unsigned long parkClock = 0;
-unsigned long safetyTimeOut = LOOPTIME * 50;
-unsigned long parkTimeOut = LOOPTIME * 20;
+unsigned long safetyTimeOut = LOOPTIME * 25;
+unsigned long parkTimeOut = LOOPTIME * 10;
 
 // Define union for variable datatype conversion
 union Data{ 
@@ -172,42 +172,30 @@ void setup() {
 void loop() {
   // State transitions
   // Ensure constant loop speed
-  timeSync(LOOPTIME);
+  timeSync(LOOPTIME *1000);
   
-  // Read: setspeed_M1, setspeed_M2, setspeed_M3, Kprop,Kint,Kder
+  // Read: command, setspeed_M1, setspeed_M2, setspeed_M3, Kprop,Kint,Kder
   readSerialInput();
-  int command  = int(msgIn[0]);
-  
-  // Check that a valid message is received, set operation state and reset safety timer
-  if (command != NO_COMMS){
+
+  // Check that a valid message is received.
+  if (comState != NO_COMMS){
+    comState = 1;
+    parkClock = 0;
     safetyClock = 0;
-   
-    switch (command){
-      case PARKED:
-        state = PARKED;
-        break;       
-      case RUNNING:
-        state = RUNNING;
-        break;
-      case STANDBY:
-        state = STANDBY;
-      default:
-        state = NO_COMMS;
-        break; 
-    }         
+    timeOut = 0;
+    if (int(round(msgIn[0])) == 0){motorState = PARKED;}
+    else {motorState = RUNNING;}
   }
   else{
-    state = NO_COMMS;
-    Serial.print("line 200");
+    safetyClock += LOOPTIME;
   }
-  
-  if (safetyClock > safetyTimeOut){
-    state = TIMEOUT;
-  }
+
   // State actions
-  switch (state){
+  switch (motorState){
       case PARKED:
         parkClock = 0;
+        safetyClock = 0;
+        timeOut = 0;
         
         PID_M1.SetOutputLimits(0, 0);
         PID_M1.SetMode(MANUAL);
@@ -221,39 +209,39 @@ void loop() {
         PID_M3.SetMode(MANUAL);
         PID_M3.SetOutputLimits(-255, 255);
         analogWrite(PWM_M1, 0);
+        break;
         
       case RUNNING:
-        parkClock = 0;
+        // Start PID if needed
         if (PID_M1.GetMode() == MANUAL){
           PID_M1.SetMode(AUTOMATIC);
         }     
-        setspeed_M1 = msgIn[1];// Target velocity in ms^-1
-        setspeed_M2 = msgIn[2];// Target velocity in ms^-1
-        setspeed_M3 = msgIn[3];// Target velocity in ms^-1
-        Kprop = msgIn[4]*255;// Match PWM scale
-        Kint = msgIn[5]*255;
-        Kder = msgIn[6]*255;
         
-      case STANDBY:
-        parkClock = 0;
-        setspeed_M1 = 0;// Target velocity in ms^-1
-        setspeed_M2 = 0;// Target velocity in ms^-1
-        setspeed_M3 = 0;// Target velocity in ms^-1
         
-      case TIMEOUT:
-        setspeed_M1 = 0;// Target velocity in ms^-1
-        setspeed_M2 = 0;// Target velocity in ms^-1
-        setspeed_M3 = 0;// Target velocity in ms^-1
-        Kprop = 380;
-        Kint = 7800;
-        Kder = 0.255;
-        parkClock += LOOPTIME;
-        if (parkClock > parkTimeOut){
-          state = PARKED;
+        // Run down PID for a short period to avoid hard stop
+        if (safetyClock > safetyTimeOut){
+          timeOut = 1;
+          setspeed_M1 = 0;// Target velocity in ms^-1
+          setspeed_M2 = 0;// Target velocity in ms^-1
+          setspeed_M3 = 0;// Target velocity in ms^-1
+          Kprop = 380;
+          Kint = 7800;
+          Kder = 0.255;
+          parkClock += LOOPTIME;
+          if (parkClock > parkTimeOut){
+            motorState = PARKED;
+          }  
         }
-              
-      case NO_COMMS:
-        break; 
+        // Normal running
+        else{
+          setspeed_M1 = msgIn[1];// Target velocity in ms^-1
+          setspeed_M2 = msgIn[2];// Target velocity in ms^-1
+          setspeed_M3 = msgIn[3];// Target velocity in ms^-1
+          Kprop = msgIn[4]*255;// Match PWM scale
+          Kint = msgIn[5]*255;
+          Kder = msgIn[6]*255;
+        }
+        break;
     }    
 
   // Set Kp, Ki, Kd
@@ -268,11 +256,12 @@ void loop() {
     
   // Set output (u)
   setMotorSpeeds(out_M1,out_M2,out_M3);
-  safetyClock += LOOPTIME;
- 
-  //Send data + state:  
-  double mess = double(state);
-  writeSerial(&mess,&speed_M1,&out_M1,&speed_M2,&out_M2,&speed_M3,&out_M3);
+  
+  
+  //Send data + state:
+  uint32_t message = encodeMessage(comState,motorState, timeOut);
+
+  writeSerial(&message,&speed_M1,&out_M1,&speed_M2,&out_M2,&speed_M3,&out_M3);  
 }
     
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -368,7 +357,16 @@ void timeSync(unsigned long deltaT)
   delayTimer = currTime + timeToDelay;
 }
 
-void writeSerial(double* data1, double* data2, double* data3, double* data4, double* data5, double* data6, double* data7)
+uint32_t encodeMessage(int comState,int motorState, int timeOut){
+  uint32_t message = 0;
+  if (comState){ message |= (1<<0);}
+  if (motorState){ message |= (1<<1);}
+  if (timeOut){ message |= (1<<2);}
+  return message;
+} 
+
+
+void writeSerial(uint32_t* data1, double* data2, double* data3, double* data4, double* data5, double* data6, double* data7)
 { // TODO: Rewrite using loops, Unions etc
   byte* byteData1 = (byte*)(data1);
   byte* byteData2 = (byte*)(data2);
@@ -393,7 +391,6 @@ void readSerialInput(){
   
   int bytelength = INMSGSIZE * INVARBYTES;
   byte bufIn[byteLength];
-  double t0 = millis();
   // Function polls serial line for complete message
   if (Serial.available() >= byteLength){
 
@@ -412,13 +409,14 @@ void readSerialInput(){
         }
         msgIn[var] = dataIn.d;       
       }
+      comState = 1;
     }
     else{
-      msgIn[0] = NO_COMMS;
+      comState = 0;
     }
   }
   else{
-    msgIn[0] = NO_COMMS;
+    comState = 0;
   }
 }
 
