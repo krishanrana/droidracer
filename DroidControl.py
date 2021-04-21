@@ -115,8 +115,9 @@ class droidControl:
         except:
             logger.error('Serial port not found')
             sys.exit()
-        
-        
+
+        self.startReadThread()
+
         logger.debug('Initialisation successful')
         
 #------Bi-directional communication methods-----------
@@ -155,7 +156,6 @@ class droidControl:
         
         # Decode signal from remote, update states
         # Unpack 4 Byte packet and read bits
-        encoded32 = np.uint32(self.inData[0])
         self.remoteSignal = [1 if c=='1' else 0 for c in bin(intSignal)[2:].zfill(4)]
         
         print(self.remoteSignal)
@@ -205,9 +205,9 @@ class droidControl:
     def calcMotorVels(self, linearVel, theta, angularVel):
         # 3 wheel omniwheel kinematics
         # Transforms from velocity/heading/angular velocity to motor speeds
-        self.velM1 = ((linearVel * (-0.5 * np.cos(theta) - np.sqrt(3) / 2 * np.sin(theta))) + (2 * angularVel * self.droidradius));
-        self.velM2 = ((linearVel * (-0.5 * np.cos(theta) + np.sqrt(3) / 2 * np.sin(theta))) + (2 * angularVel * self.droidradius));
-        self.velM3 = (linearVel * np.cos(theta) + (2 * angularVel * self.droidradius));
+        self.velM1 = ((linearVel * (-0.5 * np.cos(theta) - np.sqrt(3) / 2 * np.sin(theta))) + (2 * angularVel * self.droidradius))
+        self.velM2 = ((linearVel * (-0.5 * np.cos(theta) + np.sqrt(3) / 2 * np.sin(theta))) + (2 * angularVel * self.droidradius))
+        self.velM3 = (linearVel * np.cos(theta) + (2 * angularVel * self.droidradius))
     
     def estimateDroidMotion(self):
         # Inverse kinematic model: INPUT - wheel velocities, OUTPUT velocity, ang vel
@@ -221,46 +221,46 @@ class droidControl:
         if Distance <= 0:
             runTime = 0
             logger.debug("No distance, aborting")
-            return;
+            return
         elif self.LinearSpeed <= 0:
             runTime = 0
             logger.debug("No linear velocity, aborting")
-            return;
+            return
         else:
             runTime = abs(Distance / self.LinearSpeed)
             logger.debug("Estimated runtime = %0.2f " % runTime)
             if runTime > 10:
                 logger.debug("Runtime too long, aborting")
-                return;
+                return
 
         # Calculate 3 motor velocities from input
-        dc.calcMotorVels(self.LinearSpeed, Heading, 0)
-        logger.debug("M1: %f" % dc.velM1)
-        logger.debug("M2: %f" % dc.velM2)
-        logger.debug("M3: %f" % dc.velM3)
+        self.calcMotorVels(self.LinearSpeed, Heading, 0)
+        logger.debug("M1: %f" % self.velM1)
+        logger.debug("M2: %f" % self.velM2)
+        logger.debug("M3: %f" % self.velM3)
         # Initialise timer
-        dc.initialTimer = time.time()
+        self.initialTimer = time.time()
         
-        dc.runCommand = 1.0
+        self.runCommand = 1.0
         driveTime = 0.0
         # Test drive to target - simple    
         while driveTime <= runTime:
-            dc.getSerialData()
-            dc.writeSerial()
+            self.getSerialData()
+            self.writeSerial()
             # Naive open-loop odometry 
-            driveTime = time.time() - dc.initialTimer
-            displacement = dc.LinearSpeed * driveTime
-            for i in range(dc.inVarNum):
-                print("%.3f" % dc.inData[i])
+            driveTime = time.time() - self.initialTimer
+            displacement = self.LinearSpeed * driveTime
+            for i in range(self.inVarNum):
+                print("%.3f" % self.inData[i])
             logger.debug('Current displacement: %0.3f' % displacement)
             time.sleep(0.025)
             
-        dc.runCommand = 0.0
-        dc.writeSerial()
+        self.runCommand = 0.0
+        self.writeSerial()
         time.sleep(0.030)
         while self.droidMoving == True:
-            dc.writeSerial()
-            dc.getSerialData()
+            self.writeSerial()
+            self.getSerialData()
             time.sleep(0.025)
         logger.debug('Droid Parked')
         
@@ -272,69 +272,69 @@ class droidControl:
         if Rotation == 0:
             runTime = 0
             logger.debug("No rotation, aborting")
-            return;
+            return
         elif self.AngularSpeed ==  0:
             runTime = 0
             logger.debug("No angular velocity, aborting")
-            return;
+            return
         else:
             runTime = abs(Rotation / (self.AngularSpeed))
             logger.debug("Estimated runtime = %0.2f " % runTime)
             if runTime > 10:
                 logger.debug("Runtime too long, aborting")
-                return;
+                return
         # Calculate velocity including sign to reach destination
         AngularVelocity = self.AngularSpeed * direction
         # Calculate 3 motor velocities from input
-        dc.calcMotorVels(0, 0, AngularVelocity)
-        logger.debug("M1: %f" % dc.velM1)
-        logger.debug("M2: %f" % dc.velM2)
-        logger.debug("M3: %f" % dc.velM3)
+        self.calcMotorVels(0, 0, AngularVelocity)
+        logger.debug("M1: %f" % self.velM1)
+        logger.debug("M2: %f" % self.velM2)
+        logger.debug("M3: %f" % self.velM3)
         # Initialise timer
-        dc.initialTimer = time.time()
+        self.initialTimer = time.time()
         
-        dc.runCommand = 1.0
+        self.runCommand = 1.0
         driveTime = 0.0
         # Test drive to target - simple    
         while driveTime <= runTime:
-            dc.getSerialData()
-            dc.writeSerial()
+            self.getSerialData()
+            self.writeSerial()
             # Naive open-loop odometry 
-            driveTime = time.time() - dc.initialTimer
+            driveTime = time.time() - self.initialTimer
             # Replace with estimate from odometry
             rotation = self.AngularSpeed * driveTime
-            for i in range(dc.inVarNum):
-                print("%.3f" % dc.inData[i])
+            for i in range(self.inVarNum):
+                print("%.3f" % self.inData[i])
             logger.debug('Current rotation: %0.3f' % rotation)
             time.sleep(0.025)
             
-        dc.runCommand = 0.0
-        dc.writeSerial()
+        self.runCommand = 0.0
+        self.writeSerial()
         time.sleep(0.030)
         while self.droidMoving == True:
-            dc.writeSerial()
-            dc.getSerialData()
+            self.writeSerial()
+            self.getSerialData()
             time.sleep(0.025)
         logger.debug('Droid Parked')
  
     def testMotors(self):
-        dc.velM1 = 0.2
-        dc.velM2 = 0.2
-        dc.velM3 = 0.2
-        dc.runCommand = 1.0
-        dc.writeSerial()
+        self.velM1 = 0.2
+        self.velM2 = 0.2
+        self.velM3 = 0.2
+        self.runCommand = 1.0
+        self.writeSerial()
         time.sleep(0.025)
-        dc.getSerialData()
+        self.getSerialData()
         for _ in range(10):
-            dc.writeSerial()
-            dc.getSerialData()
-            for i in range(dc.inVarNum):
-                print("%.3f" % dc.inData[i])
+            self.writeSerial()
+            self.getSerialData()
+            for i in range(self.inVarNum):
+                print("%.3f" % self.inData[i])
             time.sleep(0.025)
-        dc.runCommand = 0.0
-        dc.writeSerial()
+        self.runCommand = 0.0
+        self.writeSerial()
         time.sleep(0.025)
-        dc.getSerialData()
+        self.getSerialData()
         
 #------Data visualisation methods-----------
     
