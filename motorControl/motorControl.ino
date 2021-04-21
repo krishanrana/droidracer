@@ -197,6 +197,13 @@ void loop() {
         safetyClock = 0;
         timeOut = 0;
         
+        setspeed_M1 = 0;
+        setspeed_M2 = 0;
+        setspeed_M3 = 0;
+        out_M1 = 0;
+        out_M2 = 0;
+        out_M3 = 0;
+        
         PID_M1.SetOutputLimits(0, 0);
         PID_M1.SetMode(MANUAL);
         PID_M1.SetOutputLimits(-255, 255);
@@ -204,20 +211,21 @@ void loop() {
         PID_M2.SetOutputLimits(0, 0);
         PID_M2.SetMode(MANUAL);
         PID_M2.SetOutputLimits(-255, 255);
-        analogWrite(PWM_M1, 0);
+        analogWrite(PWM_M2, 0);
         PID_M3.SetOutputLimits(0, 0);
         PID_M3.SetMode(MANUAL);
         PID_M3.SetOutputLimits(-255, 255);
-        analogWrite(PWM_M1, 0);
+        analogWrite(PWM_M3, 0);
         break;
         
       case RUNNING:
         // Start PID if needed
         if (PID_M1.GetMode() == MANUAL){
           PID_M1.SetMode(AUTOMATIC);
+          PID_M2.SetMode(AUTOMATIC);
+          PID_M3.SetMode(AUTOMATIC);
         }     
-        
-        
+           
         // Run down PID for a short period to avoid hard stop
         if (safetyClock > safetyTimeOut){
           timeOut = 1;
@@ -260,8 +268,9 @@ void loop() {
   
   //Send data + state:
   uint32_t message = encodeMessage(comState,motorState, timeOut);
-
-  writeSerial(&message,&speed_M1,&out_M1,&speed_M2,&out_M2,&speed_M3,&out_M3);  
+  double* fDataArr[9] = {&setspeed_M1,&speed_M1,&out_M1,&setspeed_M2,&speed_M2,&out_M2,&setspeed_M3,&speed_M3,&out_M3};
+  int arrLen = 9;
+  writeSerial(&message,&setspeed_M1,&speed_M1,&out_M1,&setspeed_M2,&speed_M2,&out_M2,&setspeed_M3,&speed_M3,&out_M3);  
 }
     
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -365,8 +374,23 @@ uint32_t encodeMessage(int comState,int motorState, int timeOut){
   return message;
 } 
 
-
-void writeSerial(uint32_t* data1, double* data2, double* data3, double* data4, double* data5, double* data6, double* data7)
+//void writeSerial(uint32_t* message, double* data){
+//  
+//  byte bufIn[byteLength];
+//  int bytelength = OUTMSGSIZE * OUTVARBYTES;
+//  byte bufOut[byteLength];
+//  for (int idx = 0;idx<OUTMSGSIZE;idx++){
+//        int writebit = 0;
+//        union Data dataOut;
+//        for (int readbit = (var*OUTVARBYTES);readbit<(var*OUTVARBYTES+OUTVARBYTES);readbit++){       
+//          // Read each value bytes into union container 
+//          dataIn.f[writebit] = bufIn[readbit];
+//          writebit+=1;
+//        }
+//        msgIn[var] = dataIn.d;       
+//      }
+//}
+void writeSerial(uint32_t* data1, double* data2, double* data3, double* data4, double* data5, double* data6, double* data7, double* data8, double* data9, double* data10)
 { // TODO: Rewrite using loops, Unions etc
   byte* byteData1 = (byte*)(data1);
   byte* byteData2 = (byte*)(data2);
@@ -375,16 +399,22 @@ void writeSerial(uint32_t* data1, double* data2, double* data3, double* data4, d
   byte* byteData5 = (byte*)(data5);
   byte* byteData6 = (byte*)(data6);
   byte* byteData7 = (byte*)(data7);
+  byte* byteData8 = (byte*)(data8);
+  byte* byteData9 = (byte*)(data9);
+  byte* byteData10 = (byte*)(data10);
   
-  byte buf[28] = {byteData1[0], byteData1[1], byteData1[2], byteData1[3],
+  byte buf[40] = {byteData1[0], byteData1[1], byteData1[2], byteData1[3],
                  byteData2[0], byteData2[1], byteData2[2], byteData2[3],
                  byteData3[0], byteData3[1], byteData3[2], byteData3[3],
                  byteData4[0], byteData4[1], byteData4[2], byteData4[3],
                  byteData5[0], byteData5[1], byteData5[2], byteData5[3],
                  byteData6[0], byteData6[1], byteData6[2], byteData6[3],
-                 byteData7[0], byteData7[1], byteData7[2], byteData7[3]};
+                 byteData7[0], byteData7[1], byteData7[2], byteData7[3],
+                 byteData8[0], byteData8[1], byteData8[2], byteData8[3],
+                 byteData9[0], byteData9[1], byteData9[2], byteData9[3],
+                 byteData10[0], byteData10[1], byteData10[2], byteData10[3]};
 
-  Serial.write(buf, 28);
+  Serial.write(buf, 40);
 }
 
 void readSerialInput(){

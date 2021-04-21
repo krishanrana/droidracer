@@ -45,7 +45,7 @@ shutdown_flag = False
 
 class droidControl:
 
-    def __init__(self, serial_port='/dev/ttyUSB0',baud=38400,inVarNum=7,outVarNum=7,VarType = 'f'):
+    def __init__(self, serial_port='/dev/ttyUSB0',baud=38400,inVarNum=10,outVarNum=7,VarType = 'f'):
 
         # Initialise output filename and directory
         self.path = []
@@ -81,12 +81,14 @@ class droidControl:
         self.droidradius = 0.15
         
         # Control inputs
-        self.MaxLinearVelocity = 0 # Maximum speed of droid velocituy vector
-        self.MaxAngularVelocity = 0 # Maximum speed of droid velocituy vector
+        self.MaxLinearVelocity = 0.5 # Maximum linear speed m/s
+        self.MaxAngularVelocity = np.pi/2 # Maximum angular velocity rad/s
         
-        self.droidHeading = 90 # direction of travel (degrees relative to droid frame
+        self.droidHeading = np.pi/2 # direction of travel (radians relative to droid frame)
         self.worldRotation = 0 # # rotation of droid relative to initial pose
-        
+        self.LinearSpeed = 0 # m/s       
+        self.AngularSpeed = 0.0 # radian/s
+    
         self.velM1 = 0.0
         self.velM2 = 0.0
         self.velM3 = 0.0
@@ -103,7 +105,7 @@ class droidControl:
         
         # Data container for save
         # TODO: make this automatic, currently adding timestamp and setpoint
-        self.saveData = [[0] * (self.inVarNum + 4)]
+        self.saveData = [[0] * (self.inVarNum + 1)]
         self.initialTimer = 0.0
 
         # Open serial comms to Arduino
@@ -175,7 +177,8 @@ class droidControl:
             logger.debug("TIMEOUT")
             
         # todo: Change to allow variable data size inVarNum. Try append([*self.inData])
-        self.saveData.append([self.velM1,self.inData[0], self.inData[1], self.velM2, self.inData[2],self.inData[3],self.velM3,self.inData[4],self.inData[5],self.inData[6], dataTime])
+        self.saveData.append([self.inData])
+#         self.saveData.append([self.inData[0], self.velM1, self.inData[1], self.velM2, self.inData[2],self.inData[3],self.velM3,self.inData[4],self.inData[5],self.inData[6], dataTime])
         logger.debug('Data updated:%f', dataTime)
     
     def startReadThread(self):
@@ -209,7 +212,111 @@ class droidControl:
     def estimateDroidMotion(self):
         # Inverse kinematic model: INPUT - wheel velocities, OUTPUT velocity, ang vel
         pass
+#------Tests--------------------------------
+    
+    def testVectorDrive(self, Distance, Heading):
+        Heading = Heading %(2*np.pi)
+        
+        # Calculate time to drive
+        if Distance <= 0:
+            runTime = 0
+            logger.debug("No distance, aborting")
+            return;
+        elif self.LinearSpeed <= 0:
+            runTime = 0
+            logger.debug("No linear velocity, aborting")
+            return;
+        else:
+            runTime = abs(Distance / self.LinearSpeed)
+            logger.debug("Estimated runtime = %0.2f " % runTime)
+            if runTime > 10:
+                logger.debug("Runtime too long, aborting")
+                return;
 
+        # Calculate 3 motor velocities from input
+        dc.calcMotorVels(self.LinearSpeed, Heading, 0)
+        logger.debug("M1: %f" % dc.velM1)
+        logger.debug("M2: %f" % dc.velM2)
+        logger.debug("M3: %f" % dc.velM3)
+        # Initialise timer
+        dc.initialTimer = time.time()
+        
+        dc.runCommand = 1.0
+        driveTime = 0.0
+        # Test drive to target - simple    
+        while driveTime <= runTime:
+            dc.getSerialData()
+            dc.writeSerial()
+            # Naive open-loop odometry 
+            driveTime = time.time() - dc.initialTimer
+            displacement = dc.LinearVelocity * driveTime
+    #         for i in range(dc.inVarNum):
+    #             print("%.3f" % dc.inData[i])
+            logger.debug('Current displacement: %0.3f' % displacement)
+            time.sleep(0.025)
+            
+        dc.runCommand = 0.0
+        dc.writeSerial()
+        time.sleep(0.030)
+        while self.droidMoving == True:
+            dc.writeSerial()
+            dc.getSerialData()
+            time.sleep(0.025)
+        logger.debug('Droid Parked')
+        
+    def testRotationDrive(self, Rotation):
+        
+        direction = Rotation/abs(Rotation)
+        Rotation = Rotation %(2*np.pi)
+        # Calculate time to drive
+        if Rotation == 0:
+            runTime = 0
+            logger.debug("No rotation, aborting")
+            return;
+        elif self.AngularSpeed ==  0:
+            runTime = 0
+            logger.debug("No angular velocity, aborting")
+            return;
+        else:
+            runTime = abs(Rotation / (self.AngularSpeed))
+            logger.debug("Estimated runtime = %0.2f " % runTime)
+            if runTime > 10:
+                logger.debug("Runtime too long, aborting")
+                return;
+        # Calculate velocity including sign to reach destination
+        AngularVelocity = self.AngularSpeed * direction
+        # Calculate 3 motor velocities from input
+        dc.calcMotorVels(0, 0, AngularVelocity)
+        logger.debug("M1: %f" % dc.velM1)
+        logger.debug("M2: %f" % dc.velM2)
+        logger.debug("M3: %f" % dc.velM3)
+        # Initialise timer
+        dc.initialTimer = time.time()
+        
+        dc.runCommand = 1.0
+        driveTime = 0.0
+        # Test drive to target - simple    
+        while driveTime <= runTime:
+            dc.getSerialData()
+            dc.writeSerial()
+            # Naive open-loop odometry 
+            driveTime = time.time() - dc.initialTimer
+            # Replace with estimate from odometry
+            rotation = self.AngularSpeed * driveTime
+    #         for i in range(dc.inVarNum):
+    #             print("%.3f" % dc.inData[i])
+            logger.debug('Current rotation: %0.3f' % rotation)
+            time.sleep(0.025)
+            
+        dc.runCommand = 0.0
+        dc.writeSerial()
+        time.sleep(0.030)
+        while self.droidMoving == True:
+            dc.writeSerial()
+            dc.getSerialData()
+            time.sleep(0.025)
+        logger.debug('Droid Parked')
+        
 #------Data visualisation methods-----------
     
     def saveOutput(self):
@@ -263,8 +370,10 @@ class droidControl:
         shutdown_flag = True
         # Shutdown thread
         self.isrun = False
+        time.sleep(2)
         # Close serial port
         self.ser.close()
+        
         print('Releasing resources')
 
 '''
@@ -284,57 +393,32 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)
 
     global dc
-    dc = droidControl('/dev/ttyUSB0',38400,7,7,'f')
+    dc = droidControl('/dev/ttyUSB0',38400,10,7,'f')
     dc.startReadThread()
     t0 = time.time()
             
     #Use GUI loop for online changes
-    # Get user input (Waveform parameters, PID gains)
-    dc.LinearVelocity = 0.5 # m.s^-1
-    dc.AngularVelocity = 0.0 # degrees.s^-1
-    dc.Heading = np.pi /2 # radians in robot frame
-    dc.Distance = 1 # metres
-    dc.worldRotation = 0 # degrees in world frame
+    # Get user input 
+    dc.LinearSpeed = 0.2 # m.s^-1
+    dc.AngularSpeed = np.pi/2 # degrees.s^-1
+    
+    Heading = np.pi/2 # radians in robot frame
+    Distance = 0.1 # metres
+    Rotation = -0.5 * np.pi # radian in world frame
+    
     dc.Kprop = 1.5 # Proportional gain
     dc.Kint = 40 # Integral gain
     dc.Kder = 0.001 # Derivative gain
     dc.runCommand = 0.0
     
-    # Calculate 3 motor velocities from input
-    dc.calcMotorVels(dc.LinearVelocity, dc.Heading, dc.AngularVelocity)
-    logger.debug("M1: %f" % dc.velM1)
-    logger.debug("M2: %f" % dc.velM2)
-    logger.debug("M3: %f" % dc.velM3)
+#     dc.testVectorDrive(Distance, Heading)
     
-    # Calculate time to drive  
-    runTime = dc.Distance / (dc.LinearVelocity + 0.000000001)
-    logger.debug("Estimated runtime = %0.2f " % runTime)
-    # Initialise timer
-    dc.initialTimer = time.time()
-    driveTime = 0.0
-    dc.runCommand = 1.0
+    dc.testRotationDrive(Rotation)
+    
+    
+    
 
-    while driveTime <= runTime:
-        dc.getSerialData()
-        dc.writeSerial()
-        # Naive open-loop odometry 
-        driveTime = time.time() - dc.initialTimer
-        displacement = dc.LinearVelocity * driveTime
-        for i in range(dc.inVarNum):
-            print("%.3f" % dc.inData[i])
-        print('Current displacement: %0.3f' % displacement)
-        time.sleep(0.025)
-    dc.runCommand = 0.0
-    dc.writeSerial()
 
-    # Test timeout
-#     dc.writeSerial()
-#     for x in range(50):
-#         dc.getSerialData()
-#         for i in range(dc.inVarNum):
-#             print("%.3f" % dc.inData[i])
-#         time.sleep(0.025)
-#     dc.runCommand = 0.0
 
 #     # Save file
 #     dc.saveOutput()
