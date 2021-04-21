@@ -2,7 +2,7 @@
 #include "PinChangeInt.h"
 
 //Use for PID control of motors
-#include <PID_v1.h>
+#include <PID_v2.h>
 
 
 // Encoders
@@ -42,8 +42,8 @@ char dataString[50] = {0};
 //#define KP_CON 10
 //#define KI_CON 0
 //#define KD_CON 0.01
-#define KP_AGG 5
-#define KI_AGG 25
+#define KP_AGG 250
+#define KI_AGG 5000
 #define KD_AGG 0
 
 #define KP_CON 2
@@ -174,17 +174,17 @@ void loop() {
   Serial.print("M1 set: ");
   Serial.println(setspeed_M1);
   Serial.print("M1 speed: ");
-  Serial.println(speed_M1);
+  Serial.println(out_M1);
 
   Serial.print("M2 set: ");
   Serial.println(setspeed_M2);
   Serial.print("M2 speed: ");
-  Serial.println(speed_M2);
+  Serial.println(out_M2);
   
   Serial.print("M3 set: ");
   Serial.println(setspeed_M3);
   Serial.print("M3 speed: ");
-  Serial.println(speed_M3);
+  Serial.println(out_M3);
 
 
   
@@ -269,8 +269,8 @@ ISR(TIMER2_COMPA_vect) // timer compare interrupt service routine - fires every 
   // Don't know why but M2 and M3 counts are backwards.
   // Possible swapped wiring of encoders or swapped pin defs?
   speed_M1 = ticks2metres(-M1_Count / 0.01632);
-  speed_M2 = ticks2metres(M2_Count / 0.01632);
-  speed_M3 = ticks2metres(M3_Count / 0.01632);
+  speed_M2 = ticks2metres(-M2_Count / 0.01632);
+  speed_M3 = ticks2metres(-M3_Count / 0.01632);
 
   M1_Count = 0;
   M2_Count = 0;
@@ -349,5 +349,3 @@ void computeVelocities(float vel, float heading, float angular_vel) {
 double ticks2metres(int ticks) {
   return double(ticks) / TICKS_PER_REV * PI * WHEEL_DIAMETER;
 }
-
-

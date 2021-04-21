@@ -67,12 +67,9 @@ union Data{
 };
 
 // Motor PWM variables
-int pwm1 = 0;
-int dir1 = 0;
-int pwm2 = 0;
-int dir2 = 0;
-int pwm3 = 0;
-int dir3 = 0;
+
+int pwm1, pwm2, pwm3;
+int dir1, dir2, dir3;
 
 // PID variable setup
 volatile double speed_M1 = 0;
@@ -177,6 +174,11 @@ void loop() {
   // Read: command, setspeed_M1, setspeed_M2, setspeed_M3, Kprop,Kint,Kder
   readSerialInput();
 
+//-----------Manual test-------------------
+//  comState = 1;
+//  
+//  double msgIn[7] = {1.0, 1, 0, 0, 1.5,40.0,0.001};
+//----------------------------------------- 
   // Check that a valid message is received.
   if (comState != NO_COMMS){
     comState = 1;
@@ -222,7 +224,11 @@ void loop() {
         // Start PID if needed
         if (PID_M1.GetMode() == MANUAL){
           PID_M1.SetMode(AUTOMATIC);
+        }
+        if (PID_M2.GetMode() == MANUAL){ 
           PID_M2.SetMode(AUTOMATIC);
+        }
+        if (PID_M3.GetMode() == MANUAL){
           PID_M3.SetMode(AUTOMATIC);
         }     
            
@@ -263,13 +269,21 @@ void loop() {
   PID_M3.Compute();
     
   // Set output (u)
-  setMotorSpeeds(out_M1,out_M2,out_M3);
   
+  setMotorSpeeds(out_M1,out_M2,out_M3);
+//-----------Manual test-------------------
+ 
+//  Serial.println(motorState);
+//  Serial.println(out_M1);
+//  Serial.println(out_M2);
+//  Serial.println(out_M3);
+//  Serial.println();
+ 
   
   //Send data + state:
   uint32_t message = encodeMessage(comState,motorState, timeOut);
-  double* fDataArr[9] = {&setspeed_M1,&speed_M1,&out_M1,&setspeed_M2,&speed_M2,&out_M2,&setspeed_M3,&speed_M3,&out_M3};
-  int arrLen = 9;
+//  double* fDataArr[9] = {&setspeed_M1,&speed_M1,&out_M1,&setspeed_M2,&speed_M2,&out_M2,&setspeed_M3,&speed_M3,&out_M3};
+//  int arrLen = 9;
   writeSerial(&message,&setspeed_M1,&speed_M1,&out_M1,&setspeed_M2,&speed_M2,&out_M2,&setspeed_M3,&speed_M3,&out_M3);  
 }
     
@@ -281,8 +295,8 @@ ISR(TIMER2_COMPA_vect) // timer compare interrupt service routine - fires every 
   // Ticks per second
   
   speed_M1 = ticks2metres(-M1_Count / 0.01632);
-  speed_M2 = ticks2metres(M2_Count / 0.01632);
-  speed_M3 = ticks2metres(M3_Count / 0.01632);
+  speed_M2 = ticks2metres(-M2_Count / 0.01632);
+  speed_M3 = ticks2metres(-M3_Count / 0.01632);
 
   M1_Count = 0;
   M2_Count = 0;
@@ -458,7 +472,7 @@ void setMotorSpeeds(double out_M1,double out_M2,double out_M3){
         digitalWrite(DIR_M1, HIGH);
       }
       analogWrite(PWM_M1, int(abs(out_M1)));
-      return;
+      
       
       if (out_M2 < 0) {
         digitalWrite(DIR_M2, LOW);
@@ -466,7 +480,7 @@ void setMotorSpeeds(double out_M1,double out_M2,double out_M3){
         digitalWrite(DIR_M2, HIGH);
       }
       analogWrite(PWM_M2, int(abs(out_M2)));
-      return;
+      
       
       if (out_M3 < 0) {
         digitalWrite(DIR_M3, LOW);

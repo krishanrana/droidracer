@@ -205,9 +205,9 @@ class droidControl:
     def calcMotorVels(self, linearVel, theta, angularVel):
         # 3 wheel omniwheel kinematics
         # Transforms from velocity/heading/angular velocity to motor speeds
-        self.velM1 = -((linearVel * (-0.5 * np.cos(theta) - np.sqrt(3) / 2 * np.sin(theta))) + (2 * angularVel * self.droidradius));
-        self.velM2 = -((linearVel * (-0.5 * np.cos(theta) + np.sqrt(3) / 2 * np.sin(theta))) + (2 * angularVel * self.droidradius));
-        self.velM3 = -(linearVel * np.cos(theta) + (2 * angularVel * self.droidradius));
+        self.velM1 = ((linearVel * (-0.5 * np.cos(theta) - np.sqrt(3) / 2 * np.sin(theta))) + (2 * angularVel * self.droidradius));
+        self.velM2 = ((linearVel * (-0.5 * np.cos(theta) + np.sqrt(3) / 2 * np.sin(theta))) + (2 * angularVel * self.droidradius));
+        self.velM3 = (linearVel * np.cos(theta) + (2 * angularVel * self.droidradius));
     
     def estimateDroidMotion(self):
         # Inverse kinematic model: INPUT - wheel velocities, OUTPUT velocity, ang vel
@@ -249,9 +249,9 @@ class droidControl:
             dc.writeSerial()
             # Naive open-loop odometry 
             driveTime = time.time() - dc.initialTimer
-            displacement = dc.LinearVelocity * driveTime
-    #         for i in range(dc.inVarNum):
-    #             print("%.3f" % dc.inData[i])
+            displacement = dc.LinearSpeed * driveTime
+            for i in range(dc.inVarNum):
+                print("%.3f" % dc.inData[i])
             logger.debug('Current displacement: %0.3f' % displacement)
             time.sleep(0.025)
             
@@ -303,8 +303,8 @@ class droidControl:
             driveTime = time.time() - dc.initialTimer
             # Replace with estimate from odometry
             rotation = self.AngularSpeed * driveTime
-    #         for i in range(dc.inVarNum):
-    #             print("%.3f" % dc.inData[i])
+            for i in range(dc.inVarNum):
+                print("%.3f" % dc.inData[i])
             logger.debug('Current rotation: %0.3f' % rotation)
             time.sleep(0.025)
             
@@ -316,6 +316,25 @@ class droidControl:
             dc.getSerialData()
             time.sleep(0.025)
         logger.debug('Droid Parked')
+ 
+    def testMotors(self):
+        dc.velM1 = 0.2
+        dc.velM2 = 0.2
+        dc.velM3 = 0.2
+        dc.runCommand = 1.0
+        dc.writeSerial()
+        time.sleep(0.025)
+        dc.getSerialData()
+        for _ in range(10):
+            dc.writeSerial()
+            dc.getSerialData()
+            for i in range(dc.inVarNum):
+                print("%.3f" % dc.inData[i])
+            time.sleep(0.025)
+        dc.runCommand = 0.0
+        dc.writeSerial()
+        time.sleep(0.025)
+        dc.getSerialData()
         
 #------Data visualisation methods-----------
     
@@ -400,26 +419,21 @@ if __name__ == '__main__':
     #Use GUI loop for online changes
     # Get user input 
     dc.LinearSpeed = 0.2 # m.s^-1
-    dc.AngularSpeed = np.pi/2 # degrees.s^-1
+    dc.AngularSpeed = 0.1 * np.pi # degrees.s^-1
     
-    Heading = np.pi/2 # radians in robot frame
-    Distance = 0.1 # metres
-    Rotation = -0.5 * np.pi # radian in world frame
+    Heading = 3*np.pi/5 # radians in robot frame
+    Distance = 1 # metres
+    Rotation = np.pi/4 # radian in world frame
     
     dc.Kprop = 1.5 # Proportional gain
     dc.Kint = 40 # Integral gain
     dc.Kder = 0.001 # Derivative gain
     dc.runCommand = 0.0
     
-#     dc.testVectorDrive(Distance, Heading)
-    
+    dc.testVectorDrive(Distance, Heading)
+    time.sleep(2)
     dc.testRotationDrive(Rotation)
-    
-    
-    
-
-
-
+#     
 #     # Save file
 #     dc.saveOutput()
 #     
