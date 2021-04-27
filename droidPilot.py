@@ -3,19 +3,14 @@
 - Closed loop control as above
 - Manual drive using game controller """
 
-import copy
 import logging
-import os
 import signal
-import struct
 import sys
 import time
-from threading import Thread
 
 import matplotlib.pyplot as plt
 import numpy as np
 import PySimpleGUI as psg
-import serial
 
 from DroidControl import droidControl 
 
@@ -27,6 +22,7 @@ def initLogger():
     logfile = 'debug.log'
 
     # Define your own logger name
+    global logger
     logger = logging.getLogger("droidPilotLog")
     # Set default logging level to DEBUG
     logger.setLevel(logging.DEBUG)
@@ -62,6 +58,11 @@ def initPilot():
 
     global dc
     dc = droidControl()
+    dc.Kprop = 1.5 # Proportional gain
+    dc.Kint = 40 # Integral gain
+    dc.Kder = 0.001 # Derivative gain
+    dc.runCommand = 0.0
+    
 # Method to test drive droid using static input
 def manualSetInput():
 
@@ -76,11 +77,6 @@ def manualSetInput():
     Distance = 1 # metres
     Rotation = np.pi/4 # radian in world frame
 
-    dc.Kprop = 1.5 # Proportional gain
-    dc.Kint = 40 # Integral gain
-    dc.Kder = 0.001 # Derivative gain
-    dc.runCommand = 0.0
-
     dc.testVectorDrive(Distance, Heading)
     time.sleep(2)
     dc.testRotationDrive(Rotation)
@@ -89,16 +85,19 @@ def manualSetInput():
 def guiInput():
     psg.theme('Reddit')  
 
-    llayout = [[sg.Text('Drive robot to:'), sg.Text(size=(18,1), key='-OUTPUT-')],
-            [sg.Text('Heading:'), sg.Slider(range=(-180,180),default_value=0,
+    layout = [[psg.Text('Robot status:'), psg.Text(size=(18,1), key='-STATUS-')],
+            [psg.Text('Heading:'), psg.Slider(range=(180,-180),default_value=0,
             key='-HEAD-', size=(20,15), orientation='horizontal',font=('Helvetica', 12))],
-            [sg.Text('Distance:'), sg.Slider(range=(0,2000), default_value=0,
+            [psg.Text('Distance:'), psg.Slider(range=(0,2000), default_value=0,
             key='-DIST-', size=(20,15), orientation='horizontal',font=('Helvetica', 12))],
-            [sg.Text('Rotation:'), sg.Slider(range=(-180,180),default_value=0,
+            [psg.Text('Rotation:'), psg.Slider(range=(180,-180),default_value=0,
             key='-ROT-', size=(20,15),orientation='horizontal',font=('Helvetica', 12))],
-            [sg.Text('Speed:'), sg.Slider(range=(0,10),default_value=0,
-            key='-SPD-',size=(20,15),orientation='horizontal',font=('Helvetica', 12))],
-            [sg.Button('Run'), sg.Button('Exit')]]
+            [psg.Text('Linear Speed:'), psg.Slider(range=(1,10),default_value=0,
+            key='-L_SPD-',size=(20,15),orientation='horizontal',font=('Helvetica', 12))],
+            [psg.Text('Angular Speed:'), psg.Slider(range=(1,10),default_value=0,
+            key='-A_SPD-',size=(20,15),orientation='horizontal',font=('Helvetica', 12))],
+            [psg.Checkbox('Relative Motion', default=True, key='-MOTION-'),psg.Button('Run'), psg.Button('Exit')]]
+    
     
 
     window = psg.Window('GUI muthafucka!', layout)
@@ -109,8 +108,26 @@ def guiInput():
         if event == psg.WIN_CLOSED or event == 'Exit':
             break
         if event == 'Run':
-            # change the "output" element to be the value of "input" element
-            window['-OUTPUT-'].update('Running')
+            # change the "output" element to be the value of "input" element   
+            window['-STATUS-'].update('Running')
+            # Clear previous droid states - for relative motion only
+            if values['-MOTION-'] == True:
+                dc.xEst = np.array([0,0,0])
+                dc.vEst = np.array([0,0,0])
+            # move robot to command
+            deg2rad = np.pi/180
+            Heading = (values.get('-HEAD-') + 90) *deg2rad
+            Distance = values.get('-DIST-')/1000
+            Rotation = ((values.get('-ROT-') + 360) % 360) *deg2rad
+            dc.AngularSpeed = values.get('-A_SPD-')/10 * dc.MaxAngularVelocity
+            print(dc.AngularSpeed)
+            dc.LinearSpeed = values.get('-L_SPD-')/10 * dc.MaxLinearVelocity
+            # transform heading / distance to X,Y (X to right, Y forwards, heading angle CCW from Y, Rotation 0-360)
+            target = np.array([Distance * np.cos(Heading),Distance * np.sin(Heading), Rotation])
+            logger.debug('Target x: {0:0.3f}, y: {1:0.3f}, theta: {2:0.3f},'.format(target[0],target[1],target[2] *180/np.pi))
+            dc.navController(target, odoType = 'none' )
+            window['-STATUS-'].update('Movement complete')
+            
     
 
     window.close()
@@ -120,9 +137,6 @@ def guiInput():
 if __name__ == '__main__':
     initLogger()
     initPilot()
-    manualSetInput()
+    guiInput()
+#     manualSetInput()
     dc.close
-
-
-
-

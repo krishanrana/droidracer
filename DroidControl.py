@@ -78,17 +78,32 @@ class droidControl:
         self.dataOut = [0]*self.outVarNum
         
         # Motor velociries and control parameters
-        self.droidradius = 0.15
+        self.droidRadius = 0.15
         
         # Control inputs
-        self.MaxLinearVelocity = 0.5 # Maximum linear speed m/s
-        self.MaxAngularVelocity = np.pi/2 # Maximum angular velocity rad/s
+        self.maxRunTime = 20 # maximum navigation runtime
+        self.MaxLinearVelocity = 1.0 # Maximum linear speed m/s
+        self.MaxAngularVelocity = np.pi # Maximum angular velocity rad/s
+        self.LinearSpeed = 0.0 # m/s       
+        self.AngularSpeed = 0.0 # radian/s
         
         self.droidHeading = np.pi/2 # direction of travel (radians relative to droid frame)
         self.worldRotation = 0 # # rotation of droid relative to initial pose
-        self.LinearSpeed = 0 # m/s       
-        self.AngularSpeed = 0.0 # radian/s
-    
+        
+        # Robot states
+        self.xEst = np.array([0,0,0])
+        self.xEstT_1 = np.array([0,0,0])
+        self.vEst = np.array([0,0,0])
+        self.vEstT_1 = np.array([0,0,0])
+        self.vCommand = np.array([0,0,0])
+        self.vCommandT_1 = np.array([0,0,0])
+        self.navDT = 0
+        self.navTime = time.time()
+        self.navTimeT_1 = self.navTime - 0.030
+        
+
+        
+        # Motor states
         self.velM1 = 0.0
         self.velM2 = 0.0
         self.velM3 = 0.0
@@ -105,6 +120,7 @@ class droidControl:
         
         # Data container for save
         # TODO: make this automatic, currently adding timestamp and setpoint
+        self.logMotorData = True
         self.saveData = [[0] * (self.inVarNum + 1)]
         self.initialTimer = 0.0
 
@@ -141,9 +157,11 @@ class droidControl:
 
     def getSerialData(self):
         # Method reads serial stream given data format expected (floats or ints)
+        # Save data for next iteration
+        self.inDataOld = self.inData
         # Set data time logging
-        currentTimer = time.time()
-        dataTime = ((currentTimer - self.initialTimer))
+        currentTime = time.time()
+        dataTime = (currentTime - self.initialTimer)
         privateData = copy.deepcopy(self.inRawData[:]) # Synchronize all data to the same sample time
         
         byteSignal = privateData[0:4]       
@@ -153,6 +171,7 @@ class droidControl:
             # Unpack message, inVarNum = number of variables, VarBytes = datatype
             data = privateData[(i*self.VarBytes):(self.VarBytes + i*self.VarBytes)]
             self.inData[i] = struct.unpack(self.VarType, data)[0] # Unpack always returns tuple
+        self.inData.append(dataTime)
         
         # Decode signal from remote, update states
         # Unpack 4 Byte packet and read bits
@@ -177,8 +196,10 @@ class droidControl:
             logger.debug("TIMEOUT")
             
         # todo: Change to allow variable data size inVarNum. Try append([*self.inData])
-        self.saveData.append([self.inData])
-#         self.saveData.append([self.inData[0], self.velM1, self.inData[1], self.velM2, self.inData[2],self.inData[3],self.velM3,self.inData[4],self.inData[5],self.inData[6], dataTime])
+        if self.logMotorData:
+            self.saveData.append([self.inData])
+        # writeSerial(&message,&setspeed_M1,&speed_M1,&out_M1,&setspeed_M2,&speed_M2,
+        # &out_M2,&setspeed_M3,&speed_M3,&out_M3);  
         logger.debug('Data updated:%f', dataTime)
     
     def startReadThread(self):
@@ -202,16 +223,157 @@ class droidControl:
 #------High level control methods-----------
             
             
-    def calcMotorVels(self, linearVel, theta, angularVel):
+    def calcMotorVels(self, linearVel, heading, angularVel):
         # 3 wheel omniwheel kinematics
         # Transforms from velocity/heading/angular velocity to motor speeds
-        self.velM1 = ((linearVel * (-0.5 * np.cos(theta) - np.sqrt(3) / 2 * np.sin(theta))) + (2 * angularVel * self.droidradius))
-        self.velM2 = ((linearVel * (-0.5 * np.cos(theta) + np.sqrt(3) / 2 * np.sin(theta))) + (2 * angularVel * self.droidradius))
-        self.velM3 = (linearVel * np.cos(theta) + (2 * angularVel * self.droidradius))
+        self.velM1 = ((linearVel * (-0.5 * np.cos(heading) - np.sqrt(3) / 2 * np.sin(heading))) + (2 * angularVel * self.droidRadius))
+        self.velM2 = ((linearVel * (-0.5 * np.cos(heading) + np.sqrt(3) / 2 * np.sin(heading))) + (2 * angularVel * self.droidRadius))
+        self.velM3 = (linearVel * np.cos(heading) + (2 * angularVel * self.droidRadius))
     
-    def estimateDroidMotion(self):
-        # Inverse kinematic model: INPUT - wheel velocities, OUTPUT velocity, ang vel
-        pass
+    def inverseKinematics(self, vEst):
+        # See calcDroidKinematics.p for details
+        vEst[2] = vEst[2] * self.droidRadius * 2
+        self.Minv = np.array([[-0.5,-0.866  , 1],
+                              [-0.5, 0.866  , 1],
+                              [1   , 0      , 1]])
+
+        [self.velM1,self.velM2,self.velM3] = self.Minv @ vEst
+        
+    
+    def forwardKinematics(self, M1, M2, M3):
+        # Forward kinematic model: INPUT - wheel velocities, OUTPUT velocity, ang vel
+        self.M = np.array([[-0.33333333, -0.33333333,  0.66666667],
+                           [-0.57736721,  0.57736721,  0.        ],
+                           [ 0.33333333,  0.33333333,  0.33333333]])
+        
+        vEst = self.M @ np.array([M1,M2,M3])
+        vEst[2] = vEst[2]/(2* self.droidRadius)
+        return vEst
+    
+    def calcDroidSpeed(self,error):
+        normVec = np.sqrt(error[0]**2 + error[1]**2)
+        normAng = np.abs(error[2])
+        
+        # Normalise direction vector and protect against divide by zero
+        if normVec > 0:
+            unitVecX = error[0]/normVec
+            unitVecY = error[1]/normVec
+        else:
+            unitVecX = 0
+            unitVecY = 0
+            
+        if normAng > 0:
+            unitVecA = error[2]/normAng
+        else:
+            unitVecA = 0 
+        
+        # Proportional speed controller
+        Speed_L = np.min([self.LinearSpeed, 5*normVec])
+#         Speed_A = np.min([self.AngularSpeed, 10*normAng])
+        Speed_A = np.min([self.AngularSpeed, 10*normAng])
+        print('Prop: {0:0.3f}'.format(10*normAng))
+        
+        self.vCommand = np.round([unitVecX * Speed_L, unitVecY * Speed_L, unitVecA * Speed_A],decimals=3)
+        logger.debug('Speed_L: {0:0.4f}'.format(Speed_L))
+        logger.debug('Speed_A: {0:0.4f}'.format(Speed_A))
+        logger.debug('Velocity command x: {0:0.3f}, y: {1:0.3f}, Omega: {2:0.3f},'.format(self.vCommand[0],self.vCommand[1],self.vCommand[2]))
+    
+    
+    def estRobotState(self, odoType = 'none'):
+        
+        # Get latest information from sensors 
+        self.getSerialData()
+        
+        if odoType == 'encoder':
+            estM1 = self.inData[2]
+            estM2 = self.inData[5]
+            estM3 = self.inData[8]
+        
+        else:
+            estM1 = self.velM1
+            estM2 = self.velM2
+            estM3 = self.velM3
+        #NOTE: Add data fusion filter here
+        self.vEst = self.forwardKinematics(estM1, estM2, estM3)
+        
+        self.navTime = time.time()
+        self.navDt = self.navTime - self.navTimeT_1
+#         self.navDt = 0.030
+        # Integrate velocity estimate to find position estimate
+        # NOTE: Add propagate robot pose changes
+        self.xEst = self.xEstT_1 + ((self.vEst + self.vEstT_1)/2  * self.navDt)
+        self.xEst[2] = self.xEst[2] % (2*np.pi)
+        
+        # Store state for next iteration
+        self.xEstT_1 = self.xEst    
+        self.vEstT_1 = self.vEst
+        self.navTimeT_1 = self.navTime
+        
+    def calcTargetError(self, target):
+        error = target - self.xEst
+        # Bring error to interval(0,360) 
+        error[2] = error[2] % (2*np.pi)
+        # Turn in closest direction
+        if error[2] > np.pi/2:
+            error[2] = error[2] - (2*np.pi)
+        logger.debug('Target x: {0:0.3f}, y: {1:0.3f}, theta: {2:0.3f},'.format(target[0],target[1],target[2]))
+        logger.debug('xEst x: {0:0.3f}, y: {1:0.3f}, theta: {2:0.3f},'.format(self.xEst[0],self.xEst[1],self.xEst[2]))
+        logger.debug('Error x: {0:0.3f}, y: {1:0.3f}, theta: {2:0.3f},'.format(error[0],error[1],error[2]))           
+
+        return error
+    
+    def navController(self, target, odoType = 'none' ):
+        # for relative motion only
+        self.xEst = np.array([0,0,0])
+        self.xEstT_1 = np.array([0,0,0])
+        self.vEst = np.array([0,0,0])
+        self.vEstT_1 = np.array([0,0,0])
+
+
+        errorTol = np.array([0.020, 0.020, 0.02]) # +/- 50mm, 5 deg
+        
+        error = self.calcTargetError(target)
+        # Estimate time to run at set speed
+        runTime = error / np.array([self.LinearSpeed, self.LinearSpeed,self.AngularSpeed])
+        if (runTime > self.maxRunTime).any():
+            logger.warning('No speed set, infinite runtime calculated - aborting')
+            return
+        self.navTimeT_1 = time.time()
+        time.sleep(0.03)
+        self.navTime = time.time()
+        self.runCommand = 1.0   
+        # Loop until error <= tolerance
+        while (np.abs(error) > errorTol).any():
+            # Get odometry for time period
+            self.estRobotState(odoType)
+            error = self.calcTargetError(target)
+            # Calculate desired droid linear and angulare velocity
+            self.calcDroidSpeed(error)
+            # Determine motor speeds
+            self.inverseKinematics(self.vCommand)
+
+            # Write motor speeds
+            self.writeSerial()
+            self.vCommandT_1 = self.vCommand
+            
+            # Diagnostics and data display
+            logger.debug('M1: {0:0.3f}, M2: {1:0.3f}, M3: {2:0.3f},'.format(self.velM1,self.velM2,self.velM3))
+            time.sleep(0.02)
+            
+            
+        self.runCommand = 0.0
+        self.writeSerial()
+        time.sleep(0.030)
+        while self.droidMoving == True:
+            self.writeSerial()
+            self.getSerialData()
+            time.sleep(0.025)
+        logger.debug('Droid Parked')
+            
+        
+        
+        
+        
 #------Tests--------------------------------
     
     def testVectorDrive(self, Distance, Heading):
