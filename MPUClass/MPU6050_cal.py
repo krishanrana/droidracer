@@ -62,7 +62,7 @@ x_accel_reading = accel_reading[0]
 y_accel_reading = accel_reading[1]
 z_accel_reading = accel_reading[2]
 
-nAverage = 30
+nAverage = 20
 
 x_accel_avg = [0]*nAverage
 y_accel_avg = [0]*nAverage
@@ -108,8 +108,8 @@ xGyHist = []
 yGyHist = []
 zGyHist = []
 
-accelError = 2
-gyroError = 2
+accelError = 5
+gyroError = 5
 Error = np.abs(np.array(accel_reading + gyro_reading))
 allowableError = np.array([accelError,accelError,accelError,gyroError,gyroError,gyroError])
 
@@ -299,5 +299,5 @@ ax2.plot(zGyHist)
 plt.show() 
 ImuOffsets = np.array([xAcOffAvg,yAcOffAvg,zAcOffAvg,xGyOffAvg,yGyOffAvg,zGyOffAvg ])
  
-np.savetxt('imuBiases.csv',ImuOffsets,delimiter=',')
+np.savetxt('../imuBiases.csv',ImuOffsets,delimiter=',')
 print('IMU biases saved to file')              

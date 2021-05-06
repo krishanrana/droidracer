@@ -710,7 +710,7 @@ class MPU6050:
                                    ctypes.c_int8(a_offset >> 8).value)
         self.__bus.write_byte_data(self.__dev_id, C.MPU6050_RA_XA_OFFS_L_TC,
                                    ctypes.c_int8(a_offset).value)
-
+    
     def set_y_accel_offset(self, a_offset):
         self.__bus.write_byte_data(self.__dev_id, C.MPU6050_RA_YA_OFFS_H,
                                    ctypes.c_int8(a_offset >> 8).value)
@@ -759,6 +759,12 @@ class MPU6050:
         gyro[1] = ctypes.c_int16(raw_data[2] << 8 | raw_data[3]).value
         gyro[2] = ctypes.c_int16(raw_data[4] << 8 | raw_data[5]).value
         return gyro
+    def get_temp(self):
+        raw_data = self.__bus.read_i2c_block_data(self.__dev_id,
+                                                  C.MPU6050_RA_TEMP_OUT_H, 2)
+        tempC = ctypes.c_int16(raw_data[0] << 8 | raw_data[1]).value
+        tempC = tempC/340 + 36.53
+        return tempC
 
     # Interfacing functions to get data from FIFO buffer
     def DMP_get_FIFO_packet_size(self):
@@ -812,6 +818,7 @@ class MPU6050:
         x = vect.x / 16384.0
         y = vect.y / 16384.0
         z = vect.z / 16384.0
+        
         return V(x, y, z)
 
     def DMP_get_gravity(self, a_quat):
@@ -861,7 +868,7 @@ class MPU6050:
         y = a_vector_raw.y - a_vect_grav.y*8192
         z = a_vector_raw.z - a_vect_grav.z*8192
         return V(x, y, z)
-
+    
 
 class MPU6050IRQHandler:
     __mpu = MPU6050

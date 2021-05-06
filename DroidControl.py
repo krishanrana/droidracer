@@ -11,9 +11,8 @@ import os
 import copy
 import serial
 import struct
-
+from DroidInertial import droidInertial
 import matplotlib.pyplot as plt
-#import PySimpleGUI as psg
 # Log file location
 logfile = 'debug.log'
 
@@ -101,8 +100,6 @@ class droidControl:
         self.navTime = time.time()
         self.navTimeT_1 = self.navTime - 0.030
         
-
-        
         # Motor states
         self.velM1 = 0.0
         self.velM2 = 0.0
@@ -131,8 +128,9 @@ class droidControl:
         except:
             logger.error('Serial port not found')
             sys.exit()
-
-        self.startReadThread()
+        # Start 
+        self.startReadThread()      
+        self.di = droidInertial(biasType = 'Internal',dataType = 'raw')
 
         logger.debug('Initialisation successful')
         
@@ -144,9 +142,9 @@ class droidControl:
         self.ser.reset_output_buffer()
         dataOut = [
             self.runCommand,
-            np.round(self.velM1,2),
-            np.round(self.velM2,2),
-            np.round(self.velM3,2),
+            np.round(self.velM1,3),
+            np.round(self.velM2,3),
+            np.round(self.velM3,3),
             self.Kprop,
             self.Kint, 
             self.Kder]   
@@ -224,7 +222,7 @@ class droidControl:
             
             
     def calcMotorVels(self, linearVel, heading, angularVel):
-        # 3 wheel omniwheel kinematics
+        # 3 wheel omniwheel kinematics - OBSOLETE
         # Transforms from velocity/heading/angular velocity to motor speeds
         self.velM1 = ((linearVel * (-0.5 * np.cos(heading) - np.sqrt(3) / 2 * np.sin(heading))) + (2 * angularVel * self.droidRadius))
         self.velM2 = ((linearVel * (-0.5 * np.cos(heading) + np.sqrt(3) / 2 * np.sin(heading))) + (2 * angularVel * self.droidRadius))
@@ -232,7 +230,8 @@ class droidControl:
     
     def inverseKinematics(self, vEst):
         # See calcDroidKinematics.p for details
-        vEst[2] = vEst[2] * self.droidRadius * 2
+        vEst = vEst/2
+        vEst[2] = vEst[2] * self.droidRadius 
         self.Minv = np.array([[-0.5,-0.866  , 1],
                               [-0.5, 0.866  , 1],
                               [1   , 0      , 1]])
@@ -247,7 +246,17 @@ class droidControl:
                            [ 0.33333333,  0.33333333,  0.33333333]])
         
         vEst = self.M @ np.array([M1,M2,M3])
-        vEst[2] = vEst[2]/(2* self.droidRadius)
+        vEst[2] = vEst[2]/(self.droidRadius)
+        vEst = vEst*2
+        return vEst
+    
+    def getInertialData(self):
+        
+        vLinIMU = self.di.velocity
+        vAngIMU = self.di.omega
+        vEst = np.array([vLinIMU[0],vLinIMU[1], vAngIMU[2]])
+        self.timeIMU = self.di.TimeK
+        
         return vEst
     
     def calcDroidSpeed(self,error):
@@ -269,18 +278,19 @@ class droidControl:
         
         # Proportional speed controller
         Speed_L = np.min([self.LinearSpeed, 5*normVec])
-#         Speed_A = np.min([self.AngularSpeed, 10*normAng])
-        Speed_A = np.min([self.AngularSpeed, 10*normAng])
-        print('Prop: {0:0.3f}'.format(10*normAng))
+        Speed_A = np.min([self.AngularSpeed, 5*normAng])
         
         self.vCommand = np.round([unitVecX * Speed_L, unitVecY * Speed_L, unitVecA * Speed_A],decimals=3)
         logger.debug('Speed_L: {0:0.4f}'.format(Speed_L))
         logger.debug('Speed_A: {0:0.4f}'.format(Speed_A))
         logger.debug('Velocity command x: {0:0.3f}, y: {1:0.3f}, Omega: {2:0.3f},'.format(self.vCommand[0],self.vCommand[1],self.vCommand[2]))
     
+    def compFilter( data1, data2):
+        A = 0.7
+        vEst = (data1 * A) + (data2 * (1-A))
+        return vEst
     
-    def estRobotState(self, odoType = 'none'):
-        
+    def estRobotState(self, odoType = 'none'):       
         # Get latest information from sensors 
         self.getSerialData()
         
@@ -288,17 +298,24 @@ class droidControl:
             estM1 = self.inData[2]
             estM2 = self.inData[5]
             estM3 = self.inData[8]
-        
+            self.vEst = self.forwardKinematics(estM1, estM2, estM3)
+            
+        elif odoType == 'imuFusion':
+            estM1 = self.inData[2]
+            estM2 = self.inData[5]
+            estM3 = self.inData[8]
+            vEstEnc = self.forwardKinematics(estM1, estM2, estM3)           
+            vEstImu = self.getInertialData()
+            self.vEst = self.compFilter(vEstEnc, vEstImu)
+            
         else:
             estM1 = self.velM1
             estM2 = self.velM2
             estM3 = self.velM3
-        #NOTE: Add data fusion filter here
-        self.vEst = self.forwardKinematics(estM1, estM2, estM3)
-        
+            self.vEst = self.forwardKinematics(estM1, estM2, estM3)
+
         self.navTime = time.time()
         self.navDt = self.navTime - self.navTimeT_1
-#         self.navDt = 0.030
         # Integrate velocity estimate to find position estimate
         # NOTE: Add propagate robot pose changes
         self.xEst = self.xEstT_1 + ((self.vEst + self.vEstT_1)/2  * self.navDt)
@@ -329,8 +346,7 @@ class droidControl:
         self.vEst = np.array([0,0,0])
         self.vEstT_1 = np.array([0,0,0])
 
-
-        errorTol = np.array([0.020, 0.020, 0.02]) # +/- 50mm, 5 deg
+        errorTol = np.array([0.005, 0.005, 0.002]) # +/- 50mm, 5 deg
         
         error = self.calcTargetError(target)
         # Estimate time to run at set speed
@@ -359,8 +375,7 @@ class droidControl:
             # Diagnostics and data display
             logger.debug('M1: {0:0.3f}, M2: {1:0.3f}, M3: {2:0.3f},'.format(self.velM1,self.velM2,self.velM3))
             time.sleep(0.02)
-            
-            
+                       
         self.runCommand = 0.0
         self.writeSerial()
         time.sleep(0.030)
@@ -369,11 +384,7 @@ class droidControl:
             self.getSerialData()
             time.sleep(0.025)
         logger.debug('Droid Parked')
-            
-        
-        
-        
-        
+                  
 #------Tests--------------------------------
     
     def testVectorDrive(self, Distance, Heading):
@@ -541,9 +552,7 @@ class droidControl:
 
         fig.legend(loc="upper right", bbox_to_anchor=(1,1), bbox_transform=ax.transAxes)
         plt.show()
-        
-
-    
+          
 #------Shutdown methods-----------
 
     def close(self):
@@ -551,11 +560,11 @@ class droidControl:
         shutdown_flag = True
         # Shutdown thread
         self.isrun = False
-        time.sleep(2)
+        time.sleep(1)
         # Close serial port
         self.ser.close()
-        
-        print('Releasing resources')
+        self.di.close()
+        logger.debug('DroidControl releasing resources')
 
 '''
 Captures the ctrl+c keyboard command to close the services and free 

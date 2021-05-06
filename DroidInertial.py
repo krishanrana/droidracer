@@ -7,6 +7,7 @@ Created on Mon Jan 18 11:29:54 2021
 NOTE: Some code from MPU6050.py and iC2 library by Jeff Rowland via Geir Istad
 """
 # Import packages
+from threading import Thread
 import numpy as np
 import sys
 from MPUClass.MPU6050 import MPU6050 # Rewrite class using native numpy
@@ -18,7 +19,6 @@ from mpl_toolkits.mplot3d import axes3d
 from scipy.optimize import least_squares
 from scipy.spatial.transform import Rotation as spr
 import logging
-from DroidControl import droidControl
 
 # Setup logging (Use droidlogging.conf as alternative)
 
@@ -52,24 +52,58 @@ logger.addHandler(console_handler)
 # Initialise class as Child of MPU6050
 class droidInertial(MPU6050):
     
-    def __init__(self):
+    def __init__(self,biasType = 'External',dataType = 'raw'):
+        
+        # Flags for thread operation
+        self.dmpReceiving = False
+        self.dmpIsRun = True
+        self.dmpThread = None
+        
+        self.imuReceiving = False
+        self.imuIsRun = True
+        self.imuThread = None
+        
+        self.newData = False
         
         self.TimeKminus1 = time.time()        
         self.TimeK = time.time()
         #self.gravity = np.array([0,0,9.80665])
         self.gravity = 9.80665
-        self.FIFO_buffer = [0]*42
-        self.dmpAccel = np.array([0,0,0])
-        self.rawAccel = np.array([0,0,0])
-        self.velocity = np.array([0,0,0])
-        self.displacement = np.array([0,0,0])
+        
+
+        # User set internal or external bias correction
+        self.biasType = biasType
         self.accelBias = np.array([0,0,0])
+        self.gyroBias = np.array([0,0,0])
+        self.dataType = dataType
+        self.FIFO_buffer = [0]*42
+        # DMP states
+        self.dmpAccel = np.array([[0,0,0]])
+        self.dmpEulerTheta = np.array([[0,0,0]])
+        
+        # Raw readings from IMU
+        self.rawAccel = np.array([0,0,0])
+        self.rawAccelMinus1 = np.array([0,0,0])
         
         self.rawOmega = np.array([0,0,0])
-        self.theta = np.array([0,0,0])
-        self.gyroBias = np.array([0,0,0])
+        self.rawOmegaMinus1 = np.array([0,0,0])
         
-        self.imuOut = []        
+        # Processed output 
+        self.accel = np.array([0,0,0])
+        self.accelMinus1 = np.array([0,0,0])
+        self.velocity = np.array([0,0,0])
+        self.velocityMinus1 = np.array([0,0,0])
+        self.displacement = np.array([0,0,0])
+        self.displacementMinus1 = np.array([0,0,0])
+        
+        self.omega = np.array([0,0,0])
+        self.omegaMinus1 = np.array([0,0,0])   
+        self.theta = np.array([0,0,0])
+        self.thetaMinus1 = np.array([0,0,0])
+             
+        # Storage
+        self.imuOut = []
+        
         i2c_bus = 1
         device_address = 0x68
 
@@ -89,56 +123,140 @@ class droidInertial(MPU6050):
         logger.debug('FIFO Packet size: %s ' % self.FIFO_packet_size)
         logger.debug(('FIFO count: %s ' % hex(self.get_FIFO_count())))
         
-#         self.set_x_accel_offset(x_accel_offset)
-#         self.set_y_accel_offset(y_accel_offset)
-#         self.set_z_accel_offset(z_accel_offset)
+        if self.biasType == 'Internal':
+            self.set_x_accel_offset(self.accelBias[0])
+            self.set_y_accel_offset(self.accelBias[1])
+            self.set_z_accel_offset(self.accelBias[2])
+            self.set_x_gyro_offset(self.gyroBias[0])
+            self.set_y_gyro_offset(self.gyroBias[1])
+            self.set_z_gyro_offset(self.gyroBias[2])
+            logger.debug('IMU biases compensated INTERNALLY')
+        else:
+            logger.debug('IMU biases compensated EXTERNALLY')
+            
+        if self.dataType == 'dmp':   
+            self.startDMPThread()
+            logger.debug('Data from DMP')
+        else:
+            self.startIMUThread()
+            logger.debug('Data from IMU')
+              
+    def startIMUThread(self):
+        if self.imuThread == None:
+            self.imuThread = Thread(target=self.readIMUthread, daemon = True)
+            #self.thread.daemon = True
+            self.imuThread.start()
+            # Block till we start receiving values
+            while self.imuReceiving != True:
+                time.sleep(0.1)
+                
+    def readIMUthread(self):
+        time.sleep(0.5)  # give some buffer time for retrieving data
+        logger.debug('readIMUThread starting..')
+        while (self.imuIsRun):
+            self.TimeKminus1 = self.TimeK
+            self.TimeK = time.time()
+            # : Store as numpy arrays as we will be using matrix operations for Kalman filter
+            rawAccel = np.array([self.get_acceleration()])
+            rawOmega = np.array([self.get_rotation()])
+            # Manually remove bias if needed
+            if self.biasType != 'Internal':
+                rawAccel = rawAccel - (self.accelBias * 8.95)
+                rawOmega = rawOmega - (self.gyroBias * 8.95)
+            # Scale and Convert to ms-2
+            self.rawAccel = rawAccel / 2**14  * self.gravity
+            self.rawOmega = rawOmega / 131.0
+            self.imuReceiving = True
+            self.newData = True
+            time.sleep(0.000001)
                
-    def readIMUraw(self):
-        self.TimeKminus1 = self.TimeK
-        self.rawAccelMinus1 = self.rawAccel
-        self.rawOmegaMinus1 = self.rawOmega
-        self.TimeK = time.time()
-        # : Store as numpy arrays as we will be using matrix operations for Kalman filter
-        self.rawAccel = np.array([self.get_acceleration()])/ 2**14  * self.gravity
-        self.rawOmega = np.array([self.get_rotation()]) / 131.0
-               
-    def readDMP(self):
-        self.TimeKminus1 = self.TimeK
-        FIFO_count = self.get_FIFO_count()
-        mpu_int_status = self.get_int_status()
-        
-        while FIFO_count < self.FIFO_packet_size:
+    def startDMPThread(self):
+        if self.dmpThread == None:
+            self.dmpThread = Thread(target=self.readDMPThread,daemon = True)
+            #self.thread.daemon = True
+            self.dmpThread.start()
+            # Block till we start receiving values
+            while self.dmpReceiving != True:
+                time.sleep(0.1)
+            
+    
+    def readDMPThread(self):    # retrieve data
+        time.sleep(0.5)  # give some buffer time for retrieving data
+        self.reset_FIFO()
+        logger.debug('readDMPThread starting..')
+        while (self.dmpIsRun):
             FIFO_count = self.get_FIFO_count()
-        # If overflow is detected by status or fifo count we want to reset
-        if (FIFO_count == 1024) or (mpu_int_status & 0x10):
-            self.reset_FIFO()
-            logger.warning('FIFO overflow')
-        # Check if fifo data is ready
-        elif (mpu_int_status & 0x02):
-            # Wait until packet_size number of bytes are ready for reading, default
-            # is 42 bytes
+            mpu_int_status = self.get_int_status()
+        
             while FIFO_count < self.FIFO_packet_size:
                 FIFO_count = self.get_FIFO_count()
+                time.sleep(0.000001)
+            # If overflow is detected by status or fifo count we want to reset
+            if (FIFO_count == 1024) or (mpu_int_status & 0x10):
+                self.reset_FIFO()
+                logger.warning('FIFO overflow')
+            # Check if fifo data is ready
+            elif (mpu_int_status & 0x02):
+                # Wait until packet_size number of bytes are ready for reading, default
+                # is 42 bytes
+                while FIFO_count < self.FIFO_packet_size:
+                    FIFO_count = self.get_FIFO_count()
+                    time.sleep(0.000001)
+                
+                self.TimeKminus1 = self.TimeK
+                self.TimeK = time.time()
+                self.FIFO_buffer = self.get_FIFO_bytes(self.FIFO_packet_size)
+                self.reset_FIFO()
+                self.dmpReceiving = True
+                self.newData = True
+                time.sleep(0.000001)
             
-            self.TimeK = time.time()
-            self.FIFO_buffer = self.get_FIFO_bytes(self.FIFO_packet_size)
-            self.reset_FIFO()
-            Accel = self.DMP_get_acceleration(self.FIFO_buffer)
-            self.dmpAccel = np.array([Accel.x,Accel.y,Accel.z])
-            self.dmpQuaternion = self.DMP_get_quaternion(self.FIFO_buffer)
-            self.dmpGrav = self.DMP_get_gravity(self.dmpQuaternion)
-            Omega = self.DMP_get_euler_roll_pitch_yaw(self.dmpQuaternion, self.dmpGrav)
-            self.dmpEulerOmega = np.array([Omega.x, Omega.y, Omega.z])
-    
-    def propagateLinear(self):
-        # NOTES: Replace as part of Kalman filter
-        # Estimate current pose and remove gravity vector
-        dt = self.TimeK - self.TimeKminus1
-        self.dt = dt
+    def processInertial(self):
+        self.inertialDt = self.TimeK - self.TimeKminus1
+        
+        if self.dataType == 'dmp':
+            # Preserves data and timestamp for data regardless of polling frequency
+            if self.newData == True:
+                self.dmpAccelMinus1 = self.dmpAccel
+                self.dmpEulerThetaMinus1 = self.dmpEulerTheta
+                self.omegaMinus1 - self.omega
+                rawDMPAccel = self.DMP_get_acceleration_int16(self.FIFO_buffer)          
+                self.dmpQuaternion = self.DMP_get_quaternion(self.FIFO_buffer)
+                self.dmpRawAccel = np.array([[rawDMPAccel.x,rawDMPAccel.y,rawDMPAccel.z]])  
+                self.dmpGrav = self.DMP_get_gravity(self.dmpQuaternion)
+                linAccel = self.DMP_get_linear_accel(rawDMPAccel, self.dmpGrav)
+                self.dmpAccel = (np.array([[linAccel.x / 8192.0,linAccel.y / 8192.0,linAccel.z / 8192.0]])) * self.gravity         
+                theta = self.DMP_get_euler_roll_pitch_yaw(self.dmpQuaternion, self.dmpGrav)
+                self.dmpEulerTheta = np.array([theta.x, theta.y, theta.z])
+                self.newData = False;
+            # Update droid state
+            self.accel = self.dmpAccel
+            self.accelMinus1 = self.dmpAccelMinus1
+            self.theta = self.dmpEulerTheta
+            self.thetaMinus1 = self.dmpEulerThetaMinus1
+            # Calculate rough velocity through differentiation, improve with KF
+            self.omega = (self.theta - self.thetaMinus1) / self.inertialDt
+            
+        else:
+            if self.newData == True:
+                self.rawAccelMinus1 = self.rawAccel
+                self.rawOmegaMinus1 = self.rawOmega
+                self.thetaMinus1 = self.theta
+                self.newData = False;
+            
+            self.accel = self.rawAccel
+            self.accelMinus1 = self.rawAccelMinus1
+            self.omega = self.rawOmega
+            self.omegaMinus1 = self.rawOmegaMinus1
+            # Calculate rough pose through integration, improve with KF and magnetometer
+            self.theta = self.thetaMinus1 + ((self.omega + self.omegaMinus1)/2) * self.inertialDt
+        
+        # Integrate acceleration
         self.velocityMinus1 = self.velocity
+        self.velocity =  (self.accel + self.accelMinus1)/2 * self.inertialDt + self.velocityMinus1
         self.displacementMinus1 = self.displacement
-        self.velocity = (self.rawAccel + self.rawAccelMinus1)/2 * dt + self.velocityMinus1
-        self.displacement =  (self.velocity + self.velocityMinus1)/2 * dt + self.displacementMinus1
+        self.displacement =  (self.velocity + self.velocityMinus1)/2 * self.inertialDt + self.displacementMinus1
+
 
     def storeIMUdata(self):
         temp = self.rawAccel.tolist() + self.rawOmega.tolist() +  [self.TimeK]
@@ -176,13 +294,13 @@ class droidInertial(MPU6050):
             print('\n','Set up robot in',pose, 'with',blocks[0], 'blocks under wheel ',blocks[1],'\n')
             input('Press any key to continue, ctrl C to quit')
             # Get initial reading
-            self.readIMUraw()
-            self.poseAccel = self.rawAccel
+            self.processInertial()
+            self.poseAccel = self.accel
             t00 = time.time()
             while len(self.poseAccel) < sampleLength:
                 # Get raw IMU data
-                self.readIMUraw()
-                self.poseAccel = np.concatenate((self.poseAccel, self.rawAccel),axis=0)
+                self.processInertial()
+                self.poseAccel = np.concatenate((self.poseAccel, self.accel),axis=0)
                 print('.', end="", flush=True)
                 time.sleep(0.005)
                 
@@ -331,7 +449,7 @@ class droidInertial(MPU6050):
             dc.setSpeed(0,0,calOmega)
             while time.time() - t00 < calTime:
                 # Get raw IMU data
-                self.readIMUraw()
+                self.processInertial()
                 self.storeIMUdata()
                 idx +=1
 
@@ -351,31 +469,22 @@ class droidInertial(MPU6050):
             
             
     def testReadSpeed(self):
-        print("Test read time - RAW")
+        print("Test read time...")
         counter = 0
         t0 = time.time()
-        self.readIMUraw()
-        accelRaw = self.rawAccel
+        self.processInertial()
+        accel = np.array([[0,0,0]])
+        accel = np.concatenate((accel, self.accel),axis=0)
         while counter < 100:
-            self.readIMUraw()
-            accelRaw = np.concatenate((accelRaw, self.rawAccel),axis=0)
-            time.sleep(0.008)
+            self.processInertial()
+            accel = np.concatenate((accel, self.accel),axis=0)
             counter += 1
-        print('100 Raw values in: %f' % (self.TimeK - t0))
+            time.sleep(0.01)
+            
+        print('100 values in: %f' % (self.TimeK - t0))
         print('Average read time: %f' % ((self.TimeK - t0) / 100))
-       
-        print("Test read time - DMP")
-        counter = 0
-        self.reset_FIFO()
-        t0 = time.time()
-        self.readDMP()
-        accelDmp = self.dmpAccel
-        while counter < 100:
-           self.readDMP()
-           accelDmp = np.concatenate((accelDmp, self.dmpAccel),axis=0)
-           counter += 1
-        print('100 DMP values read in: %f' % (self.TimeK - t0))
-        print('Average read time: %f' % ((self.TimeK - t0) / 100))
+        self.plotDataSet(accel)
+
         
     def plotDataSet(self,data):
         
@@ -391,57 +500,56 @@ class droidInertial(MPU6050):
        
     def testLinProp(self):
         print("Test linear propagation")
-        
-#         # Ensure that calibration biases are used
-#         self.set_x_accel_offset(self.accelBias[0])
-#         self.set_y_accel_offset(self.accelBias[1])
-#         self.set_z_accel_offset(self.accelBias[2])   
-#         
+     
         # Warm up IMU
-        for idx in range(10):
-            self.readIMUraw()
-            print(idx)
+        print('Warming up...')
+        for idx in range(60): 
+            print('temp: {0}'.format(self.get_temp()))
             time.sleep(0.1)
-            
+        
+        self.processInertial()
+        time.sleep(1)
         # Initialise storage containers   
-        self.propagateLinear()
-        accelRaw = self.rawAccel - (self.accelBias/2**14 * self.gravity)
-        dispRaw = self.displacement
-        velRaw = self.velocity
+        accel = np.array([[0,0,0]])
+        disp = np.array([[0,0,0]])       
+        vel = np.array([[0,0,0]])
+        disp = np.concatenate((disp, self.displacement),axis=0)
+        vel = np.concatenate((vel, self.velocity),axis=0)
+        accel = np.concatenate((accel, self.accel),axis=0)
         
         t0 = time.time()
         counter = 0
-        while counter < 2000:
-            self.readIMUraw()
-            self.propagateLinear()
-            dispRaw = np.concatenate((dispRaw, self.displacement),axis=0)
-            velRaw = np.concatenate((velRaw, self.velocity),axis=0)
-            accelRaw = np.concatenate((accelRaw, self.rawAccel),axis=0)
+        while counter < 1000:
+            self.processInertial()
+            disp = np.concatenate((disp, self.displacement),axis=0)
+            vel = np.concatenate((vel, self.velocity),axis=0)
+            accel = np.concatenate((accel, self.accel),axis=0)
             counter +=1
+            time.sleep(0.02)
             
         tend = time.time()
         
         print('Time: %f' % (tend-t0))
-        print('xAc bias: %0.4f' % np.median(accelRaw[:,0]))
-        print('yAc bias: %0.4f' % np.median(accelRaw[:,1]))
-        print('zAc bias: %0.4f' % np.median(accelRaw[:,2]))
+        print('xAc bias: %0.4f' % np.median(accel[:,0]))
+        print('yAc bias: %0.4f' % np.median(accel[:,1]))
+        print('zAc bias: %0.4f' % np.median(accel[:,2]))
         
         fig, ax = plt.subplots(3,3,figsize=(12,9))
         
-        ax[0,0].plot(dispRaw[:,0], 'r',label='Displacement - x (m)')
+        ax[0,0].plot(disp[:,0], 'r',label='Displacement - x (m)')
         ax[0,0].set_ylabel('Displacement - m')
-        ax[0,1].plot(dispRaw[:,1], 'r',label='Displacement - y (m)')
-        ax[0,2].plot(dispRaw[:,2], 'r',label='Displacement - z (m)')
+        ax[0,1].plot(disp[:,1], 'r',label='Displacement - y (m)')
+        ax[0,2].plot(disp[:,2], 'r',label='Displacement - z (m)')
         
-        ax[1,0].plot(velRaw[:,0],'g',label='Velocity - x (m/s)')
+        ax[1,0].plot(vel[:,0],'g',label='Velocity - x (m/s)')
         ax[1,0].set_ylabel('Velocity - (m/s)')
-        ax[1,1].plot(velRaw[:,1],'g',label='Velocity - y (m/s)')
-        ax[1,2].plot(velRaw[:,2],'g',label='Velocity - z (m/s)')
+        ax[1,1].plot(vel[:,1],'g',label='Velocity - y (m/s)')
+        ax[1,2].plot(vel[:,2],'g',label='Velocity - z (m/s)')
         
-        ax[2,0].plot(accelRaw[:,0],'b',label='Accel - x (m/s^2)')
+        ax[2,0].plot(accel[:,0],'b',label='Accel - x (m/s^2)')
         ax[2,0].set_ylabel('Accel - (m/s^2)')
-        ax[2,1].plot(accelRaw[:,1],'b',label='Accel - y (m/s^2)')
-        ax[2,2].plot(accelRaw[:,2],'b',label='Accel - z (m/s^2)')
+        ax[2,1].plot(accel[:,1],'b',label='Accel - y (m/s^2)')
+        ax[2,2].plot(accel[:,2],'b',label='Accel - z (m/s^2)')
         
         plt.show()
         
@@ -522,9 +630,19 @@ class droidInertial(MPU6050):
         else:
             isRot = '??'
         return isRot, deter
+    #------Shutdown methods-----------
+
+    def close(self):
+        global shutdown_flag
+        shutdown_flag = True
+        # Shutdown thread
+        self.dmpIsRun = False
+        self.imuIsRun = False
+        time.sleep(1) 
+        logger.debug('DroidInertial releasing resources')
 
 if __name__ == "__main__":
-    di = droidInertial()
+    di = droidInertial(biasType = 'Internal',dataType = 'raw')
 #     di.testReadSpeed()
 #     di.calStatic(getStaticData = False)
 #     di.plotDataSet(di.accelData)
@@ -536,7 +654,7 @@ if __name__ == "__main__":
 # #         isRot, deter = di.checkRotation(pose)
 # #         print('Pose {0} is a {1}, determinant ={2:.2f}'.format(poseNo,isRot, deter))
 #         
-        
+    di.close()
     plt.show()
         
         

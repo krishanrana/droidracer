@@ -120,12 +120,11 @@ def guiInput():
             Distance = values.get('-DIST-')/1000
             Rotation = ((values.get('-ROT-') + 360) % 360) *deg2rad
             dc.AngularSpeed = values.get('-A_SPD-')/10 * dc.MaxAngularVelocity
-            print(dc.AngularSpeed)
             dc.LinearSpeed = values.get('-L_SPD-')/10 * dc.MaxLinearVelocity
             # transform heading / distance to X,Y (X to right, Y forwards, heading angle CCW from Y, Rotation 0-360)
             target = np.array([Distance * np.cos(Heading),Distance * np.sin(Heading), Rotation])
-            logger.debug('Target x: {0:0.3f}, y: {1:0.3f}, theta: {2:0.3f},'.format(target[0],target[1],target[2] *180/np.pi))
-            dc.navController(target, odoType = 'none' )
+            logger.debug('Target x: {0:0.3f}, y: {1:0.3f}, theta: {2:0.3f},'.format(target[0],target[1],target[2]))
+            dc.navController(target, odoType = 'encoder' )
             window['-STATUS-'].update('Movement complete')
             
     
