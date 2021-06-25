@@ -83,6 +83,7 @@ class droidControl:
         self.maxRunTime = 20 # maximum navigation runtime
         self.MaxLinearVelocity = 1.0 # Maximum linear speed m/s
         self.MaxAngularVelocity = np.pi # Maximum angular velocity rad/s
+        self.compFilterEncoderValue = 0.9
         self.LinearSpeed = 0.0 # m/s       
         self.AngularSpeed = 0.0 # radian/s
         
@@ -131,6 +132,8 @@ class droidControl:
         # Start 
         self.startReadThread()      
         self.di = droidInertial(biasType = 'Internal',dataType = 'raw')
+        self.di.processInertial()
+        print(self.di.accel)
 
         logger.debug('Initialisation successful')
         
@@ -251,10 +254,11 @@ class droidControl:
         return vEst
     
     def getInertialData(self):
-        
-        vLinIMU = self.di.velocity
-        vAngIMU = self.di.omega
+        self.di.processInertial()
+        vLinIMU = self.di.velocity[0]
+        vAngIMU = self.di.omega[0]
         vEst = np.array([vLinIMU[0],vLinIMU[1], vAngIMU[2]])
+        print(vEst)
         self.timeIMU = self.di.TimeK
         
         return vEst
@@ -281,12 +285,12 @@ class droidControl:
         Speed_A = np.min([self.AngularSpeed, 5*normAng])
         
         self.vCommand = np.round([unitVecX * Speed_L, unitVecY * Speed_L, unitVecA * Speed_A],decimals=3)
-        logger.debug('Speed_L: {0:0.4f}'.format(Speed_L))
-        logger.debug('Speed_A: {0:0.4f}'.format(Speed_A))
-        logger.debug('Velocity command x: {0:0.3f}, y: {1:0.3f}, Omega: {2:0.3f},'.format(self.vCommand[0],self.vCommand[1],self.vCommand[2]))
+#         logger.debug('Speed_L: {0:0.4f}'.format(Speed_L))
+#         logger.debug('Speed_A: {0:0.4f}'.format(Speed_A))
+#         logger.debug('Velocity command x: {0:0.3f}, y: {1:0.3f}, Omega: {2:0.3f},'.format(self.vCommand[0],self.vCommand[1],self.vCommand[2]))
     
-    def compFilter( data1, data2):
-        A = 0.7
+    def compFilter(self, data1, data2):
+        A = self.compFilterEncoderValue
         vEst = (data1 * A) + (data2 * (1-A))
         return vEst
     
@@ -306,8 +310,11 @@ class droidControl:
             estM3 = self.inData[8]
             vEstEnc = self.forwardKinematics(estM1, estM2, estM3)           
             vEstImu = self.getInertialData()
+#             logger.debug('vEst Imu x: {0:0.3f}, y: {1:0.3f}, theta: {2:0.3f},'.format(vEstImu[0],vEstImu[1],vEstImu[2]))
+#             logger.debug('vEst Enc x: {0:0.3f}, y: {1:0.3f}, theta: {2:0.3f},'.format(vEstEnc[0],vEstEnc[1],vEstEnc[2]))
             self.vEst = self.compFilter(vEstEnc, vEstImu)
-            
+#             logger.debug('vEst Comp x: {0:0.3f}, y: {1:0.3f}, theta: {2:0.3f},'.format(self.vEst[0],self.vEst[1],self.vEst[2]))
+  
         else:
             estM1 = self.velM1
             estM2 = self.velM2
@@ -333,7 +340,7 @@ class droidControl:
         # Turn in closest direction
         if error[2] > np.pi/2:
             error[2] = error[2] - (2*np.pi)
-        logger.debug('Target x: {0:0.3f}, y: {1:0.3f}, theta: {2:0.3f},'.format(target[0],target[1],target[2]))
+#         logger.debug('Target x: {0:0.3f}, y: {1:0.3f}, theta: {2:0.3f},'.format(target[0],target[1],target[2]))
         logger.debug('xEst x: {0:0.3f}, y: {1:0.3f}, theta: {2:0.3f},'.format(self.xEst[0],self.xEst[1],self.xEst[2]))
         logger.debug('Error x: {0:0.3f}, y: {1:0.3f}, theta: {2:0.3f},'.format(error[0],error[1],error[2]))           
 
@@ -346,7 +353,7 @@ class droidControl:
         self.vEst = np.array([0,0,0])
         self.vEstT_1 = np.array([0,0,0])
 
-        errorTol = np.array([0.005, 0.005, 0.002]) # +/- 50mm, 5 deg
+        errorTol = np.array([0.05, 0.05, 0.01]) # +/- 50mm, 5 deg
         
         error = self.calcTargetError(target)
         # Estimate time to run at set speed
@@ -355,7 +362,7 @@ class droidControl:
             logger.warning('No speed set, infinite runtime calculated - aborting')
             return
         self.navTimeT_1 = time.time()
-        time.sleep(0.03)
+#         time.sleep(0.03)
         self.navTime = time.time()
         self.runCommand = 1.0   
         # Loop until error <= tolerance
@@ -373,8 +380,9 @@ class droidControl:
             self.vCommandT_1 = self.vCommand
             
             # Diagnostics and data display
-            logger.debug('M1: {0:0.3f}, M2: {1:0.3f}, M3: {2:0.3f},'.format(self.velM1,self.velM2,self.velM3))
+#             logger.debug('M1: {0:0.3f}, M2: {1:0.3f}, M3: {2:0.3f},'.format(self.velM1,self.velM2,self.velM3))
             time.sleep(0.02)
+            
                        
         self.runCommand = 0.0
         self.writeSerial()
