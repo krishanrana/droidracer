@@ -24,7 +24,7 @@ except:
 
 # Set which type of animation will be plotted. One of:
 # line, pcolor, scatter, contour, quiver, labels
-animation_type = 'line'
+animation_type = 'quiver'
 
 # ----------------------------------------------------------------------------
 # Create data to plot. F is 2D array. G is 3D array
