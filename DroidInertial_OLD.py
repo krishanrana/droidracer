@@ -76,7 +76,6 @@ class droidInertial(MPU6050):
         self.accelBias = np.array([0,0,0])
         self.gyroBias = np.array([0,0,0])
         self.accelTrim = np.array([0,0,0])
-        self.gyroTrim = np.array([0,0,0])
         
         self.dataType = dataType
         self.FIFO_buffer = [0]*42
@@ -143,8 +142,6 @@ class droidInertial(MPU6050):
         else:
             self.startIMUThread()
             logger.debug('Data from IMU')
-        
-        self.calTrimIMU(2)
               
     def startIMUThread(self):
         if self.imuThread == None:
@@ -169,8 +166,8 @@ class droidInertial(MPU6050):
                 rawAccel = rawAccel - (self.accelBias * 8.95)
                 rawOmega = rawOmega - (self.gyroBias * 8.95)
             # Scale and Convert to ms-2
-            self.rawAccel = rawAccel / 2**14  * self.gravity *[-1,1,1] - self.accelTrim
-            self.rawOmega = rawOmega / (131.0 * 57.2958)  *[-1,1,-1] - self.gyroTrim# Convert to rad/s
+            self.rawAccel = rawAccel / 2**14  * self.gravity *[-1,1,1] - [0.14,0.16,0]
+            self.rawOmega = rawOmega / (131.0 * 57.2958)  *[-1,1,-1]# Convert to rad/s
             self.imuReceiving = True
             self.newData = True
             time.sleep(0.004)
@@ -468,29 +465,6 @@ class droidInertial(MPU6050):
 
             self.imuOffset = np.array([0,0,0])
             
-    def calTrimIMU(self,runtime):
-        logger.info('Trimming IMU:{0:0.2f} seconds'.format(runtime))
-        print('IMU temp: {0}'.format(self.get_temp()))        
-        self.processInertial()
-        # Initialise storage containers   
-        accel = np.array([[0,0,0]])      
-        omega = np.array([[0,0,0]])
-        accel = np.concatenate((accel, self.accel),axis=0)        
-        omega = np.concatenate((omega, self.omega),axis=0)
-        
-        t0 = time.time()
-        while (time.time() - t0) < runtime:
-            accel = np.concatenate((accel, self.accel),axis=0)
-            omega = np.concatenate((omega, self.omega),axis=0)
-            time.sleep(0.010)          
-        tend = time.time()
-        self.accelTrim = [np.median(accel[:,0]),np.median(accel[:,1]),np.median(accel[:,2])]
-        self.gyroTrim = [np.median(omega[:,0]),np.median(omega[:,1]),np.median(omega[:,2])]
-        logger.info('Accelerometer trimmed in {0:0.2f} seconds, error: x {1:0.4f}, y {2:0.4f}, z {3:0.4f}'.format(runtime,self.accelTrim[0],self.accelTrim[1],self.accelTrim[2]))
-        logger.info('Gyroscope trimmed in {0:0.2f} seconds, error: x {1:0.4f}, y {2:0.4f}, z {3:0.4f}'.format(runtime,self.gyroTrim[0],self.gyroTrim[1],self.gyroTrim[2]))
-        time.sleep(0.010)
-        
-
             
 #-------Methods to test functionality--------------------
             
@@ -533,7 +507,7 @@ class droidInertial(MPU6050):
         for idx in range(10): 
             print('temp: {0}'.format(self.get_temp()))
             time.sleep(0.1)
-        di.calTrimIMU(5)
+        
         self.processInertial()
         time.sleep(1)
         # Initialise storage containers   
@@ -550,17 +524,20 @@ class droidInertial(MPU6050):
         
         omega = np.concatenate((omega, self.omega),axis=0)
         theta = np.concatenate((theta, self.theta),axis=0)
-        print('GO!')
+        
         t0 = time.time()
         counter = 0
-        while (time.time() - t0) < 5:
+        while counter < 500:
             self.processInertial()
             disp = np.concatenate((disp, self.displacement),axis=0)
             vel = np.concatenate((vel, self.velocity),axis=0)
             accel = np.concatenate((accel, self.accel),axis=0)
             omega = np.concatenate((omega, self.omega),axis=0)
             theta = np.concatenate((theta, self.theta),axis=0)
-            time.sleep(0.010)
+            counter +=1
+            if counter %100 == 0:
+                print('T = %0.3f' % (time.time() - t0))
+            time.sleep(0.025)
             
         tend = time.time()
         
@@ -696,7 +673,6 @@ if __name__ == "__main__":
 #     di.calStatic(getStaticData = False)
 #     di.plotDataSet(di.accelData)
     di.testLinProp()
-#     di.calTrimIMU(2)
 #     di.loadCalData(loadStaticData = True)
 #     rotations = di.estPose(di.accelData, di.accelBias)
 #     for poseNo,pose in enumerate(rotations,start=1):

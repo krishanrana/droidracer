@@ -1,6 +1,6 @@
 """ This Script is front end / GUI to allow control of omni droid using:
-- Displacement / Pose control: input via GUI
-- Closed loop control as above
+- Displacement / Pose control: input via GUI -DONE
+- Closed loop control as above -DONE
 - Manual drive using game controller """
 
 import logging
@@ -13,8 +13,6 @@ import numpy as np
 import PySimpleGUI as psg
 
 from DroidControl import droidControl 
-
-
 
 # Setup logging
 def initLogger():
@@ -96,6 +94,9 @@ def guiInput():
             key='-L_SPD-',size=(20,15),orientation='horizontal',font=('Helvetica', 12))],
             [psg.Text('Angular Speed:'), psg.Slider(range=(1,10),default_value=0,
             key='-A_SPD-',size=(20,15),orientation='horizontal',font=('Helvetica', 12))],
+            [psg.Checkbox('Use Odometry Filter', default=False, key='-FILTER-'),
+            psg.Slider(range=(0,100),default_value=90,key='-DATA_A-', size=(20,15),
+            orientation='horizontal',font=('Helvetica', 12))],
             [psg.Checkbox('Relative Motion', default=True, key='-MOTION-'),psg.Button('Run'), psg.Button('Exit')]]
     
     
@@ -114,6 +115,11 @@ def guiInput():
             if values['-MOTION-'] == True:
                 dc.xEst = np.array([0,0,0])
                 dc.vEst = np.array([0,0,0])
+            if values['-FILTER-'] == True:
+                dc.compFilterEncoderValue = values.get('-DATA_A-')/100
+                odoType = 'imuFusion'
+            else:
+                odoType = 'encoder' 
             # move robot to command
             deg2rad = np.pi/180
             Heading = (values.get('-HEAD-') + 90) *deg2rad
@@ -124,7 +130,7 @@ def guiInput():
             # transform heading / distance to X,Y (X to right, Y forwards, heading angle CCW from Y, Rotation 0-360)
             target = np.array([Distance * np.cos(Heading),Distance * np.sin(Heading), Rotation])
             logger.debug('Target x: {0:0.3f}, y: {1:0.3f}, theta: {2:0.3f},'.format(target[0],target[1],target[2]))
-            dc.navController(target, odoType = 'encoder' )
+            dc.navController(target, odoType) # 'imuFusion','none'
             window['-STATUS-'].update('Movement complete')
             
     

@@ -5480,3 +5480,899 @@
 [2021-05-06 20:43:44,203] DEBUG    Imulog       readIMUThread starting..
 [2021-05-06 20:43:44,306] DEBUG    Imulog       Data from IMU
 [2021-05-06 20:43:56,018] DEBUG    Imulog       Releasing resources
+[2021-05-21 10:04:06,290] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-21 10:04:10,198] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-21 10:04:10,199] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-21 10:04:10,201] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-05-21 10:04:10,207] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-21 10:04:10,709] DEBUG    Imulog       readIMUThread starting..
+[2021-05-21 10:04:10,811] DEBUG    Imulog       Data from IMU
+[2021-05-21 10:05:01,022] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-21 10:19:20,801] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-21 10:19:24,736] DEBUG    Imulog       Interrupt status: 0x1 
+[2021-05-21 10:19:24,737] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-21 10:19:24,739] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-21 10:19:24,744] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-21 10:19:25,247] DEBUG    Imulog       readIMUThread starting..
+[2021-05-21 10:19:25,348] DEBUG    Imulog       Data from IMU
+[2021-05-21 10:22:39,585] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-21 10:22:43,461] DEBUG    Imulog       Interrupt status: 0x1 
+[2021-05-21 10:22:43,462] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-21 10:22:43,465] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-05-21 10:22:43,471] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-21 10:22:43,974] DEBUG    Imulog       readIMUThread starting..
+[2021-05-21 10:22:44,078] DEBUG    Imulog       Data from IMU
+[2021-05-21 10:24:25,256] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-21 10:24:29,153] DEBUG    Imulog       Interrupt status: 0x1 
+[2021-05-21 10:24:29,154] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-21 10:24:29,156] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-21 10:24:29,161] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-21 10:24:29,664] DEBUG    Imulog       readIMUThread starting..
+[2021-05-21 10:24:29,765] DEBUG    Imulog       Data from IMU
+[2021-05-21 10:27:58,243] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-21 10:28:02,162] DEBUG    Imulog       Interrupt status: 0x1 
+[2021-05-21 10:28:02,163] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-21 10:28:02,165] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-05-21 10:28:02,171] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-21 10:28:02,673] DEBUG    Imulog       readIMUThread starting..
+[2021-05-21 10:28:02,775] DEBUG    Imulog       Data from IMU
+[2021-05-21 10:36:43,179] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-21 10:36:47,084] DEBUG    Imulog       Interrupt status: 0x1 
+[2021-05-21 10:36:47,085] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-21 10:36:47,087] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-21 10:36:47,094] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-21 10:36:47,597] DEBUG    Imulog       readIMUThread starting..
+[2021-05-21 10:36:47,700] DEBUG    Imulog       Data from IMU
+[2021-05-21 10:57:23,071] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-21 10:57:27,011] DEBUG    Imulog       Interrupt status: 0x1 
+[2021-05-21 10:57:27,013] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-21 10:57:27,016] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-21 10:57:27,021] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-21 10:57:27,523] DEBUG    Imulog       readIMUThread starting..
+[2021-05-21 10:57:27,625] DEBUG    Imulog       Data from IMU
+[2021-05-21 10:59:14,405] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-21 10:59:19,231] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-21 10:59:19,232] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-21 10:59:19,246] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-21 10:59:19,255] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-21 10:59:19,760] DEBUG    Imulog       readIMUThread starting..
+[2021-05-21 10:59:19,763] DEBUG    Imulog       Data from IMU
+[2021-05-21 11:03:31,996] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-21 11:03:35,926] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-21 11:03:35,927] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-21 11:03:35,928] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-21 11:03:35,935] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-21 11:03:36,438] DEBUG    Imulog       readIMUThread starting..
+[2021-05-21 11:03:36,540] DEBUG    Imulog       Data from IMU
+[2021-05-21 11:04:49,495] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-21 11:10:10,187] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-21 11:10:14,116] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-21 11:10:14,117] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-21 11:10:14,119] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-21 11:10:14,124] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-21 11:10:14,626] DEBUG    Imulog       readIMUThread starting..
+[2021-05-21 11:10:14,727] DEBUG    Imulog       Data from IMU
+[2021-05-21 11:10:26,544] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-21 11:11:06,599] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-21 11:11:10,700] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-21 11:11:10,701] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-21 11:11:10,708] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-21 11:11:10,713] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-21 11:11:11,215] DEBUG    Imulog       readIMUThread starting..
+[2021-05-21 11:11:11,321] DEBUG    Imulog       Data from IMU
+[2021-05-21 11:12:03,691] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-21 11:12:07,568] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-21 11:12:07,569] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-21 11:12:07,570] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-05-21 11:12:07,576] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-21 11:12:08,078] DEBUG    Imulog       readIMUThread starting..
+[2021-05-21 11:12:08,184] DEBUG    Imulog       Data from IMU
+[2021-05-21 11:18:02,802] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-21 11:18:06,646] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-21 11:18:06,647] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-21 11:18:06,649] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-21 11:18:06,655] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-21 11:18:07,157] DEBUG    Imulog       readIMUThread starting..
+[2021-05-21 11:18:07,258] DEBUG    Imulog       Data from IMU
+[2021-05-21 11:19:40,690] DEBUG    Imulog       DroidInertial releasing resources
+                                                                                 [2021-05-21 21:38:40,288] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-21 21:38:44,130] DEBUG    Imulog       Interrupt status: 0x1 
+[2021-05-21 21:38:44,132] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-21 21:38:44,134] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-21 21:38:44,139] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-21 21:38:44,642] DEBUG    Imulog       readIMUThread starting..
+[2021-05-21 21:38:44,745] DEBUG    Imulog       Data from IMU
+[2021-05-21 21:45:17,470] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-21 21:45:21,397] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-21 21:45:21,398] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-21 21:45:21,400] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-05-21 21:45:21,405] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-21 21:45:21,908] DEBUG    Imulog       readIMUThread starting..
+[2021-05-21 21:45:21,911] DEBUG    Imulog       Data from IMU
+[2021-05-21 21:48:25,593] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-21 21:48:29,708] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-21 21:48:29,710] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-21 21:48:29,714] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-21 21:48:29,722] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-21 21:48:30,226] DEBUG    Imulog       readIMUThread starting..
+[2021-05-21 21:48:30,328] DEBUG    Imulog       Data from IMU
+[2021-05-24 15:43:13,326] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-24 15:43:17,239] DEBUG    Imulog       Interrupt status: 0x1 
+[2021-05-24 15:43:17,241] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-24 15:43:17,243] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-24 15:43:17,250] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-24 15:43:17,753] DEBUG    Imulog       readIMUThread starting..
+[2021-05-24 15:43:17,757] DEBUG    Imulog       Data from IMU
+[2021-05-24 15:44:58,409] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-24 15:45:02,324] DEBUG    Imulog       Interrupt status: 0x1 
+[2021-05-24 15:45:02,326] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-24 15:45:02,327] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-24 15:45:02,333] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-24 15:45:02,835] DEBUG    Imulog       readIMUThread starting..
+[2021-05-24 15:45:02,839] DEBUG    Imulog       Data from IMU
+[2021-05-24 15:46:30,012] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-24 15:46:33,918] DEBUG    Imulog       Interrupt status: 0x1 
+[2021-05-24 15:46:33,920] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-24 15:46:33,922] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-24 15:46:33,928] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-24 15:46:34,431] DEBUG    Imulog       readIMUThread starting..
+[2021-05-24 15:46:34,534] DEBUG    Imulog       Data from IMU
+[2021-05-24 15:47:12,035] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-24 15:47:15,881] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-24 15:47:15,883] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-24 15:47:15,885] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-05-24 15:47:15,891] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-24 15:47:16,395] DEBUG    Imulog       readIMUThread starting..
+[2021-05-24 15:47:16,498] DEBUG    Imulog       Data from IMU
+[2021-05-24 15:51:51,088] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-24 15:51:55,004] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-24 15:51:55,005] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-24 15:51:55,007] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-05-24 15:51:55,013] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-24 15:51:55,515] DEBUG    Imulog       readIMUThread starting..
+[2021-05-24 15:51:55,617] DEBUG    Imulog       Data from IMU
+[2021-05-24 16:00:46,730] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-24 16:00:50,651] DEBUG    Imulog       Interrupt status: 0x1 
+[2021-05-24 16:00:50,652] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-24 16:00:50,654] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-24 16:00:50,660] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-24 16:00:51,162] DEBUG    Imulog       readIMUThread starting..
+[2021-05-24 16:00:51,263] DEBUG    Imulog       Data from IMU
+[2021-05-24 16:01:21,361] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-24 16:04:02,211] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-24 16:04:06,118] DEBUG    Imulog       Interrupt status: 0x1 
+[2021-05-24 16:04:06,119] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-24 16:04:06,121] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-24 16:04:06,126] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-24 16:04:06,629] DEBUG    Imulog       readIMUThread starting..
+[2021-05-24 16:04:06,730] DEBUG    Imulog       Data from IMU
+[2021-05-24 16:04:44,245] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-24 16:07:30,714] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-24 16:07:34,632] DEBUG    Imulog       Interrupt status: 0x1 
+[2021-05-24 16:07:34,633] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-24 16:07:34,635] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-24 16:07:34,641] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-24 16:07:35,144] DEBUG    Imulog       readIMUThread starting..
+[2021-05-24 16:07:35,245] DEBUG    Imulog       Data from IMU
+[2021-05-24 16:08:28,180] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-24 16:09:52,480] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-24 16:09:56,362] DEBUG    Imulog       Interrupt status: 0x1 
+[2021-05-24 16:09:56,363] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-24 16:09:56,366] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-24 16:09:56,372] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-24 16:09:56,875] DEBUG    Imulog       readIMUThread starting..
+[2021-05-24 16:09:56,977] DEBUG    Imulog       Data from IMU
+[2021-05-24 16:10:32,837] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-24 16:25:46,753] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-24 16:25:50,582] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-24 16:25:50,584] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-24 16:25:50,586] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-24 16:25:50,591] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-24 16:25:51,094] DEBUG    Imulog       readIMUThread starting..
+[2021-05-24 16:25:51,195] DEBUG    Imulog       Data from IMU
+[2021-05-24 16:27:53,182] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-24 16:27:56,984] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-24 16:27:56,985] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-24 16:27:56,986] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-24 16:27:56,992] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-24 16:27:57,511] DEBUG    Imulog       readIMUThread starting..
+[2021-05-24 16:27:57,612] DEBUG    Imulog       Data from IMU
+[2021-05-24 16:30:44,779] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-24 16:35:18,715] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-24 16:35:22,639] DEBUG    Imulog       Interrupt status: 0x1 
+[2021-05-24 16:35:22,641] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-24 16:35:22,643] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-05-24 16:35:22,649] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-24 16:35:23,152] DEBUG    Imulog       readIMUThread starting..
+[2021-05-24 16:35:23,254] DEBUG    Imulog       Data from IMU
+[2021-05-24 16:36:15,657] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-24 16:36:58,526] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-24 16:37:02,412] DEBUG    Imulog       Interrupt status: 0x1 
+[2021-05-24 16:37:02,414] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-24 16:37:02,416] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-24 16:37:02,421] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-24 16:37:02,924] DEBUG    Imulog       readIMUThread starting..
+[2021-05-24 16:37:03,027] DEBUG    Imulog       Data from IMU
+[2021-05-24 16:38:29,776] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-24 16:38:40,344] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-24 16:38:44,215] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-24 16:38:44,217] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-24 16:38:44,220] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-05-24 16:38:44,226] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-24 16:38:44,729] DEBUG    Imulog       readIMUThread starting..
+[2021-05-24 16:38:44,830] DEBUG    Imulog       Data from IMU
+[2021-05-24 16:43:51,950] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-24 16:44:03,330] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-24 16:44:07,173] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-24 16:44:07,174] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-24 16:44:07,176] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-24 16:44:07,181] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-24 16:44:07,684] DEBUG    Imulog       readIMUThread starting..
+[2021-05-24 16:44:07,785] DEBUG    Imulog       Data from IMU
+[2021-05-24 16:44:50,543] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-24 16:45:01,246] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-24 16:45:05,130] DEBUG    Imulog       Interrupt status: 0x1 
+[2021-05-24 16:45:05,131] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-24 16:45:05,133] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-05-24 16:45:05,138] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-24 16:45:05,641] DEBUG    Imulog       readIMUThread starting..
+[2021-05-24 16:45:05,743] DEBUG    Imulog       Data from IMU
+[2021-05-24 16:54:34,263] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-24 16:54:38,138] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-24 16:54:38,139] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-24 16:54:38,141] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-05-24 16:54:38,146] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-24 16:54:38,649] DEBUG    Imulog       readIMUThread starting..
+[2021-05-24 16:54:38,749] DEBUG    Imulog       Data from IMU
+[2021-05-24 16:55:06,879] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-24 16:55:16,660] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-24 16:55:20,545] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-24 16:55:20,547] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-24 16:55:20,548] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-05-24 16:55:20,554] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-24 16:55:21,057] DEBUG    Imulog       readIMUThread starting..
+[2021-05-24 16:55:21,160] DEBUG    Imulog       Data from IMU
+[2021-05-24 16:55:53,891] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-24 16:55:57,795] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-24 16:55:57,796] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-24 16:55:57,798] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-05-24 16:55:57,803] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-24 16:55:58,306] DEBUG    Imulog       readIMUThread starting..
+[2021-05-24 16:55:58,407] DEBUG    Imulog       Data from IMU
+[2021-05-24 16:57:40,404] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-24 16:57:57,128] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-24 16:58:01,049] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-24 16:58:01,050] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-24 16:58:01,052] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-24 16:58:01,057] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-24 16:58:01,560] DEBUG    Imulog       readIMUThread starting..
+[2021-05-24 16:58:01,663] DEBUG    Imulog       Data from IMU
+[2021-05-27 09:31:00,509] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 09:31:04,373] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 09:31:04,374] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 09:31:04,376] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 09:31:04,381] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 09:31:04,884] DEBUG    Imulog       readIMUThread starting..
+[2021-05-27 09:31:04,985] DEBUG    Imulog       Data from IMU
+[2021-05-27 09:38:33,076] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 09:39:00,597] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 09:39:04,411] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 09:39:04,412] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 09:39:04,414] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 09:39:04,420] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 09:39:04,925] DEBUG    Imulog       readDMPThread starting..
+[2021-05-27 09:39:04,939] WARNING  Imulog       FIFO overflow
+[2021-05-27 09:39:05,025] DEBUG    Imulog       Data from DMP
+[2021-05-27 09:43:58,501] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 09:44:02,331] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 09:44:02,332] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 09:44:02,334] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 09:44:02,339] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 09:44:02,843] DEBUG    Imulog       readDMPThread starting..
+[2021-05-27 09:44:02,858] WARNING  Imulog       FIFO overflow
+[2021-05-27 09:44:02,944] DEBUG    Imulog       Data from DMP
+[2021-05-27 09:46:57,650] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 09:47:01,476] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 09:47:01,477] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 09:47:01,479] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 09:47:01,484] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 09:47:01,987] DEBUG    Imulog       readDMPThread starting..
+[2021-05-27 09:47:02,002] WARNING  Imulog       FIFO overflow
+[2021-05-27 09:47:02,088] DEBUG    Imulog       Data from DMP
+[2021-05-27 09:48:46,893] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 09:48:50,940] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 09:48:50,943] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 09:48:50,947] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 09:48:50,954] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 09:48:51,459] DEBUG    Imulog       readDMPThread starting..
+[2021-05-27 09:48:51,479] WARNING  Imulog       FIFO overflow
+[2021-05-27 09:48:51,565] DEBUG    Imulog       Data from DMP
+[2021-05-27 09:58:41,401] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 09:58:45,421] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 09:58:45,423] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 09:58:45,427] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 09:58:45,434] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 09:58:45,940] DEBUG    Imulog       readDMPThread starting..
+[2021-05-27 09:58:45,959] WARNING  Imulog       FIFO overflow
+[2021-05-27 09:58:46,041] DEBUG    Imulog       Data from DMP
+[2021-05-27 10:01:02,971] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 10:03:25,081] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 10:03:28,923] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 10:03:28,924] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 10:03:28,926] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 10:03:28,931] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 10:03:29,435] DEBUG    Imulog       readDMPThread starting..
+[2021-05-27 10:03:29,449] WARNING  Imulog       FIFO overflow
+[2021-05-27 10:03:29,536] DEBUG    Imulog       Data from DMP
+[2021-05-27 10:04:58,840] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 10:11:51,417] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 10:11:55,253] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 10:11:55,254] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 10:11:55,256] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 10:11:55,257] DEBUG    Imulog       IMU biases compensated EXTERNALLY
+[2021-05-27 10:11:55,760] DEBUG    Imulog       readDMPThread starting..
+[2021-05-27 10:11:55,779] WARNING  Imulog       FIFO overflow
+[2021-05-27 10:11:55,866] DEBUG    Imulog       Data from DMP
+[2021-05-27 10:18:36,384] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 10:22:00,550] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 10:22:04,382] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 10:22:04,384] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 10:22:04,385] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 10:22:04,386] DEBUG    Imulog       IMU biases compensated EXTERNALLY
+[2021-05-27 10:22:04,890] DEBUG    Imulog       readDMPThread starting..
+[2021-05-27 10:22:04,910] WARNING  Imulog       FIFO overflow
+[2021-05-27 10:22:04,991] DEBUG    Imulog       Data from DMP
+[2021-05-27 10:23:40,462] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 10:28:31,374] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 10:28:35,149] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 10:28:35,150] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 10:28:35,151] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 10:28:35,152] DEBUG    Imulog       IMU biases compensated EXTERNALLY
+[2021-05-27 10:28:35,655] DEBUG    Imulog       readDMPThread starting..
+[2021-05-27 10:28:35,658] WARNING  Imulog       FIFO overflow
+[2021-05-27 10:28:35,756] DEBUG    Imulog       Data from DMP
+[2021-05-27 10:32:58,330] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 13:47:11,297] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 13:47:15,151] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 13:47:15,153] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 13:47:15,156] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 13:47:15,157] DEBUG    Imulog       IMU biases compensated EXTERNALLY
+[2021-05-27 13:47:15,661] DEBUG    Imulog       readDMPThread starting..
+[2021-05-27 13:47:15,678] WARNING  Imulog       FIFO overflow
+[2021-05-27 13:47:15,762] DEBUG    Imulog       Data from DMP
+[2021-05-27 14:01:27,148] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 14:04:24,351] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 14:04:28,192] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 14:04:28,193] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 14:04:28,195] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 14:04:28,196] DEBUG    Imulog       IMU biases compensated EXTERNALLY
+[2021-05-27 14:04:28,699] DEBUG    Imulog       readDMPThread starting..
+[2021-05-27 14:04:28,719] WARNING  Imulog       FIFO overflow
+[2021-05-27 14:04:28,801] DEBUG    Imulog       Data from DMP
+[2021-05-27 14:19:06,602] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 14:20:57,503] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 14:21:01,322] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 14:21:01,323] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 14:21:01,325] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 14:21:01,326] DEBUG    Imulog       IMU biases compensated EXTERNALLY
+[2021-05-27 14:21:01,829] DEBUG    Imulog       readDMPThread starting..
+[2021-05-27 14:21:01,848] WARNING  Imulog       FIFO overflow
+[2021-05-27 14:21:01,930] DEBUG    Imulog       Data from DMP
+[2021-05-27 14:22:26,431] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 14:22:30,262] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 14:22:30,263] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 14:22:30,265] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 14:22:30,266] DEBUG    Imulog       IMU biases compensated EXTERNALLY
+[2021-05-27 14:22:30,769] DEBUG    Imulog       readDMPThread starting..
+[2021-05-27 14:22:30,789] WARNING  Imulog       FIFO overflow
+[2021-05-27 14:22:30,870] DEBUG    Imulog       Data from DMP
+[2021-05-27 14:25:33,873] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 14:27:02,461] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 14:27:06,310] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 14:27:06,312] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 14:27:06,313] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 14:27:06,314] DEBUG    Imulog       IMU biases compensated EXTERNALLY
+[2021-05-27 14:27:06,818] DEBUG    Imulog       readDMPThread starting..
+[2021-05-27 14:27:06,837] WARNING  Imulog       FIFO overflow
+[2021-05-27 14:27:06,918] DEBUG    Imulog       Data from DMP
+[2021-05-27 14:29:56,865] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 14:30:40,455] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 14:30:44,285] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 14:30:44,287] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 14:30:44,290] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 14:30:44,296] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 14:30:44,799] DEBUG    Imulog       readIMUThread starting..
+[2021-05-27 14:30:44,803] DEBUG    Imulog       Data from IMU
+[2021-05-27 14:32:41,903] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 14:33:22,051] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 14:33:25,815] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 14:33:25,816] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 14:33:25,818] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 14:33:25,824] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 14:33:26,326] DEBUG    Imulog       readIMUThread starting..
+[2021-05-27 14:33:26,427] DEBUG    Imulog       Data from IMU
+[2021-05-27 14:34:59,093] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 14:35:15,037] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 14:35:18,811] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 14:35:18,813] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 14:35:18,815] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 14:35:18,821] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 14:35:19,336] DEBUG    Imulog       readIMUThread starting..
+[2021-05-27 14:35:19,437] DEBUG    Imulog       Data from IMU
+[2021-05-27 14:38:24,024] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 14:38:30,732] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 14:38:34,542] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 14:38:34,543] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 14:38:34,545] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 14:38:34,550] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 14:38:35,053] DEBUG    Imulog       readIMUThread starting..
+[2021-05-27 14:38:35,155] DEBUG    Imulog       Data from IMU
+[2021-05-27 14:42:40,920] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 14:47:09,213] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 14:47:13,060] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 14:47:13,061] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 14:47:13,063] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 14:47:13,068] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 14:47:13,571] DEBUG    Imulog       readIMUThread starting..
+[2021-05-27 14:47:13,673] DEBUG    Imulog       Data from IMU
+[2021-05-27 15:31:07,042] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 16:12:27,928] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 16:12:31,781] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 16:12:31,782] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 16:12:31,784] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 16:12:31,790] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 16:12:32,292] DEBUG    Imulog       readIMUThread starting..
+[2021-05-27 16:12:32,395] DEBUG    Imulog       Data from IMU
+[2021-05-27 16:18:10,083] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 16:19:25,678] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 16:19:29,521] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 16:19:29,522] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 16:19:29,524] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 16:19:29,529] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 16:19:30,032] DEBUG    Imulog       readIMUThread starting..
+[2021-05-27 16:19:30,134] DEBUG    Imulog       Data from IMU
+[2021-05-27 16:22:52,541] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 16:23:00,319] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 16:23:04,471] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 16:23:04,473] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 16:23:04,476] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 16:23:04,491] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 16:23:05,002] DEBUG    Imulog       readIMUThread starting..
+[2021-05-27 16:23:05,105] DEBUG    Imulog       Data from IMU
+[2021-05-27 16:24:50,677] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 16:25:46,771] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 16:25:50,587] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 16:25:50,588] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 16:25:50,590] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 16:25:50,596] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 16:25:51,099] DEBUG    Imulog       readIMUThread starting..
+[2021-05-27 16:25:51,201] DEBUG    Imulog       Data from IMU
+[2021-05-27 16:28:04,058] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 16:28:07,892] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 16:28:07,894] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 16:28:07,896] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 16:28:07,897] DEBUG    Imulog       IMU biases compensated EXTERNALLY
+[2021-05-27 16:28:08,399] DEBUG    Imulog       readIMUThread starting..
+[2021-05-27 16:28:08,500] DEBUG    Imulog       Data from IMU
+[2021-05-27 16:39:00,938] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 16:39:04,788] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 16:39:04,790] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 16:39:04,792] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 16:39:04,793] DEBUG    Imulog       IMU biases compensated EXTERNALLY
+[2021-05-27 16:39:05,296] DEBUG    Imulog       readIMUThread starting..
+[2021-05-27 16:39:05,396] DEBUG    Imulog       Data from IMU
+[2021-05-27 16:40:03,165] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 16:40:36,867] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 16:40:40,800] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 16:40:40,801] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 16:40:40,803] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 16:40:40,808] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 16:40:41,311] DEBUG    Imulog       readIMUThread starting..
+[2021-05-27 16:40:41,413] DEBUG    Imulog       Data from IMU
+[2021-05-27 16:41:34,425] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 16:44:27,605] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 16:44:31,440] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 16:44:31,441] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 16:44:31,443] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 16:44:31,448] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 16:44:31,951] DEBUG    Imulog       readIMUThread starting..
+[2021-05-27 16:44:32,053] DEBUG    Imulog       Data from IMU
+[2021-05-27 16:45:24,021] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 16:47:13,668] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 16:47:17,519] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 16:47:17,520] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 16:47:17,530] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-05-27 16:47:17,536] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 16:47:18,038] DEBUG    Imulog       readIMUThread starting..
+[2021-05-27 16:47:18,140] DEBUG    Imulog       Data from IMU
+[2021-05-27 16:48:16,998] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 16:49:24,561] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 16:49:28,401] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 16:49:28,402] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 16:49:28,404] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 16:49:28,409] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 16:49:28,912] DEBUG    Imulog       readIMUThread starting..
+[2021-05-27 16:49:29,014] DEBUG    Imulog       Data from IMU
+[2021-05-27 16:50:19,558] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 16:51:34,583] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 16:51:38,424] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 16:51:38,425] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 16:51:38,427] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 16:51:38,432] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 16:51:38,934] DEBUG    Imulog       readIMUThread starting..
+[2021-05-27 16:51:39,035] DEBUG    Imulog       Data from IMU
+[2021-05-27 16:52:45,108] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 16:55:28,251] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 16:55:32,103] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 16:55:32,105] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 16:55:32,108] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-05-27 16:55:32,114] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 16:55:32,618] DEBUG    Imulog       readIMUThread starting..
+[2021-05-27 16:55:32,720] DEBUG    Imulog       Data from IMU
+[2021-05-27 16:56:21,988] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 16:57:33,473] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 16:57:37,314] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 16:57:37,315] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 16:57:37,317] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 16:57:37,322] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 16:57:37,825] DEBUG    Imulog       readIMUThread starting..
+[2021-05-27 16:57:37,927] DEBUG    Imulog       Data from IMU
+[2021-05-27 16:58:35,939] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 16:58:39,774] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 16:58:39,776] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 16:58:39,778] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-05-27 16:58:39,784] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 16:58:40,287] DEBUG    Imulog       readIMUThread starting..
+[2021-05-27 16:58:40,389] DEBUG    Imulog       Data from IMU
+[2021-05-27 16:59:55,482] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 17:01:19,939] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 17:01:23,773] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 17:01:23,774] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 17:01:23,776] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 17:01:23,782] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 17:01:24,284] DEBUG    Imulog       readIMUThread starting..
+[2021-05-27 17:01:24,390] DEBUG    Imulog       Data from IMU
+[2021-05-27 17:02:16,303] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 17:02:44,117] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 17:02:47,915] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 17:02:47,916] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 17:02:47,919] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 17:02:47,925] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 17:02:48,428] DEBUG    Imulog       readIMUThread starting..
+[2021-05-27 17:02:48,530] DEBUG    Imulog       Data from IMU
+[2021-05-27 17:03:48,798] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 17:04:02,516] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 17:04:06,290] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 17:04:06,292] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 17:04:06,294] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 17:04:06,300] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 17:04:06,803] DEBUG    Imulog       readIMUThread starting..
+[2021-05-27 17:04:06,904] DEBUG    Imulog       Data from IMU
+[2021-05-27 17:06:33,838] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 17:06:38,727] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 17:06:42,557] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 17:06:42,558] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 17:06:42,560] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 17:06:42,566] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 17:06:43,068] DEBUG    Imulog       readIMUThread starting..
+[2021-05-27 17:06:43,072] DEBUG    Imulog       Data from IMU
+[2021-05-27 17:09:50,165] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 17:10:01,189] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 17:10:04,989] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 17:10:04,991] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 17:10:04,995] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-05-27 17:10:05,001] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 17:10:05,505] DEBUG    Imulog       readIMUThread starting..
+[2021-05-27 17:10:05,511] DEBUG    Imulog       Data from IMU
+[2021-05-27 17:11:19,362] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 17:11:45,171] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 17:11:48,968] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 17:11:48,969] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 17:11:48,971] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 17:11:48,976] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 17:11:49,478] DEBUG    Imulog       readIMUThread starting..
+[2021-05-27 17:11:49,582] DEBUG    Imulog       Data from IMU
+[2021-05-27 17:12:41,127] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 17:13:00,541] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 17:13:04,384] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 17:13:04,385] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 17:13:04,388] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 17:13:04,405] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 17:13:04,908] DEBUG    Imulog       readIMUThread starting..
+[2021-05-27 17:13:05,011] DEBUG    Imulog       Data from IMU
+[2021-05-27 17:15:09,675] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 17:15:15,108] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 17:15:19,005] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 17:15:19,006] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 17:15:19,007] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 17:15:19,013] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 17:15:19,515] DEBUG    Imulog       readIMUThread starting..
+[2021-05-27 17:15:19,618] DEBUG    Imulog       Data from IMU
+[2021-05-27 17:17:00,375] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 17:17:33,132] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 17:17:36,923] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 17:17:36,925] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 17:17:36,927] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 17:17:36,933] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 17:17:37,436] DEBUG    Imulog       readIMUThread starting..
+[2021-05-27 17:17:37,540] DEBUG    Imulog       Data from IMU
+[2021-05-27 17:19:44,072] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 17:19:53,912] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 17:19:57,713] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 17:19:57,715] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 17:19:57,716] DEBUG    Imulog       FIFO count: 0x0 
+[2021-05-27 17:19:57,722] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 17:19:58,225] DEBUG    Imulog       readIMUThread starting..
+[2021-05-27 17:19:58,327] DEBUG    Imulog       Data from IMU
+[2021-05-27 17:21:00,573] DEBUG    Imulog       DroidInertial releasing resources
+[2021-05-27 17:22:44,858] INFO     Imulog       Initialising IMU biases to file.
+[2021-05-27 17:22:48,688] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-05-27 17:22:48,690] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-05-27 17:22:48,693] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-05-27 17:22:48,699] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-05-27 17:22:49,203] DEBUG    Imulog       readIMUThread starting..
+[2021-05-27 17:22:49,304] DEBUG    Imulog       Data from IMU
+[2021-05-27 17:24:15,041] DEBUG    Imulog       DroidInertial releasing resources
+[2021-06-12 19:24:02,923] INFO     Imulog       Initialising IMU biases to file.
+[2021-06-12 19:24:06,846] DEBUG    Imulog       Interrupt status: 0x1 
+[2021-06-12 19:24:06,848] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-06-12 19:24:06,851] DEBUG    Imulog       FIFO count: 0x0 
+[2021-06-12 19:24:06,857] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-06-12 19:24:07,361] DEBUG    Imulog       readIMUThread starting..
+[2021-06-12 19:24:07,462] DEBUG    Imulog       Data from IMU
+[2021-06-12 19:33:51,112] DEBUG    Imulog       DroidInertial releasing resources
+[2021-06-12 19:36:48,276] INFO     Imulog       Initialising IMU biases to file.
+[2021-06-12 19:37:05,262] INFO     Imulog       Initialising IMU biases to file.
+[2021-06-12 19:37:09,178] DEBUG    Imulog       Interrupt status: 0x1 
+[2021-06-12 19:37:09,179] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-06-12 19:37:09,181] DEBUG    Imulog       FIFO count: 0x0 
+[2021-06-12 19:37:09,186] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-06-12 19:37:09,689] DEBUG    Imulog       readIMUThread starting..
+[2021-06-12 19:37:09,790] DEBUG    Imulog       Data from IMU
+[2021-06-12 19:44:30,601] INFO     Imulog       Initialising IMU biases to file.
+[2021-06-12 19:44:34,433] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-06-12 19:44:34,434] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-06-12 19:44:34,436] DEBUG    Imulog       FIFO count: 0x0 
+[2021-06-12 19:44:34,441] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-06-12 19:44:34,944] DEBUG    Imulog       readIMUThread starting..
+[2021-06-12 19:44:35,045] DEBUG    Imulog       Data from IMU
+[2021-06-12 19:45:37,655] DEBUG    Imulog       DroidInertial releasing resources
+[2021-06-12 19:45:47,868] INFO     Imulog       Initialising IMU biases to file.
+[2021-06-12 19:45:51,923] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-06-12 19:45:51,924] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-06-12 19:45:51,926] DEBUG    Imulog       FIFO count: 0x0 
+[2021-06-12 19:45:51,931] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-06-12 19:45:52,434] DEBUG    Imulog       readIMUThread starting..
+[2021-06-12 19:45:52,437] DEBUG    Imulog       Data from IMU
+[2021-06-12 19:50:35,122] INFO     Imulog       Initialising IMU biases to file.
+[2021-06-12 19:50:39,200] DEBUG    Imulog       Interrupt status: 0x2 
+[2021-06-12 19:50:39,202] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-06-12 19:50:39,204] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-06-12 19:50:39,210] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-06-12 19:50:39,713] DEBUG    Imulog       readIMUThread starting..
+[2021-06-12 19:50:39,814] DEBUG    Imulog       Data from IMU
+[2021-06-12 19:52:19,238] INFO     Imulog       Initialising IMU biases to file.
+[2021-06-12 19:52:24,545] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-06-12 19:52:24,548] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-06-12 19:52:24,555] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-06-12 19:52:24,565] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-06-12 19:52:25,070] DEBUG    Imulog       readIMUThread starting..
+[2021-06-12 19:52:25,172] DEBUG    Imulog       Data from IMU
+[2021-06-12 20:01:03,625] INFO     Imulog       Initialising IMU biases to file.
+[2021-06-12 20:01:07,538] DEBUG    Imulog       Interrupt status: 0x1 
+[2021-06-12 20:01:07,539] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-06-12 20:01:07,541] DEBUG    Imulog       FIFO count: 0x0 
+[2021-06-12 20:01:07,546] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-06-12 20:01:08,049] DEBUG    Imulog       readIMUThread starting..
+[2021-06-12 20:01:08,152] DEBUG    Imulog       Data from IMU
+[2021-06-20 16:25:54,100] INFO     Imulog       Initialising IMU biases to file.
+[2021-06-20 16:25:59,261] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-06-20 16:25:59,267] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-06-20 16:25:59,269] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-06-20 16:25:59,275] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-06-20 16:25:59,777] DEBUG    Imulog       readIMUThread starting..
+[2021-06-20 16:25:59,879] DEBUG    Imulog       Data from IMU
+[2021-06-20 16:28:25,928] DEBUG    Imulog       DroidInertial releasing resources
+[2021-06-20 16:32:41,831] INFO     Imulog       Initialising IMU biases to file.
+[2021-06-20 16:32:47,912] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-06-20 16:32:47,913] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-06-20 16:32:47,915] DEBUG    Imulog       FIFO count: 0x0 
+[2021-06-20 16:32:47,923] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-06-20 16:32:48,426] DEBUG    Imulog       readIMUThread starting..
+[2021-06-20 16:32:48,530] DEBUG    Imulog       Data from IMU
+[2021-06-20 16:35:29,380] DEBUG    Imulog       DroidInertial releasing resources
+[2021-06-20 16:38:54,825] INFO     Imulog       Initialising IMU biases to file.
+[2021-06-20 16:39:00,859] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-06-20 16:39:00,861] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-06-20 16:39:00,864] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-06-20 16:39:00,873] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-06-20 16:39:01,377] DEBUG    Imulog       readIMUThread starting..
+[2021-06-20 16:39:01,478] DEBUG    Imulog       Data from IMU
+[2021-06-20 16:41:26,943] DEBUG    Imulog       DroidInertial releasing resources
+[2021-06-20 16:43:02,893] INFO     Imulog       Initialising IMU biases to file.
+[2021-06-20 16:43:08,926] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-06-20 16:43:08,928] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-06-20 16:43:08,930] DEBUG    Imulog       FIFO count: 0x0 
+[2021-06-20 16:43:08,938] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-06-20 16:43:09,441] DEBUG    Imulog       readIMUThread starting..
+[2021-06-20 16:43:09,542] DEBUG    Imulog       Data from IMU
+[2021-06-20 16:44:15,489] DEBUG    Imulog       DroidInertial releasing resources
+[2021-06-20 16:44:23,395] INFO     Imulog       Initialising IMU biases to file.
+[2021-06-20 16:44:30,073] DEBUG    Imulog       Interrupt status: 0x1 
+[2021-06-20 16:44:30,074] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-06-20 16:44:30,078] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-06-20 16:44:30,086] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-06-20 16:44:30,589] DEBUG    Imulog       readIMUThread starting..
+[2021-06-20 16:44:30,697] DEBUG    Imulog       Data from IMU
+[2021-06-20 16:46:06,725] DEBUG    Imulog       DroidInertial releasing resources
+[2021-06-20 16:47:51,672] INFO     Imulog       Initialising IMU biases to file.
+[2021-06-20 16:47:57,342] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-06-20 16:47:57,344] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-06-20 16:47:57,347] DEBUG    Imulog       FIFO count: 0x0 
+[2021-06-20 16:47:57,353] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-06-20 16:47:57,856] DEBUG    Imulog       readIMUThread starting..
+[2021-06-20 16:47:57,957] DEBUG    Imulog       Data from IMU
+[2021-06-20 16:49:11,752] DEBUG    Imulog       DroidInertial releasing resources
+[2021-06-20 16:49:42,268] INFO     Imulog       Initialising IMU biases to file.
+[2021-06-20 16:49:48,689] DEBUG    Imulog       Interrupt status: 0x2 
+[2021-06-20 16:49:48,691] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-06-20 16:49:48,693] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-06-20 16:49:48,702] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-06-20 16:49:49,207] DEBUG    Imulog       readIMUThread starting..
+[2021-06-20 16:49:49,310] DEBUG    Imulog       Data from IMU
+[2021-06-20 16:51:05,980] DEBUG    Imulog       DroidInertial releasing resources
+[2021-06-20 16:57:08,210] INFO     Imulog       Initialising IMU biases to file.
+[2021-06-20 16:57:13,987] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-06-20 16:57:13,988] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-06-20 16:57:13,991] DEBUG    Imulog       FIFO count: 0x0 
+[2021-06-20 16:57:13,996] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-06-20 16:57:14,498] DEBUG    Imulog       readIMUThread starting..
+[2021-06-20 16:57:14,599] DEBUG    Imulog       Data from IMU
+[2021-06-20 16:58:29,437] DEBUG    Imulog       DroidInertial releasing resources
+[2021-06-20 17:39:56,755] INFO     Imulog       Initialising IMU biases to file.
+[2021-06-20 17:40:02,387] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-06-20 17:40:02,388] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-06-20 17:40:02,391] DEBUG    Imulog       FIFO count: 0x0 
+[2021-06-20 17:40:02,399] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-06-20 17:40:02,902] DEBUG    Imulog       readIMUThread starting..
+[2021-06-20 17:40:03,004] DEBUG    Imulog       Data from IMU
+[2021-06-20 17:46:05,705] INFO     Imulog       Initialising IMU biases to file.
+[2021-06-20 17:46:10,594] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-06-20 17:46:10,595] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-06-20 17:46:10,597] DEBUG    Imulog       FIFO count: 0x0 
+[2021-06-20 17:46:10,602] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-06-20 17:46:11,105] DEBUG    Imulog       readIMUThread starting..
+[2021-06-20 17:46:11,110] DEBUG    Imulog       Data from IMU
+[2021-06-20 17:46:11,111] INFO     Imulog       Trimming IMU:2.00 seconds
+[2021-06-20 17:46:14,132] DEBUG    Imulog       DroidInertial releasing resources
+[2021-06-20 17:47:25,725] INFO     Imulog       Initialising IMU biases to file.
+[2021-06-20 17:47:32,370] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-06-20 17:47:32,373] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-06-20 17:47:32,396] DEBUG    Imulog       FIFO count: 0x0 
+[2021-06-20 17:47:32,407] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-06-20 17:47:32,910] DEBUG    Imulog       readIMUThread starting..
+[2021-06-20 17:47:33,017] DEBUG    Imulog       Data from IMU
+[2021-06-20 17:47:33,020] INFO     Imulog       Trimming IMU:2.00 seconds
+[2021-06-20 17:47:35,047] INFO     Imulog       Accelerometer trimmed in 2.00 seconds, error: x -0.0155, y 0.0291, z 0.0108
+[2021-06-20 17:47:36,049] DEBUG    Imulog       DroidInertial releasing resources
+[2021-06-20 17:50:40,458] INFO     Imulog       Initialising IMU biases to file.
+[2021-06-20 17:50:44,846] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-06-20 17:50:44,847] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-06-20 17:50:44,849] DEBUG    Imulog       FIFO count: 0x0 
+[2021-06-20 17:50:44,854] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-06-20 17:50:45,356] DEBUG    Imulog       readIMUThread starting..
+[2021-06-20 17:50:45,460] DEBUG    Imulog       Data from IMU
+[2021-06-20 17:50:45,461] INFO     Imulog       Trimming IMU:2.00 seconds
+[2021-06-20 17:52:10,630] INFO     Imulog       Initialising IMU biases to file.
+[2021-06-20 17:52:16,766] DEBUG    Imulog       Interrupt status: 0x1 
+[2021-06-20 17:52:16,768] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-06-20 17:52:16,770] DEBUG    Imulog       FIFO count: 0x0 
+[2021-06-20 17:52:16,778] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-06-20 17:52:17,282] DEBUG    Imulog       readIMUThread starting..
+[2021-06-20 17:52:17,393] DEBUG    Imulog       Data from IMU
+[2021-06-20 17:52:17,394] INFO     Imulog       Trimming IMU:2.00 seconds
+[2021-06-20 17:52:19,414] INFO     Imulog       Accelerometer trimmed in 2.00 seconds, error: x 0.0048, y 0.0674, z 0.0287
+[2021-06-20 17:52:19,415] INFO     Imulog       Gyroscope trimmed in 2.00 seconds, error: x -0.0021, y 0.0007, z 0.0009
+[2021-06-20 17:52:20,421] DEBUG    Imulog       DroidInertial releasing resources
+[2021-06-20 17:56:57,445] INFO     Imulog       Initialising IMU biases to file.
+[2021-06-20 17:57:03,491] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-06-20 17:57:03,493] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-06-20 17:57:03,495] DEBUG    Imulog       FIFO count: 0x0 
+[2021-06-20 17:57:03,503] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-06-20 17:57:04,006] DEBUG    Imulog       readIMUThread starting..
+[2021-06-20 17:57:04,107] DEBUG    Imulog       Data from IMU
+[2021-06-20 17:57:05,135] INFO     Imulog       Trimming IMU:2.00 seconds
+[2021-06-20 17:57:07,143] INFO     Imulog       Accelerometer trimmed in 2.00 seconds, error: x 0.0994, y 0.2035, z -0.0407
+[2021-06-20 17:57:07,149] INFO     Imulog       Gyroscope trimmed in 2.00 seconds, error: x -0.0001, y 0.0000, z 0.0009
+[2021-06-20 17:58:35,113] DEBUG    Imulog       DroidInertial releasing resources
+[2021-06-20 17:59:27,704] INFO     Imulog       Initialising IMU biases to file.
+[2021-06-20 17:59:34,144] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-06-20 17:59:34,145] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-06-20 17:59:34,160] DEBUG    Imulog       FIFO count: 0x0 
+[2021-06-20 17:59:34,176] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-06-20 17:59:34,690] DEBUG    Imulog       readIMUThread starting..
+[2021-06-20 17:59:34,792] DEBUG    Imulog       Data from IMU
+[2021-06-20 17:59:35,827] INFO     Imulog       Trimming IMU:5.00 seconds
+[2021-06-20 17:59:40,843] INFO     Imulog       Accelerometer trimmed in 5.00 seconds, error: x 0.1209, y 0.1939, z 0.0168
+[2021-06-20 17:59:40,845] INFO     Imulog       Gyroscope trimmed in 5.00 seconds, error: x -0.0016, y 0.0001, z 0.0008
+[2021-06-20 18:01:43,311] DEBUG    Imulog       DroidInertial releasing resources
+[2021-06-20 18:04:18,500] INFO     Imulog       Initialising IMU biases to file.
+[2021-06-20 18:04:24,282] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-06-20 18:04:24,283] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-06-20 18:04:24,286] DEBUG    Imulog       FIFO count: 0x0 
+[2021-06-20 18:04:24,294] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-06-20 18:04:24,797] DEBUG    Imulog       readIMUThread starting..
+[2021-06-20 18:04:24,899] DEBUG    Imulog       Data from IMU
+[2021-06-20 18:04:25,935] INFO     Imulog       Trimming IMU:5.00 seconds
+[2021-06-20 18:04:30,946] INFO     Imulog       Accelerometer trimmed in 5.00 seconds, error: x 0.1305, y 0.2119, z 0.0347
+[2021-06-20 18:04:30,949] INFO     Imulog       Gyroscope trimmed in 5.00 seconds, error: x -0.0019, y 0.0016, z 0.0013
+[2021-06-20 18:05:34,938] DEBUG    Imulog       DroidInertial releasing resources
+[2021-06-20 18:05:44,942] INFO     Imulog       Initialising IMU biases to file.
+[2021-06-20 18:05:51,171] DEBUG    Imulog       Interrupt status: 0x1 
+[2021-06-20 18:05:51,173] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-06-20 18:05:51,176] DEBUG    Imulog       FIFO count: 0x0 
+[2021-06-20 18:05:51,184] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-06-20 18:05:51,700] DEBUG    Imulog       readIMUThread starting..
+[2021-06-20 18:05:51,807] DEBUG    Imulog       Data from IMU
+[2021-06-20 18:05:52,869] INFO     Imulog       Trimming IMU:5.00 seconds
+[2021-06-20 18:05:57,890] INFO     Imulog       Accelerometer trimmed in 5.00 seconds, error: x 0.1879, y 0.2047, z 0.0587
+[2021-06-20 18:05:57,892] INFO     Imulog       Gyroscope trimmed in 5.00 seconds, error: x -0.0011, y 0.0016, z 0.0020
+[2021-06-20 18:09:10,477] DEBUG    Imulog       DroidInertial releasing resources
+[2021-06-20 18:09:24,257] INFO     Imulog       Initialising IMU biases to file.
+[2021-06-20 18:09:30,424] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-06-20 18:09:30,425] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-06-20 18:09:30,429] DEBUG    Imulog       FIFO count: 0x0 
+[2021-06-20 18:09:30,437] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-06-20 18:09:30,941] DEBUG    Imulog       readIMUThread starting..
+[2021-06-20 18:09:31,043] DEBUG    Imulog       Data from IMU
+[2021-06-20 18:09:32,109] INFO     Imulog       Trimming IMU:5.00 seconds
+[2021-06-20 18:09:37,132] INFO     Imulog       Accelerometer trimmed in 5.00 seconds, error: x 0.1903, y 0.1891, z -0.0156
+[2021-06-20 18:09:37,133] INFO     Imulog       Gyroscope trimmed in 5.00 seconds, error: x -0.0012, y 0.0004, z 0.0011
+[2021-06-20 18:14:57,682] DEBUG    Imulog       DroidInertial releasing resources
+[2021-06-25 20:35:01,297] INFO     Imulog       Initialising IMU biases to file.
+[2021-06-25 20:35:07,386] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-06-25 20:35:07,387] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-06-25 20:35:07,393] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-06-25 20:35:07,401] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-06-25 20:35:07,904] DEBUG    Imulog       readIMUThread starting..
+[2021-06-25 20:35:08,005] DEBUG    Imulog       Data from IMU
+[2021-06-25 20:35:09,032] INFO     Imulog       Trimming IMU:5.00 seconds
+[2021-06-25 20:35:14,061] INFO     Imulog       Accelerometer trimmed in 5.00 seconds, error: x -0.2023, y 0.1185, z 0.4274
+[2021-06-25 20:35:14,062] INFO     Imulog       Gyroscope trimmed in 5.00 seconds, error: x -0.2384, y -0.0326, z 0.2547
+[2021-06-25 21:16:49,005] INFO     Imulog       Initialising IMU biases to file.
+[2021-06-25 21:16:55,217] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-06-25 21:16:55,219] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-06-25 21:16:55,221] DEBUG    Imulog       FIFO count: 0x0 
+[2021-06-25 21:16:55,229] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-06-25 21:16:55,732] DEBUG    Imulog       readIMUThread starting..
+[2021-06-25 21:16:55,833] DEBUG    Imulog       Data from IMU
+[2021-06-25 21:22:24,487] INFO     Imulog       Initialising IMU biases to file.
+[2021-06-25 21:22:29,537] DEBUG    Imulog       Interrupt status: 0x1 
+[2021-06-25 21:22:29,539] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-06-25 21:22:29,541] DEBUG    Imulog       FIFO count: 0x0 
+[2021-06-25 21:22:29,547] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-06-25 21:22:30,050] DEBUG    Imulog       readIMUThread starting..
+[2021-06-25 21:22:30,151] DEBUG    Imulog       Data from IMU
+[2021-06-25 21:24:58,098] DEBUG    Imulog       DroidInertial releasing resources
+[2021-06-25 21:26:56,274] INFO     Imulog       Initialising IMU biases to file.
+[2021-06-25 21:27:02,393] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-06-25 21:27:02,395] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-06-25 21:27:02,397] DEBUG    Imulog       FIFO count: 0x0 
+[2021-06-25 21:27:02,405] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-06-25 21:27:02,908] DEBUG    Imulog       readIMUThread starting..
+[2021-06-25 21:27:03,009] DEBUG    Imulog       Data from IMU
+[2021-06-25 21:28:30,258] DEBUG    Imulog       DroidInertial releasing resources
+[2021-06-25 21:32:47,103] INFO     Imulog       Initialising IMU biases to file.
+[2021-06-25 21:32:53,198] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-06-25 21:32:53,200] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-06-25 21:32:53,203] DEBUG    Imulog       FIFO count: 0x0 
+[2021-06-25 21:32:53,210] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-06-25 21:32:53,714] DEBUG    Imulog       readIMUThread starting..
+[2021-06-25 21:32:53,814] DEBUG    Imulog       Data from IMU
+[2021-06-25 21:32:53,816] INFO     Imulog       Trimming IMU:2.00 seconds
+[2021-06-25 21:32:55,840] INFO     Imulog       Accelerometer trimmed in 2.00 seconds, error: x -0.0108, y 0.0491, z -0.0575
+[2021-06-25 21:32:55,842] INFO     Imulog       Gyroscope trimmed in 2.00 seconds, error: x -0.0020, y -0.0012, z -0.0015
+[2021-06-25 21:32:56,887] INFO     Imulog       Trimming IMU:5.00 seconds
+[2021-06-25 21:33:01,896] INFO     Imulog       Accelerometer trimmed in 5.00 seconds, error: x 0.0060, y -0.0263, z 0.0251
+[2021-06-25 21:33:01,902] INFO     Imulog       Gyroscope trimmed in 5.00 seconds, error: x -0.0003, y -0.0003, z 0.0005
+[2021-06-25 21:34:10,992] DEBUG    Imulog       DroidInertial releasing resources
