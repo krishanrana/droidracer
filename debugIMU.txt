@@ -6376,3 +6376,17 @@
 [2021-06-25 21:33:01,896] INFO     Imulog       Accelerometer trimmed in 5.00 seconds, error: x 0.0060, y -0.0263, z 0.0251
 [2021-06-25 21:33:01,902] INFO     Imulog       Gyroscope trimmed in 5.00 seconds, error: x -0.0003, y -0.0003, z 0.0005
 [2021-06-25 21:34:10,992] DEBUG    Imulog       DroidInertial releasing resources
+[2021-06-25 22:08:54,195] INFO     Imulog       Initialising IMU biases to file.
+[2021-06-25 22:09:00,272] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-06-25 22:09:00,273] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-06-25 22:09:00,276] DEBUG    Imulog       FIFO count: 0x0 
+[2021-06-25 22:09:00,284] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-06-25 22:09:00,787] DEBUG    Imulog       readIMUThread starting..
+[2021-06-25 22:09:00,888] DEBUG    Imulog       Data from IMU
+[2021-06-25 22:09:00,893] INFO     Imulog       Trimming IMU:2.00 seconds
+[2021-06-25 22:09:02,902] INFO     Imulog       Accelerometer trimmed in 2.00 seconds, error: x 0.0156, y 0.0156, z -0.0263
+[2021-06-25 22:09:02,907] INFO     Imulog       Gyroscope trimmed in 2.00 seconds, error: x -0.0017, y -0.0015, z 0.0001
+[2021-06-25 22:09:03,950] INFO     Imulog       Trimming IMU:5.00 seconds
+[2021-06-25 22:09:08,969] INFO     Imulog       Accelerometer trimmed in 5.00 seconds, error: x 0.0072, y 0.0419, z -0.0802
+[2021-06-25 22:09:08,971] INFO     Imulog       Gyroscope trimmed in 5.00 seconds, error: x 0.0000, y -0.0024, z -0.0007
+[2021-06-25 22:10:42,412] DEBUG    Imulog       DroidInertial releasing resources

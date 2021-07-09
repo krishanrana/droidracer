@@ -484,8 +484,8 @@ class droidInertial(MPU6050):
             omega = np.concatenate((omega, self.omega),axis=0)
             time.sleep(0.010)          
         tend = time.time()
-        self.accelTrim = [np.median(accel[:,0]),np.median(accel[:,1]),np.median(accel[:,2])]
-        self.gyroTrim = [np.median(omega[:,0]),np.median(omega[:,1]),np.median(omega[:,2])]
+        self.accelTrim = self.accelTrim + np.array([np.median(accel[:,0]),np.median(accel[:,1]),np.median(accel[:,2])])
+        self.gyroTrim = self.gyroTrim + np.array([np.median(omega[:,0]),np.median(omega[:,1]),np.median(omega[:,2])])
         logger.info('Accelerometer trimmed in {0:0.2f} seconds, error: x {1:0.4f}, y {2:0.4f}, z {3:0.4f}'.format(runtime,self.accelTrim[0],self.accelTrim[1],self.accelTrim[2]))
         logger.info('Gyroscope trimmed in {0:0.2f} seconds, error: x {1:0.4f}, y {2:0.4f}, z {3:0.4f}'.format(runtime,self.gyroTrim[0],self.gyroTrim[1],self.gyroTrim[2]))
         time.sleep(0.010)
