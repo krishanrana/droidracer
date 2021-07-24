@@ -153,8 +153,8 @@ class droidControl:
             self.Kder]   
         dataByte = struct.pack(self.VarType *len(dataOut),*dataOut)
         self.ser.write(dataByte)
-        logger.debug('Data written to serial')
-        print(self.runCommand)
+#         logger.debug('Data written to serial')
+#         print(self.runCommand)
 
     def getSerialData(self):
         # Method reads serial stream given data format expected (floats or ints)
@@ -289,6 +289,19 @@ class droidControl:
 #         logger.debug('Speed_A: {0:0.4f}'.format(Speed_A))
 #         logger.debug('Velocity command x: {0:0.3f}, y: {1:0.3f}, Omega: {2:0.3f},'.format(self.vCommand[0],self.vCommand[1],self.vCommand[2]))
     
+    def processCommands(self,dirX,dirY,rotL,rotR):
+        # Process data from f710 joystick, reverse Y axis control
+        dirY = -dirY       
+        velX = dirX * self.LinearSpeed
+        velY = dirY * self.LinearSpeed
+        velA = (rotL-rotR) * self.AngularSpeed
+        logger.debug('Velocity command x: {0:0.3f}, y: {1:0.3f}, Omega: {2:0.3f},'.format(velX,velY,velA))
+
+        self.vCommand = np.round([velX, velY, velA],decimals=3)
+        logger.debug('Velocity command x: {0:0.3f}, y: {1:0.3f}, Omega: {2:0.3f},'.format(self.vCommand[0],self.vCommand[1],self.vCommand[2]))
+
+
+
     def compFilter(self, data1, data2):
         A = self.compFilterEncoderValue
         vEst = (data1 * A) + (data2 * (1-A))
@@ -382,8 +395,7 @@ class droidControl:
             # Diagnostics and data display
 #             logger.debug('M1: {0:0.3f}, M2: {1:0.3f}, M3: {2:0.3f},'.format(self.velM1,self.velM2,self.velM3))
             time.sleep(0.02)
-            
-                       
+                             
         self.runCommand = 0.0
         self.writeSerial()
         time.sleep(0.030)
@@ -392,7 +404,20 @@ class droidControl:
             self.getSerialData()
             time.sleep(0.025)
         logger.debug('Droid Parked')
-                  
+
+    def driveDroid(self):
+        
+        self.estRobotState('encoder')       
+        # Calculate desired droid linear and angulare velocity
+        # Determine motor speeds
+        self.inverseKinematics(self.vCommand)
+
+        # Write motor speeds
+        self.writeSerial()
+        self.vCommandT_1 = self.vCommand
+
+        logger.debug('M1: {0:0.3f}, M2: {1:0.3f}, M3: {2:0.3f},'.format(self.velM1,self.velM2,self.velM3))
+            
 #------Tests--------------------------------
     
     def testVectorDrive(self, Distance, Heading):
@@ -592,7 +617,6 @@ if __name__ == '__main__':
 
     global dc
     dc = droidControl('/dev/ttyUSB0',38400,10,7,'f')
-    dc.startReadThread()
     t0 = time.time()
             
     #Use GUI loop for online changes

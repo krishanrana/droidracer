@@ -2,10 +2,19 @@
 
 import pygame, sys
 import time
+import numpy as np
+from DroidControl import droidControl 
+
 
 
 class pyJoystick():
     def __init__(self, windowSize = (200,200),windowPos = [0,32]):
+        self.dirX = 0
+        self.dirY = 0
+        self.rotL = 0
+        self.rotR = 0
+        self.stop = 0
+        
         joystick_count = 0
         # setup the pygame window
         pygame.init()
@@ -42,6 +51,8 @@ class pyJoystick():
           # value between 1.0 and -1.0
             print ("Axis value is %s" %(self.joystick.get_axis(number)))
             print ("Axis ID is %s" %(number))
+        else:
+            print(self.joystick.get_axis(number))
      
     def getButton(self,number):
         # returns 1 or 0 - pressed or not
@@ -55,7 +66,7 @@ class pyJoystick():
             print ("Hat value is %s, %s" %(self.joystick.get_hat(number)[0],self.joystick.get_hat(number)[1]))
             print ("Hat ID is %s" %(number))
     
-    def startEventLoop(self):
+    def getButtonMapping(self):
 
         while True:
             for event in pygame.event.get():
@@ -66,19 +77,63 @@ class pyJoystick():
             if self.axes != 0:
                 for i in range(self.axes):
                     self.getAxis(i)
-        #         print("axis {0}: value {1}".format(i,getAxis(i)))
             if self.buttons != 0:
                 for i in range(self.buttons):
                     self.getButton(i)
-        #         print("Button {0}: value {1}".format(i,getButton(i))) 
             if self.hats != 0:
                 for i in range(self.hats):
                     self.getHat(i)
-        #         print("Hat {0}: value {1}".format(i,getHat(i)))
             time.sleep(0.1)
-
+            
+    def getJoystickInput(self):
+        
+        for event in pygame.event.get():
+              # loop through events, if window shut down, quit program
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+        if self.axes != 0:
+            dirX = np.round(self.joystick.get_axis(0),decimals=3)
+            if (dirX < -0.1) or (dirX > 0.1):
+                self.dirX = dirX
+            else: self.dirX = 0
+            
+            dirY = np.round(self.joystick.get_axis(1),decimals=3)
+            if (dirY < -0.1) or (dirY > 0.1):
+                self.dirY = dirY
+            else:
+                self.dirY = 0
+            self.rotL = np.round((self.joystick.get_axis(2) + 1.0)/2,decimals=3)
+            self.rotR = np.round((self.joystick.get_axis(5) + 1.0)/2,decimals=3)
+            
+        if self.buttons != 0: 
+            self.stop = self.joystick.get_button(1)
+                
+        
+            
+            
 if __name__ == "__main__":
     f710 = pyJoystick()
-    f710.startEventLoop()
+    
+    dc = droidControl()
+    dc.LinearSpeed = 1
+    dc.AngularSpeed = 3.1415
+    dc.runCommand = True
+#     f710.getButtonMapping()
+    
+    while f710.stop == 0:
+#         t0 = time.time()
+        f710.getJoystickInput()
+        print([f710.dirX, -f710.dirY, f710.rotL, f710.rotR])
+#         print(time.time() - t0)
+        dc.processCommands(f710.dirX, f710.dirY, f710.rotL, f710.rotR)
+        dc.driveDroid()
+        time.sleep(0.05)
+        
+    dc.runCommand = False
+    dc.writeSerial()
+    dc.close()
+    time.sleep(2)
+    sys.exit()
     
     
