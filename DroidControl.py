@@ -153,8 +153,8 @@ class droidControl:
             self.Kder]   
         dataByte = struct.pack(self.VarType *len(dataOut),*dataOut)
         self.ser.write(dataByte)
-#         logger.debug('Data written to serial')
-#         print(self.runCommand)
+        logger.debug('Data written to serial')
+        print(self.runCommand)
 
     def getSerialData(self):
         # Method reads serial stream given data format expected (floats or ints)
@@ -633,8 +633,8 @@ if __name__ == '__main__':
     dc.Kder = 0.001 # Derivative gain
     dc.runCommand = 0.0
     
-    dc.testVectorDrive(Distance, Heading)
-    time.sleep(2)
+#     dc.testVectorDrive(Distance, Heading)
+#     time.sleep(2)
     dc.testRotationDrive(Rotation)
 #     
 #     # Save file

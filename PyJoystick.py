@@ -119,6 +119,9 @@ if __name__ == "__main__":
     dc.LinearSpeed = 1
     dc.AngularSpeed = 3.1415
     dc.runCommand = True
+    dc.Kprop = 1.5 # Proportional gain
+    dc.Kint = 40 # Integral gain
+    dc.Kder = 0.001 # Derivative gain
 #     f710.getButtonMapping()
     
     while f710.stop == 0:
