@@ -83,7 +83,7 @@ class droidControl:
         self.maxRunTime = 20 # maximum navigation runtime
         self.MaxLinearVelocity = 1.0 # Maximum linear speed m/s
         self.MaxAngularVelocity = np.pi # Maximum angular velocity rad/s
-        self.compFilterEncoderValue = 0.9
+        self.compFilterEncoderValue = 0.95
         self.LinearSpeed = 0.0 # m/s       
         self.AngularSpeed = 0.0 # radian/s
         
@@ -121,7 +121,7 @@ class droidControl:
         self.logMotorData = False
         self.saveData = [[0] * (self.inVarNum + 1)]
         # Store : Command(Ux,Uy,Uo), Odometry(Vx,Vy,Vo), IMU(Ix,Iy,Io),Time
-        self.saveState = [[0]*10]
+        self.saveState = []
         self.saveStateData = True
         self.initialTimer = 0.0
 
@@ -357,8 +357,11 @@ class droidControl:
         self.navTimeT_1 = self.navTime
 
         # Save state
-        if self.saveStateData is True:
-            self.saveState.append([self.vCommand,vEstEnc,vEstImu,self.navTime])
+        if (self.saveStateData is True) and (odoType == 'imuFusion'):
+#             dataOut = np.concatenate((self.vCommand,vEstEnc,vEstImu))
+#             dataOut = np.append(dataOut,self.navTime)
+            dataOut = self.vCommand.tolist() + vEstEnc.tolist() + vEstImu.tolist() + [self.navTime]
+            self.saveState.append(dataOut)
         
     def calcTargetError(self, target):
         error = target - self.xEst
@@ -421,7 +424,7 @@ class droidControl:
 
     def driveDroid(self):
         # Estimate robot state using sensor feedback
-        self.estRobotState('encoder')  
+        self.estRobotState('imuFusion')  
         # Calculate desired droid linear and angular velocity
         # Determine motor speeds
         self.inverseKinematics(self.vCommand)
@@ -560,8 +563,8 @@ class droidControl:
     
     def saveOutput(self,data,filename):
         saveDataNP = np.array(data)
-        self.saveDataNP = saveDataNP[saveDataNP[:,9]>0]
-        np.savetxt(filename,self.saveDataNP,delimiter=',')
+#         self.saveDataNP = saveDataNP[saveDataNP[:,9]>0]
+        np.savetxt(filename,saveDataNP,delimiter=',')
         logger.debug('Results saved to file')          
 
     def plotOutput(self):

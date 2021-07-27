@@ -82,7 +82,7 @@ if __name__ == '__main__':
         dc.driveDroid()
         time.sleep(0.05)
         
-    dc.saveOutput(dc.saveStateData,filename='telemetry.csv')
+    dc.saveOutput(dc.saveState,filename='telemetry.csv')
     dc.runCommand = 0
     dc.writeSerial()
     dc.close()

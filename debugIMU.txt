@@ -6628,3 +6628,137 @@
 [2021-07-24 23:14:06,280] INFO     Imulog       Trimming IMU:2.00 seconds
 [2021-07-24 23:14:08,288] INFO     Imulog       Accelerometer trimmed in 2.00 seconds, error: x 0.0479, y -0.0910, z -0.0419
 [2021-07-24 23:14:08,289] INFO     Imulog       Gyroscope trimmed in 2.00 seconds, error: x -0.0007, y 0.0015, z 0.0015
+[2021-07-25 19:41:54,856] INFO     Imulog       Initialising IMU biases to file.
+[2021-07-25 19:41:58,766] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-07-25 19:41:58,767] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-07-25 19:41:58,769] DEBUG    Imulog       FIFO count: 0x0 
+[2021-07-25 19:41:58,774] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-07-25 19:41:59,276] DEBUG    Imulog       readIMUThread starting..
+[2021-07-25 19:41:59,377] DEBUG    Imulog       Data from IMU
+[2021-07-25 19:41:59,380] INFO     Imulog       Trimming IMU:2.00 seconds
+[2021-07-25 19:42:01,405] INFO     Imulog       Accelerometer trimmed in 2.00 seconds, error: x -0.0263, y 0.0215, z 0.0180
+[2021-07-25 19:42:01,406] INFO     Imulog       Gyroscope trimmed in 2.00 seconds, error: x -0.0019, y 0.0009, z 0.0008
+[2021-07-25 19:45:38,477] DEBUG    Imulog       DroidInertial releasing resources
+[2021-07-25 19:46:17,974] INFO     Imulog       Initialising IMU biases to file.
+[2021-07-25 19:46:21,918] DEBUG    Imulog       Interrupt status: 0x1 
+[2021-07-25 19:46:21,919] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-07-25 19:46:21,921] DEBUG    Imulog       FIFO count: 0x0 
+[2021-07-25 19:46:21,926] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-07-25 19:46:22,428] DEBUG    Imulog       readIMUThread starting..
+[2021-07-25 19:46:22,529] DEBUG    Imulog       Data from IMU
+[2021-07-25 19:46:22,530] INFO     Imulog       Trimming IMU:2.00 seconds
+[2021-07-25 19:46:24,544] INFO     Imulog       Accelerometer trimmed in 2.00 seconds, error: x 0.0000, y -0.0168, z -0.0144
+[2021-07-25 19:46:24,545] INFO     Imulog       Gyroscope trimmed in 2.00 seconds, error: x -0.0004, y 0.0028, z 0.0008
+[2021-07-25 19:53:24,612] DEBUG    Imulog       DroidInertial releasing resources
+[2021-07-27 15:48:06,152] INFO     Imulog       Initialising IMU biases to file.
+[2021-07-27 15:48:10,071] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-07-27 15:48:10,073] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-07-27 15:48:10,076] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-07-27 15:48:10,082] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-07-27 15:48:10,584] DEBUG    Imulog       readIMUThread starting..
+[2021-07-27 15:48:10,687] DEBUG    Imulog       Data from IMU
+[2021-07-27 15:48:10,688] INFO     Imulog       Trimming IMU:2.00 seconds
+[2021-07-27 15:48:12,708] INFO     Imulog       Accelerometer trimmed in 2.00 seconds, error: x -0.0634, y -0.0754, z 0.0168
+[2021-07-27 15:48:12,710] INFO     Imulog       Gyroscope trimmed in 2.00 seconds, error: x -0.0020, y 0.0008, z 0.0001
+[2021-07-27 15:50:51,441] INFO     Imulog       Initialising IMU biases to file.
+[2021-07-27 15:50:55,356] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-07-27 15:50:55,357] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-07-27 15:50:55,359] DEBUG    Imulog       FIFO count: 0x0 
+[2021-07-27 15:50:55,365] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-07-27 15:50:55,867] DEBUG    Imulog       readIMUThread starting..
+[2021-07-27 15:50:55,970] DEBUG    Imulog       Data from IMU
+[2021-07-27 15:50:55,971] INFO     Imulog       Trimming IMU:2.00 seconds
+[2021-07-27 15:50:57,987] INFO     Imulog       Accelerometer trimmed in 2.00 seconds, error: x -0.0611, y -0.1006, z -0.0204
+[2021-07-27 15:50:57,989] INFO     Imulog       Gyroscope trimmed in 2.00 seconds, error: x -0.0004, y 0.0015, z 0.0003
+[2021-07-27 15:55:16,413] INFO     Imulog       Initialising IMU biases to file.
+[2021-07-27 15:55:20,283] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-07-27 15:55:20,284] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-07-27 15:55:20,286] DEBUG    Imulog       FIFO count: 0x0 
+[2021-07-27 15:55:20,292] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-07-27 15:55:20,794] DEBUG    Imulog       readIMUThread starting..
+[2021-07-27 15:55:20,895] DEBUG    Imulog       Data from IMU
+[2021-07-27 15:55:20,896] INFO     Imulog       Trimming IMU:2.00 seconds
+[2021-07-27 15:55:22,913] INFO     Imulog       Accelerometer trimmed in 2.00 seconds, error: x -0.0682, y -0.0670, z 0.0204
+[2021-07-27 15:55:22,916] INFO     Imulog       Gyroscope trimmed in 2.00 seconds, error: x -0.0029, y 0.0015, z -0.0001
+[2021-07-27 15:59:05,886] INFO     Imulog       Initialising IMU biases to file.
+[2021-07-27 15:59:09,803] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-07-27 15:59:09,804] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-07-27 15:59:09,806] DEBUG    Imulog       FIFO count: 0x0 
+[2021-07-27 15:59:09,812] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-07-27 15:59:10,314] DEBUG    Imulog       readIMUThread starting..
+[2021-07-27 15:59:10,415] DEBUG    Imulog       Data from IMU
+[2021-07-27 15:59:10,416] INFO     Imulog       Trimming IMU:2.00 seconds
+[2021-07-27 15:59:12,422] INFO     Imulog       Accelerometer trimmed in 2.00 seconds, error: x -0.0563, y -0.0275, z -0.0479
+[2021-07-27 15:59:12,426] INFO     Imulog       Gyroscope trimmed in 2.00 seconds, error: x -0.0019, y 0.0023, z -0.0001
+[2021-07-27 16:24:59,880] INFO     Imulog       Initialising IMU biases to file.
+[2021-07-27 16:25:03,765] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-07-27 16:25:03,766] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-07-27 16:25:03,768] DEBUG    Imulog       FIFO count: 0x0 
+[2021-07-27 16:25:03,774] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-07-27 16:25:04,276] DEBUG    Imulog       readIMUThread starting..
+[2021-07-27 16:25:04,377] DEBUG    Imulog       Data from IMU
+[2021-07-27 16:25:04,378] INFO     Imulog       Trimming IMU:2.00 seconds
+[2021-07-27 16:25:06,393] INFO     Imulog       Accelerometer trimmed in 2.00 seconds, error: x -0.0622, y -0.0862, z 0.0551
+[2021-07-27 16:25:06,394] INFO     Imulog       Gyroscope trimmed in 2.00 seconds, error: x 0.0000, y 0.0019, z -0.0007
+[2021-07-27 16:28:42,710] INFO     Imulog       Initialising IMU biases to file.
+[2021-07-27 16:28:46,598] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-07-27 16:28:46,600] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-07-27 16:28:46,602] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-07-27 16:28:46,608] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-07-27 16:28:47,111] DEBUG    Imulog       readIMUThread starting..
+[2021-07-27 16:28:47,115] DEBUG    Imulog       Data from IMU
+[2021-07-27 16:28:47,117] INFO     Imulog       Trimming IMU:2.00 seconds
+[2021-07-27 16:28:49,131] INFO     Imulog       Accelerometer trimmed in 2.00 seconds, error: x -0.0599, y -0.0838, z 0.0120
+[2021-07-27 16:28:49,135] INFO     Imulog       Gyroscope trimmed in 2.00 seconds, error: x -0.0016, y 0.0021, z 0.0008
+[2021-07-27 16:28:53,725] DEBUG    Imulog       DroidInertial releasing resources
+[2021-07-27 16:29:05,150] INFO     Imulog       Initialising IMU biases to file.
+[2021-07-27 16:29:09,049] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-07-27 16:29:09,050] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-07-27 16:29:09,052] DEBUG    Imulog       FIFO count: 0x0 
+[2021-07-27 16:29:09,058] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-07-27 16:29:09,561] DEBUG    Imulog       readIMUThread starting..
+[2021-07-27 16:29:09,662] DEBUG    Imulog       Data from IMU
+[2021-07-27 16:29:09,663] INFO     Imulog       Trimming IMU:2.00 seconds
+[2021-07-27 16:29:11,672] INFO     Imulog       Accelerometer trimmed in 2.00 seconds, error: x -0.0455, y -0.0599, z -0.0120
+[2021-07-27 16:29:11,674] INFO     Imulog       Gyroscope trimmed in 2.00 seconds, error: x -0.0016, y 0.0000, z -0.0008
+[2021-07-27 16:36:03,920] INFO     Imulog       Initialising IMU biases to file.
+[2021-07-27 16:36:07,829] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-07-27 16:36:07,830] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-07-27 16:36:07,832] DEBUG    Imulog       FIFO count: 0x0 
+[2021-07-27 16:36:07,837] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-07-27 16:36:08,340] DEBUG    Imulog       readIMUThread starting..
+[2021-07-27 16:36:08,440] DEBUG    Imulog       Data from IMU
+[2021-07-27 16:36:08,441] INFO     Imulog       Trimming IMU:2.00 seconds
+[2021-07-27 16:36:10,458] INFO     Imulog       Accelerometer trimmed in 2.00 seconds, error: x -0.0634, y -0.0934, z -0.0156
+[2021-07-27 16:36:10,462] INFO     Imulog       Gyroscope trimmed in 2.00 seconds, error: x -0.0016, y 0.0029, z 0.0004
+[2021-07-27 16:41:36,273] INFO     Imulog       Initialising IMU biases to file.
+[2021-07-27 16:41:40,217] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-07-27 16:41:40,218] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-07-27 16:41:40,221] DEBUG    Imulog       FIFO count: 0x0 
+[2021-07-27 16:41:40,226] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-07-27 16:41:40,729] DEBUG    Imulog       readIMUThread starting..
+[2021-07-27 16:41:40,830] DEBUG    Imulog       Data from IMU
+[2021-07-27 16:41:40,833] INFO     Imulog       Trimming IMU:2.00 seconds
+[2021-07-27 16:41:42,844] INFO     Imulog       Accelerometer trimmed in 2.00 seconds, error: x -0.0347, y -0.0371, z -0.0036
+[2021-07-27 16:41:42,846] INFO     Imulog       Gyroscope trimmed in 2.00 seconds, error: x -0.0015, y 0.0016, z -0.0003
+[2021-07-27 16:45:07,994] INFO     Imulog       Initialising IMU biases to file.
+[2021-07-27 16:45:11,877] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-07-27 16:45:11,878] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-07-27 16:45:11,880] DEBUG    Imulog       FIFO count: 0x0 
+[2021-07-27 16:45:11,885] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-07-27 16:45:12,388] DEBUG    Imulog       readIMUThread starting..
+[2021-07-27 16:45:12,489] DEBUG    Imulog       Data from IMU
+[2021-07-27 16:45:12,490] INFO     Imulog       Trimming IMU:2.00 seconds
+[2021-07-27 16:45:14,509] INFO     Imulog       Accelerometer trimmed in 2.00 seconds, error: x -0.0515, y -0.0730, z -0.0383
+[2021-07-27 16:45:14,511] INFO     Imulog       Gyroscope trimmed in 2.00 seconds, error: x -0.0024, y 0.0016, z -0.0007
+[2021-07-27 16:47:06,465] INFO     Imulog       Initialising IMU biases to file.
+[2021-07-27 16:47:10,349] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-07-27 16:47:10,350] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-07-27 16:47:10,352] DEBUG    Imulog       FIFO count: 0x2a 
+[2021-07-27 16:47:10,358] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-07-27 16:47:10,861] DEBUG    Imulog       readIMUThread starting..
+[2021-07-27 16:47:10,962] DEBUG    Imulog       Data from IMU
+[2021-07-27 16:47:10,962] INFO     Imulog       Trimming IMU:2.00 seconds
+[2021-07-27 16:47:12,974] INFO     Imulog       Accelerometer trimmed in 2.00 seconds, error: x -0.0275, y -0.0539, z 0.0096
+[2021-07-27 16:47:12,975] INFO     Imulog       Gyroscope trimmed in 2.00 seconds, error: x -0.0009, y 0.0019, z 0.0000
+[2021-07-27 16:47:26,024] DEBUG    Imulog       DroidInertial releasing resources
