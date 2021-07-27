@@ -7,8 +7,9 @@ import logging
 import signal
 import sys
 import time
+import pygame
+from PyJoystick import pyJoystick
 
-import matplotlib.pyplot as plt
 import numpy as np
 
 from DroidControl import droidControl 
@@ -59,6 +60,11 @@ def initPilot():
     dc.Kint = 40 # Integral gain
     dc.Kder = 0.001 # Derivative gain
     dc.runCommand = 0.0
+    dc.LinearSpeed = 1.0
+    dc.AngularSpeed = 3.1415
+
+    global f710
+    f710 = pyJoystick()
     
 
 
@@ -66,4 +72,19 @@ def initPilot():
 if __name__ == '__main__':
     initLogger()
     initPilot()
-    dc.close
+
+    while f710.stop == 0:
+#         t0 = time.time()
+        f710.getJoystickInput()
+        print([f710.dirX, -f710.dirY, f710.rotL, f710.rotR])
+#         print(time.time() - t0)
+        dc.processCommands(f710.dirX, f710.dirY, f710.rotL, f710.rotR)
+        dc.driveDroid()
+        time.sleep(0.05)
+        
+    dc.saveOutput(dc.saveStateData,filename='telemetry.csv')
+    dc.runCommand = 0
+    dc.writeSerial()
+    dc.close()
+    time.sleep(2)
+    sys.exit()

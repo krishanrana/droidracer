@@ -118,8 +118,11 @@ class droidControl:
         
         # Data container for save
         # TODO: make this automatic, currently adding timestamp and setpoint
-        self.logMotorData = True
+        self.logMotorData = False
         self.saveData = [[0] * (self.inVarNum + 1)]
+        # Store : Command(Ux,Uy,Uo), Odometry(Vx,Vy,Vo), IMU(Ix,Iy,Io),Time
+        self.saveState = [[0]*10]
+        self.saveStateData = True
         self.initialTimer = 0.0
 
         # Open serial comms to Arduino
@@ -291,13 +294,20 @@ class droidControl:
     
     def processCommands(self,dirX,dirY,rotL,rotR):
         # Process data from f710 joystick, reverse Y axis control
+        
         dirY = -dirY       
         velX = dirX * self.LinearSpeed
         velY = dirY * self.LinearSpeed
         velA = (rotL-rotR) * self.AngularSpeed
+        
         logger.debug('Velocity command x: {0:0.3f}, y: {1:0.3f}, Omega: {2:0.3f},'.format(velX,velY,velA))
 
         self.vCommand = np.round([velX, velY, velA],decimals=3)
+        
+        if (self.vCommand != 0).any():
+            self.runCommand = 1
+        else:
+            self.runCommand = 0
         logger.debug('Velocity command x: {0:0.3f}, y: {1:0.3f}, Omega: {2:0.3f},'.format(self.vCommand[0],self.vCommand[1],self.vCommand[2]))
 
 
@@ -345,6 +355,10 @@ class droidControl:
         self.xEstT_1 = self.xEst    
         self.vEstT_1 = self.vEst
         self.navTimeT_1 = self.navTime
+
+        # Save state
+        if self.saveStateData is True:
+            self.saveState.append([self.vCommand,vEstEnc,vEstImu,self.navTime])
         
     def calcTargetError(self, target):
         error = target - self.xEst
@@ -406,9 +420,9 @@ class droidControl:
         logger.debug('Droid Parked')
 
     def driveDroid(self):
-        
-        self.estRobotState('encoder')       
-        # Calculate desired droid linear and angulare velocity
+        # Estimate robot state using sensor feedback
+        self.estRobotState('encoder')  
+        # Calculate desired droid linear and angular velocity
         # Determine motor speeds
         self.inverseKinematics(self.vCommand)
 
@@ -416,7 +430,7 @@ class droidControl:
         self.writeSerial()
         self.vCommandT_1 = self.vCommand
 
-        logger.debug('M1: {0:0.3f}, M2: {1:0.3f}, M3: {2:0.3f},'.format(self.velM1,self.velM2,self.velM3))
+        # logger.debug('M1: {0:0.3f}, M2: {1:0.3f}, M3: {2:0.3f},'.format(self.velM1,self.velM2,self.velM3))
             
 #------Tests--------------------------------
     
@@ -544,10 +558,10 @@ class droidControl:
         
 #------Data visualisation methods-----------
     
-    def saveOutput(self):
-        saveDataNP = np.array(self.saveData)
+    def saveOutput(self,data,filename):
+        saveDataNP = np.array(data)
         self.saveDataNP = saveDataNP[saveDataNP[:,9]>0]
-        np.savetxt('drive.csv',self.saveDataNP,delimiter=',')
+        np.savetxt(filename,self.saveDataNP,delimiter=',')
         logger.debug('Results saved to file')          
 
     def plotOutput(self):

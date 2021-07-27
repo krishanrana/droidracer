@@ -40,9 +40,6 @@ class pyJoystick():
         self.buttons = self.joystick.get_numbuttons()
         self.hats = self.joystick.get_numhats()
 
-        print ("There is " + str(self.axes) + " axes")
-        print ("There is " + str(self.buttons) + " button/s")
-        print ("There is " + str(self.hats) + " hat/s")
 
     def getAxis(self,number):
         # when nothing is moved on an axis, the VALUE IS NOT EXACTLY ZERO
