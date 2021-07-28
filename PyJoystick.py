@@ -105,8 +105,40 @@ class pyJoystick():
             
         if self.buttons != 0: 
             self.stop = self.joystick.get_button(1)
-                
         
+    def initTelemetry(self):
+        return 0
+
+    
+    def updateTelemetry(self):
+        # Get current droid position and rotation from droidControl
+        
+        # From Controller
+
+        # From Encoder
+
+        # From IMU
+
+        # From Fusion Estimate
+
+        # Set sprite positions
+
+        # Update window
+        return 0
+
+
+class DroidSprite(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        self.image = pygame.Surface((32, 32))
+        self.image.fill(WHITE)
+        self.rect = self.image.get_rect()  # Get rect of some size as 'image'.
+        self.position = [0, 0]
+        self.rotation = 0
+
+    def update(self):
+        self.rect.move_ip(*self.velocity)
+     
             
             
 if __name__ == "__main__":

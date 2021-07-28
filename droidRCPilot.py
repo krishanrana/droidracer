@@ -1,7 +1,7 @@
 """ This Script is front end / GUI to allow control of omni droid using:
 - Displacement / Pose control: input via GUI -DONE
 - Closed loop control as above -DONE
-- Manual drive using game controller """
+- Manual drive using game controller  - DONE"""
 
 import logging
 import signal
@@ -65,14 +65,15 @@ def initPilot():
 
     global f710
     f710 = pyJoystick()
-    
+
+
 
 
 
 if __name__ == '__main__':
     initLogger()
     initPilot()
-
+    # initVis()
     while f710.stop == 0:
 #         t0 = time.time()
         f710.getJoystickInput()

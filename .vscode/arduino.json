@@ -2,5 +2,5 @@
     "board": "arduino:avr:uno",
     "programmer": "AVR ISP",
     "sketch": "CommsTest/CommsTest.ino",
-    "port": "/dev/ttyUSB0"
+    "port": "/dev/tty.Bluetooth-Incoming-Port"
 }

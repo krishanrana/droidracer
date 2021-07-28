@@ -18,7 +18,7 @@ from mpl_toolkits.mplot3d import axes3d
 #import PySimpleGUI as psg
 from scipy.optimize import least_squares
 from scipy.spatial.transform import Rotation as spr
-import logging
+from DroidControl import droidControl
 
 # Setup logging (Use droidlogging.conf as alternative)
 
