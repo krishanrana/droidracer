@@ -5,8 +5,6 @@ import time
 import numpy as np
 from DroidControl import droidControl 
 
-
-
 class pyJoystick():
     def __init__(self, windowSize = (200,200),windowPos = [0,32]):
         self.dirX = 0

@@ -62,11 +62,11 @@ def initPilot():
     dc.runCommand = 0.0
     dc.LinearSpeed = 1.0
     dc.AngularSpeed = 3.1415
+    
+    
 
     global f710
     f710 = pyJoystick()
-    
-
 
 
 if __name__ == '__main__':
