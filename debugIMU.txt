@@ -6806,3 +6806,25 @@
 [2021-08-01 16:15:48,125] INFO     Imulog       Accelerometer trimmed in 2.00 seconds, error: x -0.0192, y 0.0922, z -0.0587
 [2021-08-01 16:15:48,126] INFO     Imulog       Gyroscope trimmed in 2.00 seconds, error: x -0.0013, y 0.0005, z -0.0007
 [2021-08-01 16:16:14,383] DEBUG    Imulog       DroidInertial releasing resources
+[2021-08-01 16:19:05,878] INFO     Imulog       Initialising IMU biases to file.
+[2021-08-01 16:19:09,744] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-08-01 16:19:09,745] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-08-01 16:19:09,746] DEBUG    Imulog       FIFO count: 0x0 
+[2021-08-01 16:19:09,751] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-08-01 16:19:10,253] DEBUG    Imulog       readIMUThread starting..
+[2021-08-01 16:19:10,354] DEBUG    Imulog       Data from IMU
+[2021-08-01 16:19:10,355] INFO     Imulog       Trimming IMU:2.00 seconds
+[2021-08-01 16:19:12,368] INFO     Imulog       Accelerometer trimmed in 2.00 seconds, error: x -0.0263, y 0.0778, z -0.0120
+[2021-08-01 16:19:12,369] INFO     Imulog       Gyroscope trimmed in 2.00 seconds, error: x -0.0029, y 0.0001, z -0.0013
+[2021-08-01 16:19:43,456] DEBUG    Imulog       DroidInertial releasing resources
+[2021-08-01 16:19:55,607] INFO     Imulog       Initialising IMU biases to file.
+[2021-08-01 16:19:59,467] DEBUG    Imulog       Interrupt status: 0x0 
+[2021-08-01 16:19:59,468] DEBUG    Imulog       FIFO Packet size: 42 
+[2021-08-01 16:19:59,470] DEBUG    Imulog       FIFO count: 0x0 
+[2021-08-01 16:19:59,475] DEBUG    Imulog       IMU biases compensated INTERNALLY
+[2021-08-01 16:19:59,977] DEBUG    Imulog       readIMUThread starting..
+[2021-08-01 16:20:00,077] DEBUG    Imulog       Data from IMU
+[2021-08-01 16:20:00,078] INFO     Imulog       Trimming IMU:2.00 seconds
+[2021-08-01 16:20:02,091] INFO     Imulog       Accelerometer trimmed in 2.00 seconds, error: x 0.0239, y 0.0251, z -0.0275
+[2021-08-01 16:20:02,094] INFO     Imulog       Gyroscope trimmed in 2.00 seconds, error: x -0.0012, y 0.0008, z -0.0016
+[2021-08-01 16:20:28,796] DEBUG    Imulog       DroidInertial releasing resources
