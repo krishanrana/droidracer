@@ -310,8 +310,6 @@ class droidControl:
             self.runCommand = 0
         logger.debug('Velocity command x: {0:0.3f}, y: {1:0.3f}, Omega: {2:0.3f},'.format(self.vCommand[0],self.vCommand[1],self.vCommand[2]))
 
-
-
     def compFilter(self, data1, data2):
         A = self.compFilterEncoderValue
         vEst = (data1 * A) + (data2 * (1-A))
@@ -382,9 +380,7 @@ class droidControl:
         self.xEstT_1 = np.array([0,0,0])
         self.vEst = np.array([0,0,0])
         self.vEstT_1 = np.array([0,0,0])
-
         errorTol = np.array([0.05, 0.05, 0.01]) # +/- 50mm, 5 deg
-        
         error = self.calcTargetError(target)
         # Estimate time to run at set speed
         runTime = error / np.array([self.LinearSpeed, self.LinearSpeed,self.AngularSpeed])
@@ -392,7 +388,7 @@ class droidControl:
             logger.warning('No speed set, infinite runtime calculated - aborting')
             return
         self.navTimeT_1 = time.time()
-#         time.sleep(0.03)
+#       time.sleep(0.03)
         self.navTime = time.time()
         self.runCommand = 1.0   
         # Loop until error <= tolerance
@@ -410,7 +406,7 @@ class droidControl:
             self.vCommandT_1 = self.vCommand
             
             # Diagnostics and data display
-#             logger.debug('M1: {0:0.3f}, M2: {1:0.3f}, M3: {2:0.3f},'.format(self.velM1,self.velM2,self.velM3))
+#       logger.debug('M1: {0:0.3f}, M2: {1:0.3f}, M3: {2:0.3f},'.format(self.velM1,self.velM2,self.velM3))
             time.sleep(0.02)
                              
         self.runCommand = 0.0

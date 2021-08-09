@@ -9,24 +9,22 @@ def rot2eul(rot):
 
 
 
-data = np.loadtxt('./Telemetry/telemetry_2.csv', delimiter=',', dtype = "float")
+data = np.loadtxt('./Telemetry/telemetry_Table.csv', delimiter=',', dtype = "float")
 
 vCommand = data[:,0:3]
 vEncoder = data[:,3:6]
 vImu = data[:,6:9]
 vTime = data[:,9]
 
-
 t0 = vTime[0]
 vTime = vTime - t0
 
-
-
 # Apply filter
-filtCoeff_A = np.array([1,1,0.6])
+filtCoeff_A = np.array([1,1,1])
 filtCoeff_B = np.subtract(np.array([1,1,1]),filtCoeff_A)
 
 vEstR = [(filtCoeff_A *  vEncoder[0] + filtCoeff_B * vImu[0]).tolist()]
+# vEstR = [(filtCoeff_A *  vEncoder[0] + filtCoeff_B * vCommand[0]).tolist()]
 vEstN = [vCommand[0].tolist()]
 pEstN = [[0,0,0]]
 # Initialise rotation matrix
@@ -36,43 +34,46 @@ for idx in range(1,len(vTime)):
     #...........ATTITUDE AT TIME K.............
     # Fuse sensor readings
     vEstR_K = (filtCoeff_A * vEncoder[idx-1] + filtCoeff_B * vImu[idx-1]).tolist()
-    
+    # vEstR_K = vCommand[idx-1]
     # Assume that rotation is 2D and body frame inertial measurements == Nav frame 
     dT = vTime[idx] - vTime[idx-1]
+    print('dT: {0:0.3f}'.format(dT))
     Omega = vEstR_K[2] # Last reported angular velocity from odometry filter
+    print('Omega: {0:0.3f}'.format(Omega))
     ThetaK = pEstN[idx-1][2] + (Omega * dT)
     Cnr =np.array([[np.cos(ThetaK), -np.sin(ThetaK)],[np.sin(ThetaK),np.cos(ThetaK)]])
-    # Sw = np.array([[0, -Omega],[Omega,0]])
-
-    # # THIS IS WRONG!!!!
-    # Rdot = np.dot(Sw,pEstN[idx-1][2])
-    # Cnr = pEstN[idx-1][2] + (Rdot * dT)
 
     #..........VELOCITY AT TIME K..................
     # Convert Velocity estimate to Nav frame
     nVel = np.dot(Cnr,vEstR_K[0:2])
-    # Convert Rot matrix to euler 2D
-    # nRot = rot2eul(Cnr)
-    nVec = (np.append(nVel,Omega)).tolist()
-    
     # Integrate velocity to position
     # Optional: Add GPS  / Abs position + filter here  
-    nPosK = (dT * nVel).tolist()
-    nPosK.append(ThetaK)
-    nPos = (np.add(pEstN[idx-1],nPosK)).tolist()
+    nPos = ((dT * nVel) + pEstN[idx-1][0:2]).tolist()
+    nPos.append(ThetaK)
 
-    # store record of position, velocity estimates
+    print('Position X: {0:0.3f} '.format(nPos[0]))
+    print('Position Y: {0:0.3f} '.format(nPos[1]))
+    print('Theta: {0:0.3f} '.format(nPos[2]))
+
+    # Store velocity estimate in Nav frame
+    nVec = (np.append(nVel,Omega)).tolist()
     vEstN.append(nVec)
+    # Store velocity estimate in Robot frame
     vEstR.append(vEstR_K)
+    # Store position estimate in Nav frame
     pEstN.append(nPos)
     
 robotPos = np.array(pEstN)
 robotVel = np.array(vEstR)
 plt.plot(robotPos[:,0],robotPos[:,1],'r--')
 plt.plot(robotPos[0,0],robotPos[0,1],'ko')
+plt.text(robotPos[0,0],robotPos[0,1],'START',color='black')
 plt.plot(robotPos[-1,0],robotPos[-1,1],'b*')
+plt.text(robotPos[-1,0],robotPos[-1,1],'STOP',color='blue')
+
 plt.xlabel('X axis - m')
 plt.ylabel('Y axis -m')
+plt.axis('equal')
 # plt.show()
 
 # Plot velocity from sensors

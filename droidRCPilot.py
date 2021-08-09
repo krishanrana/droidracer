@@ -68,10 +68,6 @@ def initPilot():
     global f710
     f710 = pyJoystick()
 
-
-
-
-
 if __name__ == '__main__':
     initLogger()
     initPilot()
